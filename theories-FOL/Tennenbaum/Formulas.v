@@ -25,7 +25,6 @@ Definition unary α := bounded 1 α.
 Definition binary α := bounded 2 α.
 
 
-
 Ltac invert_bounds1 :=
   match goal with
     H : bounded _ _ |- _ => inversion H; subst; clear H

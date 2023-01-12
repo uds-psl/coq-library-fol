@@ -980,4 +980,5 @@ FOL/FST.v
 ../theories-FOL/Tennenbaum/Coding.v
 ../theories-FOL/Tennenbaum/Tennenbaum_diagonal.v
 ../theories-FOL/Tennenbaum/Tennenbaum_insep.v
+../theories-FOL/Tennenbaum/Makholm.v
 ../theories-FOL/Tennenbaum/Variants.v

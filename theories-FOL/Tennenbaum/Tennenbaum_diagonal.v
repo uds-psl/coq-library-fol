@@ -27,11 +27,8 @@ Section Model.
   Existing Instance I | 100.
   Existing Instance I' | 0.
   Notation "⊨ phi" := (forall rho, rho ⊨ phi) (at level 21).
-  Variable axioms : forall ax, PA ax -> ⊨ ax.
-
   Notation "N⊨ phi" := (forall rho, @sat _ _ nat interp_nat _ rho phi) (at level 40).
-
-
+  Variable axioms : forall ax, PA ax -> ⊨ ax.
 
   Notation "x 'i=' y"  := (@i_atom PA_funcs_signature PA_preds_signature D I Eq ([x ; y])) (at level 40).
   Notation "'iσ' x" := (@i_func PA_funcs_signature PA_preds_signature D I Succ ([x])) (at level 37).
@@ -64,8 +61,8 @@ Section Model.
     { right; intros [k Hk]. rewrite mult_zero in Hk; auto. }
     refine (let H' := @iEuclid' D I axioms d (S n) _ in _).
     assert (exists q r, r < S n /\ d = (g q) i⊗ inu (S n) i⊕ inu r) as H.
-    { destruct H' as [Q [r ]], (Hg Q) as [q Hq]. 
-      exists q, r. unfold g. now rewrite Hq. 
+    { destruct H' as [Q [r ]], (Hg Q) as [q Hq].
+      exists q, r. unfold g. now rewrite Hq.
     } clear H'.
     apply ProductWO in H.
     destruct H as [q [r [? Hr]]].
@@ -73,21 +70,21 @@ Section Model.
       + left. exists (g q).
         now rewrite Hr, E, add_zero_r, mult_comm.
       + right. intros [k Hk]. apply E.
-        enough (iE : inu r = inu 0). 
+        enough (iE : inu r = inu 0).
         { now apply inu_inj in iE. }
         enough ((g q) = k /\ inu r = inu 0) by tauto.
         eapply (@iFac_unique D I axioms).
         -- pose (@lt_equiv D I) as lt_equiv. unfold I'. rewrite <- inu_I. apply lt_equiv. easy. apply H.
         -- pose (@lt_equiv D I axioms 0 (S n)) as lt_equiv. unfold I'. rewrite <- inu_I.
            apply lt_equiv. lia.
-        -- rewrite add_zero. rewrite add_comm. unfold I' in *. rewrite <- inu_I. rewrite <- ! inu_I in Hr. 
+        -- rewrite add_zero. rewrite add_comm. unfold I' in *. rewrite <- inu_I. rewrite <- ! inu_I in Hr.
            rewrite <- Hr. rewrite mult_comm. all:eauto.
     * intros x y. apply and_dec; [apply Compare_dec.lt_dec|apply eq].
     Unshelve. lia.
   Qed.
 
 
-  (*  We can show the same for types that are witnessing and discrete. 
+  (*  We can show the same for types that are witnessing and discrete.
       This is a bit more general, since every enumerable type is witnessing.
    *)
   Lemma dec_div_2 :
@@ -102,13 +99,13 @@ Section Model.
     refine (let H := @iEuclid' D I axioms d (S n) _ in _).
     apply wo in H.
     - destruct H as [a Ha].
-      apply Witnessing_nat in Ha. 
+      apply Witnessing_nat in Ha.
       * destruct Ha as [r [? Hr]].
         destruct (nat_eq_dec r 0) as [E|E].
         + left. exists a.
           now rewrite Hr, E, add_zero_r, mult_comm.
         + right. intros [k Hk]. apply E.
-          enough (iE : inu r = inu 0). 
+          enough (iE : inu r = inu 0).
           { now apply inu_inj in iE. }
           enough (a = k /\ inu r = inu 0) by tauto.
           unshelve eapply (@iFac_unique D I axioms (inu (S n))).
@@ -177,13 +174,11 @@ Section Model.
         now rewrite Hk.
   Qed.
 
-  (*  We can now use the above coding lemma in combination with RT 
-      to give a diagonal argument which shows that enumerable and  
-      discrete PA models must potentially be standard.             
-      The double negation can actually also be eliminated, and this
-      is done in Variants.v, where the needed lemmas are shown.    
+  (*  We can now use the above coding lemma in combination with RT to
+      give a diagonal argument which shows that enumerable and discrete
+      PA models must potentially be standard. The double negation can actually also be eliminated, and this is done in Variants.v,
+      where the needed lemmas are shown.
    *)
-
   Theorem Tennenbaum_diagonal :
     CT_Q -> MP -> Enumerable D -> Discrete D -> ~~ forall e, std e.
   Proof.
@@ -202,7 +197,7 @@ Section Model.
       + right. apply DN. now apply ψ_equiv.
       + left. intros ?. apply nh. eapply ψ_equiv; eauto.
     - intros [c' H]. destruct (HG c') as [c Hc].
-      specialize (H c). revert H. 
+      specialize (H c). revert H.
       unfold p, g. rewrite Hc.
       tauto.
   Qed.

@@ -38,7 +38,7 @@ Fact DN_remove {A B} :
   ~~A -> (A -> ~B) -> ~B.
 Proof. tauto. Qed.
 
-Fact DN_chaining {A B : Prop} : 
+Fact DN_chaining {A B : Prop} :
   ~ ~ A -> ~ ~(A -> B) -> ~ ~ B.
 Proof. tauto. Qed.
 
@@ -79,7 +79,7 @@ Proof.
     exists (fun x => if D x then true else false).
     intros x. destruct (D x); cbn; intuition congruence.
   - intros [f decf]. constructor. intros x.
-    specialize (decf x). 
+    specialize (decf x).
     destruct (f x) eqn:Hx; [left; tauto|right].
     now intros ?%decf.
 Qed.
@@ -103,7 +103,7 @@ Proof.
     exists (fun x => if D x then true else false).
     intros x. destruct (D x); cbn; intuition congruence.
   - intros [f decf]. intros x.
-    specialize (decf x). 
+    specialize (decf x).
     destruct (f x) eqn:Hx; [left; tauto|right].
     now intros ?%decf.
 Qed.
@@ -122,13 +122,21 @@ Lemma DN_Dec_equiv X (p : X -> Prop) :
   ~ ~ Dec p <-> ((Dec_sigT p -> False) -> False).
 Proof.
   split.
-  - intros nnH. apply (DN_remove nnH). 
-    intros [H]. intros nH. apply nH. 
+  - intros nnH. apply (DN_remove nnH).
+    intros [H]. intros nH. apply nH.
     intros x. apply H.
   - intros nnH nH. apply nnH. intros H.
     apply nH. constructor. apply H.
 Qed.
 
+Lemma Dec_equivalent_predicates {X} {p P: X -> Prop} :
+  (forall x, P x <-> p x) -> Dec P -> Dec p.
+Proof.
+  intros H [Dec_P].
+  constructor. intros x.
+  destruct (Dec_P x); specialize (H x);
+    (left; tauto) || right; tauto.
+Qed.
 
 Lemma Witnessing_equiv X :
   Witnessing X <=> forall (f : X -> bool), (exists x, f x = true) -> {x & f x = true}.
@@ -143,10 +151,11 @@ Proof.
     + exists x. now apply Hf.
 Qed.
 
-Definition Witnessing_nat : Witnessing nat.
+Definition Witnessing_nat :
+  Witnessing nat.
 Proof.
   intros p Dec_p H.
-  specialize (constructive_indefinite_ground_description_nat p Dec_p H). 
+  specialize (constructive_indefinite_ground_description_nat p Dec_p H).
   intros [x Hx]. now exists x.
 Defined.
 
@@ -171,10 +180,10 @@ Qed.
 
 Fact enumerable_nat p :
   enumerable p -> exists f, forall x : nat, p x <-> exists n : nat, f n = S x.
-Proof. 
+Proof.
   intros [f Hf].
   exists (fun n => match f n with Some x => S x | _ => 0 end).
-  intros x. rewrite Hf. split; intros [n Hn]; exists n. 
+  intros x. rewrite Hf. split; intros [n Hn]; exists n.
   - now rewrite Hn.
   - destruct (f n); congruence.
 Qed.
@@ -211,7 +220,7 @@ Proof.
   intros uc Def. apply Dec_decider.
   refine (uc (fun x y => p x <-> y = true) _).
   intros n. destruct (Def n) as [h|h].
-  - exists true; split; [tauto|]. 
+  - exists true; split; [tauto|].
     intros []; try congruence.
     intros H. now rewrite H in h.
   - exists false; split.

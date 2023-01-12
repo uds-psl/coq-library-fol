@@ -7,7 +7,7 @@ Require Import Lia.
 From Equations Require Import Equations.
 
 Import Vector.VectorNotations.
-  
+
 
 Notation "x 'el' A" := (List.In x A) (at level 70).
 Notation "A '<<=' B" := (List.incl A B) (at level 70).
@@ -43,21 +43,21 @@ Section Facts.
 
 (*  We show some facts about standard numbers. Namely:
     - If x + y is standard, then so are x and y.
-    - If x * y =/= 0 is standard, then so are x and y.
+    - If x * y ≠ 0 is standard, then so are x and y.
     - The embedding of nat into a PA model preserves the
       order on natural numbers.
-    - A non-standard number is bigger than any natural number.   
+    - A non-standard number is bigger than any natural number.
  *)
 
 
-Lemma std_add x y : 
+Lemma std_add x y :
   std (x i⊕ y) -> std x /\ std y.
 Proof.
   intros [n Hn].
   revert Hn.  revert x y.
   induction n.
   - intros ?? H. symmetry in H. apply sum_is_zero in H as [-> ->].
-    split; exists 0; auto. apply axioms. 
+    split; exists 0; auto. apply axioms.
   - intros. destruct (@zero_or_succ D I axioms x) as [-> | [e ->]].
     + rewrite add_zero in Hn. rewrite <-Hn. split.
       exists 0; auto. exists (S n); auto. apply axioms.
@@ -68,7 +68,7 @@ Proof.
       all: apply axioms.
 Qed.
 
-Lemma std_mult x y m : 
+Lemma std_mult x y m :
   (iσ x) i⊗ y = inu m -> std y.
 Proof.
   cbn. rewrite mult_rec. intros E.
@@ -77,8 +77,7 @@ Proof.
   apply axioms.
 Qed.
 
-
-Lemma std_mult' x y m : 
+Lemma std_mult' x y m :
   x i⊗ y = inu (S m) -> std x /\ std y.
 Proof.
   destruct (@zero_or_succ D I axioms x) as [-> | [e ->]],
@@ -86,18 +85,16 @@ Proof.
   + intros _. split; now exists 0.
   + rewrite mult_zero; auto.
     intros []%zero_succ; auto.
-  + rewrite mult_zero_r; auto. 
+  + rewrite mult_zero_r; auto.
     intros []%zero_succ; auto.
   + intros E. split.
-    * eapply std_mult. 
+    * eapply std_mult.
       rewrite mult_comm; auto.
-      apply E.  
+      apply E.
     * eapply std_mult, E.
 Qed.
 
-
-
-Lemma lt_equiv x y : 
+Lemma lt_equiv x y :
   x < y <-> inu x i⧀ inu y.
 Proof.
   assert (x < y <-> exists k, S x + k = y) as H.
@@ -119,14 +116,14 @@ Proof.
         [now rewrite add_rec, Hk | apply axioms | apply axioms].
 Qed.
 
-Lemma num_lt_nonStd n d : 
+Lemma num_lt_nonStd n d :
   ~ std d -> inu n i⧀ d.
 Proof.
   intros nonStd.
   destruct (@trichotomy D I axioms (inu n) d) as [H|[<-|H]]; auto.
   all : contradiction nonStd.
   - exists n; auto.
-  - apply lessthen_num in H. 
+  - apply lessthen_num in H.
     destruct H as [k [? ->]].
     exists k; auto.
     apply axioms.
@@ -136,13 +133,15 @@ End Facts.
 
 
 
-(*  The following Lemma shows that if there is a formula which
-    is satisfied only by the standard elements of a PA model,
-    then the model is already the standard model.
+(*  The following Lemma shows that if there is a formula which is
+    satisfied only by the standard elements of a PA model, then the
+    model is already the standard model.
  *)
 
 Lemma stdModel_equiv :
-  @stdModel D I <-> exists phi, unary phi /\ (forall e, std e <-> forall ρ, (e .: ρ) ⊨ phi).
+  @stdModel D I <->
+    exists phi, unary phi /\
+    (forall e, std e <-> forall ρ, (e .: ρ) ⊨ phi).
 Proof.
   split.
   - intros H.
@@ -151,7 +150,7 @@ Proof.
     1: unfold unary; repeat solve_bounds.
     intros e; split; intros ?; [reflexivity|apply H].
   - intros [phi Hphi] e.
-    apply Hphi, induction. 
+    apply Hphi, induction.
     + apply axioms.
     + apply Hphi.
     + apply Hphi. exists 0. reflexivity.
@@ -161,12 +160,12 @@ Qed.
 
 (** * Overspill *)
 
-(*  From the above we can conclude that if the model is not standard 
-    and a formula is satisfied for every standard element, then it cannot 
-    only be satisfied on standard elements. 
+(*  From the above we can conclude that if the model is not standard
+    and a formula is satisfied for every standard element, then it
+    cannot only be satisfied on standard elements.
 
-    Given further assumptions, this can even gives us the existence of a
-    non-standard element.
+    Given further assumptions, this can even gives us the existence of
+    a non-standard element.
  *)
 
 Section Overspill.
@@ -177,17 +176,19 @@ Section Overspill.
   Variable nStd : ~ stdModel D.
 
   Corollary Overspill :
-    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) -> ~ (forall e, (forall rho, (e.:rho) ⊨ alpha) -> std e ).
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) ->
+    ~ (forall e, (forall rho, (e.:rho) ⊨ alpha) -> std e ).
   Proof.
     intros ??. apply nStd, stdModel_equiv. exists alpha. split.
     - apply Halpha.
     - split; auto.
   Qed.
-  
-  
+
+
   Lemma Overspill_DN' :
     (forall x, stable (std x)) ->
-    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) ->  ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) ->
+    ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
   Proof.
     intros stable_std H1 H2. apply Overspill in H1. apply H1. intros e.
     intros H. apply stable_std. intros He. apply H2. now exists e.
@@ -195,7 +196,8 @@ Section Overspill.
 
 
   Lemma on_std_equiv :
-    (forall n rho, ((inu n).:rho) ⊨ alpha) <-> (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha)).
+    (forall n rho, ((inu n).:rho) ⊨ alpha) <->
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha)).
   Proof.
     split; intros H.
     - intros e [n <-]. apply H.
@@ -204,7 +206,8 @@ Section Overspill.
 
   Lemma Overspill_DN :
     (forall x, stable (std x)) ->
-    (forall n rho, ((inu n).:rho) ⊨ alpha) ->  ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+    (forall n rho, ((inu n).:rho) ⊨ alpha) ->
+    ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
   Proof.
     intros dne.
     setoid_rewrite on_std_equiv.
@@ -214,7 +217,8 @@ Section Overspill.
 
   Lemma Overspill_DNE :
     DNE ->
-    (forall n rho, ((inu n).:rho) ⊨ alpha) ->  exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+    (forall n rho, ((inu n).:rho) ⊨ alpha) ->
+    exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
   Proof.
     intros dne H.
     now apply dne, Overspill_DN.
@@ -229,28 +233,30 @@ End Overspill.
 
 Section Coding.
 
-  (*  We assume that we have a formula ψ representing an injective function 
-      which only produces prime numbers.
+  (*  We assume that we have a formula ψ representing an injective
+      function which only produces prime numbers.
    *)
   Variable ψ : form.
-  Variable Hψ : binary ψ /\ (forall x, Q ⊢I ∀ ψ[up (num x)..] ↔ $0 == num (Irred x) ).
+  Variable Hψ :
+    binary ψ /\ (forall x, Q ⊢I ∀ ψ[up (num x)..] ↔ $0 == num (Irred x) ).
 
 
   Definition div e d := exists k : D, e i⊗ k = d.
   Definition div_num n (d : D) := exists e, inu n i⊗ e = d.
   Definition Div_nat (d : D) := fun n => div_num n d.
-  Definition div_pi n a :=  (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
+  Definition div_pi n a := (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
 
   Lemma sat_Qeq ax : (ax el Qeq -> ⊨ ax).
   Proof using axioms. cbn.
-    intros [<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[<- |[]]]]]]]]]]]]]].
+    intros H. repeat try destruct H as [<-|H].
     1-10: apply axioms; apply PAeq_FA; cbn; eauto 15; fail.
     - apply axioms. apply PAeq_discr.
     - apply axioms. apply PAeq_inj.
     - apply axioms. apply PAeq_induction.
+    - destruct H.
   Qed.
-  
-  Lemma ψ_repr x d rho : 
+
+  Lemma ψ_repr x d rho :
     (d .: inu x .: rho) ⊨ ψ <-> d = inu (Irred x).
   Proof.
     destruct Hψ as (_ & H).
@@ -277,7 +283,9 @@ Section Coding.
       predicate on natural numbers up to some bound.
    *)
   Lemma Coding_nat A n :
-    ~ ~ exists c, forall u, (u < n -> A u <-> Mod (Irred u) c = 0) /\ (Mod (Irred u) c = 0 -> u < n).
+    ~ ~ exists c, forall u,
+      (u < n -> A u <-> Mod (Irred u) c = 0) /\
+      (Mod (Irred u) c = 0 -> u < n).
   Proof.
     induction n.
     - apply DN. exists 1. intros u. split. lia.
@@ -298,29 +306,32 @@ Section Coding.
                apply H.
            +++ intros [|H']%irred_integral_domain.
                apply Ha; assumption.
-               apply irred_Mod_eq, inj_Irred in H'. lia. 
+               apply irred_Mod_eq, inj_Irred in H'. lia.
                all: apply irred_Irred.
-           +++ intuition. apply Mod_divides. 
+           +++ intuition. apply Mod_divides.
                now exists a.
         ++ intros [H |H]%irred_integral_domain.
            apply Ha in H. auto.
-           apply irred_Mod_eq, inj_Irred in H. lia. 
+           apply irred_Mod_eq, inj_Irred in H. lia.
            all: apply irred_Irred.
       + exists a. intros u.
         assert (u < S n <-> u < n \/ u = n) as -> by lia.
         split.
-        ++ intros Hu. destruct Hu as [| ->]. 
+        ++ intros Hu. destruct Hu as [| ->].
            now apply Ha.
            split. now intros ?%NA_n.
            intros H%Ha. lia.
         ++ intros H%Ha. tauto.
   Qed.
 
-  (*  The same as above, but if the predicate is definite, we get not only
-      potential existence of a code, but actual existence.
+  (*  The same as above, but if the predicate is definite, we get not
+      only potential existence of a code, but actual existence.
    *)
   Lemma Coding_nat_Definite A n :
-    Definite A -> exists c, forall u, (u < n -> A u <-> Mod (Irred u) c = 0) /\ (Mod (Irred u) c = 0 -> u < n).
+    Definite A ->
+    exists c, forall u,
+      (u < n -> A u <-> Mod (Irred u) c = 0) /\
+      (Mod (Irred u) c = 0 -> u < n).
   Proof.
     intros Def_A.
     induction n.
@@ -339,18 +350,18 @@ Section Coding.
                apply H.
            +++ intros [|H']%irred_integral_domain.
                apply Ha; assumption.
-               apply irred_Mod_eq, inj_Irred in H'. lia. 
+               apply irred_Mod_eq, inj_Irred in H'. lia.
                all: apply irred_Irred.
-           +++ intuition. apply Mod_divides. 
+           +++ intuition. apply Mod_divides.
                now exists a.
         ++ intros [H |H]%irred_integral_domain.
            apply Ha in H. auto.
-           apply irred_Mod_eq, inj_Irred in H. lia. 
+           apply irred_Mod_eq, inj_Irred in H. lia.
            all: apply irred_Irred.
       + exists a. intros u.
         assert (u < S n <-> u < n \/ u = n) as -> by lia.
         split.
-        ++ intros Hu. destruct Hu as [| ->]. 
+        ++ intros Hu. destruct Hu as [| ->].
            now apply Ha.
            split. now intros ?%NA_n.
            intros H%Ha. lia.
@@ -358,7 +369,7 @@ Section Coding.
   Qed.
 
 
-  Lemma Divides_num x y : 
+  Lemma Divides_num x y :
     div_num x (inu y) <-> Mod x y = 0.
   Proof.
     split.
@@ -367,7 +378,8 @@ Section Coding.
         change i0 with (inu 0) in Hk.
         cbn. now apply inu_inj in Hk.
         apply axioms.
-      + cbn in *. destruct (std_mult Hk) as [l <-]. unfold I' in Hk. rewrite <- inu_I in Hk.
+      + cbn in *. destruct (std_mult Hk) as [l <-]. unfold I' in Hk.
+        rewrite <- inu_I in Hk.
         apply Mod_divides. exists l.
         change (iσ inu x) with (inu (S x)) in Hk.
         rewrite <-inu_mult_hom, inu_inj in Hk. lia.
@@ -380,15 +392,18 @@ Section Coding.
 
   (** In an arbitrary model, up to some bound. *)
   (*  By using the coding lemma for natural numbers, we can now
-      similarly verify that formulas can be coded in arbitrary 
-      models of PA. Here, we show this for unary and binary formulas.
+      similarly verify that formulas can be coded in arbitrary models
+      of PA. Here, we show this for unary and binary formulas.
    *)
-  Lemma Coding_model_unary alpha : 
-    unary alpha -> 
-    forall n rho, rho ⊨ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+  Lemma Coding_model_unary alpha :
+    unary alpha ->
+    forall n rho, rho ⊨
+      ¬ ¬ ∃ ∀ $0 ⧀ (num n) → alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros unary_alpha n rho. cbn.
-    apply (@DN_chaining _ _ (@Coding_nat (fun (n:nat) => forall rho, rho ⊨ alpha[(num n)..] ) n)). apply DN.
+    apply (@DN_chaining _ _
+            (@Coding_nat (fun (n:nat) => forall rho, rho ⊨ alpha[(num n)..] ) n)).
+    apply DN.
     intros [a Ha].
     exists (inu a).
     intros u' Hu. cbn in Hu.
@@ -401,22 +416,26 @@ Section Coding.
       split; [now apply ψ_repr| ].
       apply Divides_num.
       apply Ha; [apply Hu|].
-      intros ?. pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite switch_num.
+      intros ?. pose (@switch_num D I) as switch_num.
+      cbn in switch_num. rewrite switch_num.
       eapply bound_ext; [apply unary_alpha| |apply alpha_u].
       intros []; try lia; reflexivity.
     + intros [d [->%ψ_repr H]].
       eapply Divides_num, (proj1 (Ha u)) in H; auto.
-      pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite <- switch_num.
+      pose (@switch_num D I) as switch_num.
+      cbn in switch_num. rewrite <- switch_num.
       apply H.
   Qed.
 
 
-  Lemma Coding_model_binary alpha : 
-    binary alpha -> 
-    forall n rho, rho ⊨ ∀ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+  Lemma Coding_model_binary alpha :
+    binary alpha ->
+    forall n rho, rho ⊨
+      ∀ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros binary_alpha n rho b. cbn.
-    apply (@DN_chaining _ _ (@Coding_nat (fun n => forall rho, (b .: rho) ⊨ alpha[(num n)..] ) n)), DN.
+    apply (@DN_chaining _ _
+            (@Coding_nat (fun n => forall rho, (b .: rho) ⊨ alpha[(num n)..] ) n)), DN.
     intros [a Ha].
     exists (inu a).
     intros u' Hu. cbn in Hu.
@@ -429,30 +448,35 @@ Section Coding.
       split; [now apply ψ_repr| ].
       apply Divides_num.
       apply Ha; [apply Hu|].
-      intros ?. pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite switch_num.
+      intros ?. pose (@switch_num D I) as switch_num.
+      cbn in switch_num. rewrite switch_num.
       rewrite sat_comp in alpha_u.
       eapply bound_ext. eauto.
       2 : apply alpha_u.
       intros [|[]]; now cbn; try lia.
     + intros [d [->%ψ_repr H]].
       eapply Divides_num, (proj1 (Ha u)) in H; auto.
-      pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite switch_num in H. rewrite sat_comp.
+      pose (@switch_num D I) as switch_num. cbn in switch_num.
+      rewrite switch_num in H. rewrite sat_comp.
       eapply bound_ext. eauto.
       2 : apply H.
       intros [|[]]; now cbn; try lia.
     Unshelve. intros _. exact i0.
   Qed.
 
-  (*  We specialize the above results for the case where the formulas 
+  (*  We specialize the above results for the case where the formulas
       are definite. It is then possible to get rid of the double negations.
    *)
-  Lemma Coding_model_binary_Definite alpha : 
-    binary alpha -> (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ alpha )) ->
-    forall n rho, rho ⊨ ∀ ∃ ∀ $0 ⧀ (num n) → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+  Lemma Coding_model_binary_Definite alpha :
+    binary alpha ->
+    (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ alpha )) ->
+    forall n rho, rho ⊨
+      ∀ ∃ ∀ $0 ⧀ (num n) → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros binary_alpha Def_alpha n rho b.
     refine (
-      let Ha := @Coding_nat_Definite (fun u => forall rho, (b .: rho) ⊨ alpha[(num u)..] ) n _ 
+      let Ha := @Coding_nat_Definite
+                (fun u => forall rho, (b .: rho) ⊨ alpha[(num u)..] ) n _
       in _).
     destruct Ha as [a Ha].
     exists (inu a).
@@ -466,14 +490,16 @@ Section Coding.
       split; [now apply ψ_repr| ].
       apply Divides_num.
       apply Ha; [apply Hu|].
-      intros ?. pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite switch_num.
+      intros ?. pose (@switch_num D I) as switch_num.
+      cbn in switch_num. rewrite switch_num.
       rewrite sat_comp in alpha_u.
       eapply bound_ext. eauto.
       2 : apply alpha_u.
       intros [|[]]; now cbn; try lia.
     + intros [d [->%ψ_repr H]].
       eapply Divides_num, (proj1 (Ha u)) in H; auto.
-      pose (@switch_num D I) as switch_num. cbn in switch_num. rewrite switch_num in H. rewrite sat_comp.
+      pose (@switch_num D I) as switch_num.
+      cbn in switch_num. rewrite switch_num in H. rewrite sat_comp.
       eapply bound_ext. eauto.
       2 : apply H.
       intros [|[]]; now cbn; try lia.
@@ -492,21 +518,26 @@ Section notStd.
   (** In a non-standard model. *)
 
   (*  Above we have established coding results for arbitrary PA models.
-      We will now focus on the special case where the model is not standard.
-      Using Overspill we can eliminate the bound on the coding; in a non-standard
-      model, we can find elements which code the entirety of a predicate.
+      We will now focus on the special case where the model is not
+      standard. Using Overspill we can eliminate the bound on the
+      coding; in a non-standard model, we can find elements which code
+      the entirety of a predicate.
    *)
 
   Variable notStd : ~ stdModel D.
   Variable stable_std : forall x, stable (std x).
 
-  Theorem Coding_nonStd_unary alpha : 
-    unary alpha -> ~ ~ exists c, forall u rho, (inu u .: c .: rho) ⊨ (alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
+  Theorem Coding_nonStd_unary alpha :
+    unary alpha ->
+    ~ ~ exists c, forall u rho, (inu u .: c .: rho) ⊨
+      (alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
   Proof.
     intros unary_alpha.
     specialize (@Coding_model_unary _ unary_alpha) as H.
-    assert (forall n rho, (inu n .: rho) ⊨ ¬ ¬ ∃ ∀ $0 ⧀ $2 → alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
-    intros n rho. pose (@switch_num D I) as switch_num. cbn in switch_num.
+    assert (forall n rho, (inu n .: rho) ⊨
+      ¬ ¬ ∃ ∀ $0 ⧀ $2 → alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
+    intros n rho. pose (@switch_num D I) as switch_num.
+    cbn in switch_num.
     rewrite <-switch_num. cbn -[sat].
     specialize (H n rho).
     rewrite !num_subst in *.
@@ -551,13 +582,17 @@ Section notStd.
 
 
   Theorem Coding_nonstd_binary_Definite alpha :
-    binary alpha -> (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ alpha ) ) ->
-     ~ ~ forall b, exists a, forall u rho, (inu u .: b .: a .: rho) ⊨ (alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $4)).
+    binary alpha ->
+    (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ alpha ) ) ->
+     ~ ~ forall b, exists a, forall u rho, (inu u .: b .: a .: rho) ⊨
+      (alpha ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $4)).
   Proof.
     intros binary_alpha Def_A.
     specialize (@Coding_model_binary_Definite _ binary_alpha Def_A) as H.
-    assert (forall n rho, (inu n .: rho) ⊨ ∀ ∃ ∀ $0 ⧀ $3 → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
-    intros n rho. pose (@switch_num D I) as switch_num. cbn in switch_num.
+    assert (forall n rho, (inu n .: rho) ⊨
+      ∀ ∃ ∀ $0 ⧀ $3 → alpha[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
+    intros n rho. pose (@switch_num D I) as switch_num.
+    cbn in switch_num.
     rewrite <-switch_num. cbn -[sat]. rewrite !num_subst.
     assert (ψ[var] = ψ[up (up (up (up (num n)..)))] ) as <-.
     eapply bounded_subst. apply Hψ.
@@ -567,12 +602,13 @@ Section notStd.
     eapply bounded_subst. apply binary_alpha.
     intros [|[]]; cbn; try reflexivity; lia.
     setoid_rewrite <-E. rewrite !subst_var.
-    specialize (H n). 
+    specialize (H n).
     rewrite unfold_sless, !num_subst in H.
     apply H.
     apply Overspill_DN in H'; auto.
     2 : { unfold unary. solve_bounds.
-          2, 3: try eapply bounded_up; try apply binary_alpha; try apply Hψ; lia.
+          2, 3: try eapply bounded_up; try apply binary_alpha;
+                try apply Hψ; lia.
           all: eapply subst_bound; eauto.
           all: intros [|[]] ?; solve_bounds. }
     apply (DN_chaining H'), DN. clear H' H.

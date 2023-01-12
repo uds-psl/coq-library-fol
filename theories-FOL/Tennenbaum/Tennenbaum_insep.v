@@ -43,12 +43,11 @@ Section Model.
 
   Variable surj_form_ : { Φ : nat -> form & surj Φ }.
   Variable enumerable_Q_prv : forall Φ : nat -> form, enumerable (fun n => Q ⊢I (Φ n)).
-  
+
   Definition Φ := projT1 surj_form_.
   Definition surj_form := projT2 (surj_form_).
   Definition A n := Q ⊢I ¬(Φ n)[(num n)..].
   Definition B n := Q ⊢I (Φ n)[(num n)..].
-
 
   Lemma Disjoint_AB : forall n, ~(A n /\ B n).
   Proof.
@@ -61,17 +60,18 @@ Section Model.
 
   Definition Insep' :=
     exists A B : nat -> Prop,
-      enumerable A /\ enumerable B /\ 
-      (forall n, ~ (A n /\ B n) ) /\ 
-      (forall D, Dec D -> 
+      enumerable A /\ enumerable B /\
+      (forall n, ~ (A n /\ B n)) /\
+      (forall D, Dec D ->
         (forall n, A n -> D n) ->
-        (forall n, ~ (B n /\ D n)) -> False).
+        (forall n, ~ (B n /\ D n)) ->
+        False).
 
   Definition Insep :=
     exists α β,
-      bounded 3 α /\ inhabited(delta1 α) /\ bounded 3 β /\ inhabited(delta1 β) /\ 
-      (forall n, ~ Q ⊢I ((∃∃α) ∧ (∃∃β))[(num n)..] ) /\ 
-      (forall G, Dec G -> (forall n, Q ⊢I (∃∃α)[(num n)..] -> G n) -> 
+      bounded 3 α /\ inhabited(delta1 α) /\ bounded 3 β /\ inhabited(delta1 β) /\
+      (forall n, ~ Q ⊢I ((∃∃α) ∧ (∃∃β))[(num n)..] ) /\
+      (forall G, Dec G -> (forall n, Q ⊢I (∃∃α)[(num n)..] -> G n) ->
         (forall n, ~ (Q ⊢I (∃∃β)[(num n)..] /\ G n)) -> False).
 
   Lemma Insep_ :
@@ -90,14 +90,14 @@ Section Model.
     enough (~ G c); auto.
   Qed.
 
-  Lemma CT_Inseparable : 
+  Lemma CT_Inseparable :
     CT_Q -> Insep.
   Proof.
     intros ct.
     destruct (Insep_ (CT_RTs ct)) as (A & B & HA & HB & disj & H).
     destruct ((CT_RTw ct) A HA) as [α (Ha0 & [Ha1] & Hα)],
             ((CT_RTw ct) B HB) as [β (Hb0 & [Hb1] & Hβ)].
-    exists α, β. do 4 (split; auto).  
+    exists α, β. do 4 (split; auto).
     repeat split; auto; unfold weak_repr in *.
     - intros n h%soundness. apply (disj n).
       rewrite Hα, Hβ.
@@ -108,7 +108,6 @@ Section Model.
       setoid_rewrite <-Hβ.
       apply H.
   Qed.
-
 
   Lemma WInsep_ :
     WRT_strong -> Insep'.
@@ -161,13 +160,13 @@ Section Model.
     now apply axioms.
   Qed.
 
-  Lemma LEM_bounded_exist_ternary' phi : 
+  Lemma LEM_bounded_exist_ternary' phi :
     (⊨ ∀∀∀ phi ∨ ¬ phi) -> bounded 3 phi -> ⊨ ∀∀∀ (∃ $0 ⧀ $3 ∧ phi) ∨ ¬ (∃ $0 ⧀ $3 ∧ phi).
   Proof.
     intros def b3.
     pose (Phi := ∀∀ (∃ $0 ⧀ $3 ∧ phi) ∨ ¬ (∃ $0 ⧀ $3 ∧ phi)).
     assert (H : forall d rho, (d.:rho) ⊨ Phi).
-    apply induction. 
+    apply induction.
     - apply axioms.
     - repeat solve_bounds;
       eapply bounded_up; apply b3 + lia.
@@ -176,7 +175,7 @@ Section Model.
     - intros n IHN rho y x. cbn. cbn in IHN.
       destruct (IHN rho y x) as [IH|IH]; fold sat in *; cbn in IH.
       + left. destruct IH as [d Hd]. exists d. split.
-        ++ destruct Hd as [[k ->] _]. exists (iσ k). 
+        ++ destruct Hd as [[k ->] _]. exists (iσ k).
           now rewrite add_rec_r.
         ++ eapply bound_ext. apply b3.
           2 : apply Hd.
@@ -203,7 +202,7 @@ Section Model.
   Qed.
 
 
-  Lemma LEM_bounded_exist_ternary {phi} sigma : 
+  Lemma LEM_bounded_exist_ternary {phi} sigma :
     delta1 phi -> bounded 3 phi -> forall b x, (x .: b .: sigma) ⊨ (∃∃ $0 ⧀ $3 ∧ $1 ⧀ $3 ∧ phi) \/ ~ (x .: b .: sigma) ⊨ (∃∃ $0 ⧀ $3 ∧ $1 ⧀ $3 ∧ phi).
   Proof.
     intros d0 b3 b y.
@@ -226,7 +225,6 @@ Section Model.
 
 
   (** Potential existence of undecidable predicates. *)
-
   Lemma nonDecDiv :
     Insep -> Stable std -> nonStd D -> ~ ~ exists d : D, ~ Dec (fun n => div_pi n d).
   Proof.
@@ -236,11 +234,11 @@ Section Model.
     unshelve epose proof (Overspill_DN _ _ _ _ Hx) as H. all: eauto.
     - unfold Coding.unary. repeat solve_bounds.
       eapply subst_bound with (N:=4).
-      eapply subst_bound with (N:=4). eapply bounded_up; eauto. 
+      eapply subst_bound with (N:=4). eapply bounded_up; eauto.
       intros [|[|[|[|[]]]]] ?; cbn; lia + solve_bounds.
       intros [|[|[|[|[]]]]] ?; cbn; lia + solve_bounds.
       eapply subst_bound with (N:=6).
-      eapply subst_bound with (N:=6). eapply bounded_up; eauto. 
+      eapply subst_bound with (N:=6). eapply bounded_up; eauto.
       intros [|[|[|[|[|[]]]]]] ?; cbn; lia + solve_bounds.
       intros [|[|[|[|[|[]]]]]] ?; cbn; lia + solve_bounds.
     - apply nonStd_notStd. now exists d.
@@ -288,7 +286,7 @@ Section Model.
         cbn. apply H2.
     + intros n [B_n C_n].
       assert (N⊨ (∃∃β)[(num n)..]) as B_n'.
-      { intros rho. eapply soundness. 
+      { intros rho. eapply soundness.
         - apply B_n.
         - apply Q_std_axioms.
       }
@@ -319,10 +317,10 @@ Section Model.
         apply num_lt_nonStd with (n:=n); auto.
         rewrite !sat_comp.
         split.
-        **  eapply bound_ext. 
+        **  eapply bound_ext.
             apply Ha1. 2: apply Hk12.
             intros [|[|[]]] ?; try reflexivity; try lia.
-        **  eapply bound_ext. 
+        **  eapply bound_ext.
             apply Hb1. 2: apply Hk34.
             intros [|[|[]]] ?; cbn; try reflexivity; try lia.
             try setoid_rewrite num_subst; try setoid_rewrite eval_num; try easy; try lia.

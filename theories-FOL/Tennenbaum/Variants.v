@@ -67,8 +67,10 @@ Fact ψ_equiv n a ψ :
   prime_form ψ -> div_pi ψ n a <-> div_num (Irred n) a.
 Proof.
   intros Hψ. unfold div_pi. cbn. split.
-  - intros [d [HH H]]. unfold I' in HH. rewrite <- inu_I in HH. apply ψ_repr in HH; auto. subst d. apply H.
-  - intros. exists (inu (Irred n)). unfold I'. rewrite <- !inu_I. rewrite ψ_repr; auto.
+  - intros [d [HH H]]. unfold I' in HH. rewrite <- inu_I in HH. 
+    apply ψ_repr in HH; auto. subst d. apply H.
+  - intros. exists (inu (Irred n)). unfold I'. rewrite <- !inu_I. 
+    rewrite ψ_repr; auto.
 Qed.
 
 

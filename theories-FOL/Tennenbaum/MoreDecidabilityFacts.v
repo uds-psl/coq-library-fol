@@ -102,5 +102,3 @@ Proof.
   - destruct (decode n) as [x y] eqn:E.
     exists x, y. unfold P in Hn; now rewrite E in Hn.
 Qed.
-
-
