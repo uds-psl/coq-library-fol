@@ -143,12 +143,12 @@ Proof.
   split.
   - intros ?.
     assert (~~ forall e, std e) as He.
-    { eapply Tennenbaum_diagonal with (ψ:=ψ); eauto. }
+    { eapply Tennenbaum_diagonal_ct with (ψ:=ψ); eauto. }
     intros e. apply MP_Discrete_stable_std; auto.
   - intros ?. now apply Std_is_Enumerable.
 Qed.
 
-Print Assumptions Tennenbaum1.
+(* Print Assumptions Tennenbaum1. *)
 
 (** ** Tennenbaum via inseparable formulas *)
 Corollary Tennenbaum_insep :
@@ -183,7 +183,7 @@ Proof.
     now apply Dec_div_reduction.
 Qed.
 
-Print Assumptions Tennenbaum_insep.
+(* Print Assumptions Tennenbaum_insep. *)
 
 
 Theorem Tennenbaum :
@@ -198,7 +198,7 @@ Proof.
   - intros ??. eapply DN, Dec_Div_nat_std; eauto.
 Qed.
 
-Print Assumptions Tennenbaum.
+(* Print Assumptions Tennenbaum. *)
 
 (*
 (** ** Makholm's Variant *)

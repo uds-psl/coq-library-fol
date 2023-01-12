@@ -73,6 +73,9 @@ Proof.
   intros [|[|[]]]; cbn; now rewrite ?num_subst.
 Qed.
 
+Lemma CT_WCT :
+  CT_Q -> WCT_Q.
+Proof. intros ct f. specialize (ct f). tauto. Qed.
 
 (** ** Strong part of the representability theorem.  *)
 Lemma CT_RTs :
