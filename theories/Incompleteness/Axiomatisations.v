@@ -16,6 +16,10 @@ Local Set Implicit Arguments.
 Local Unset Strict Implicit.
 
 
+Definition computational_explosion := enumerable (complement SBTM.SBTM_HALT).
+
+(* Check that we anchor to the right undecidable problem *)
+Definition computational_explosion_is_sane X (p : X -> Prop) : (undecidable p) = (decidable p -> computational_explosion) := eq_refl.
 
 (* ** Section 3 *)
 

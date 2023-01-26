@@ -1,10 +1,10 @@
 all:
 	export TIMED
-	@+$(MAKE) -C theories-FOL all
+	@+$(MAKE) -C theories all
 
 force Makefile: ;
 
 %: force
-	@+$(MAKE) -C theories-FOL $@
+	@+$(MAKE) -C theories $@
 
 .PHONY: all force
