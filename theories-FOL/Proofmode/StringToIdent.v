@@ -2,7 +2,7 @@ From MetaCoq.Template Require Import All.
 
 MetaCoq Quote Definition qUnit := unit.
 
-Definition unitFunc k := tLambda {| binder_name := nNamed k; binder_relevance := Relevant |} qUnit (tRel 0).
+Definition unitFunc k := tLambda {| binder_name := nNamed (String.of_string k); binder_relevance := Relevant |} qUnit (tRel 0).
 
 Ltac coq_string_to_ident_lambda' s :=
   let k v := exact v in

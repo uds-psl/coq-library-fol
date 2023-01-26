@@ -1,12 +1,13 @@
 (* * Summary File *)
 
 From FOL Require Import FullSyntax.
-From Undecidability.Synthetic Require Import Definitions Undecidability MPFacts.
+From Undecidability.Synthetic Require Import Definitions Undecidability.
 From Undecidability.Synthetic Require Import DecidabilityFacts EnumerabilityFacts ReducibilityFacts.
 From Undecidability.Synthetic Require Import ListEnumerabilityFacts MoreEnumerabilityFacts.
 From Undecidability.Shared Require Import Dec.
 From Undecidability Require Import Synthetic.Undecidability.
 From Equations Require Import Equations.
+From FOL.Utils Require Import MPFacts.
 Require Import ConstructiveEpsilon.
 Require Import List.
 Import ListNotations.
@@ -129,9 +130,9 @@ Section FixSignature.
       stripneg phi = Some psi -> phi = ¬ psi.
     Proof.
       depelim phi; cbn; try destruct b0; try discriminate.
-      - inversion H. apply Eqdep.EqdepTheory.inj_pair2 in H1 as ->; eauto. cbn. discriminate.
+      - inversion H. apply @inj_right_pair in H1 as ->; eauto. 2: intros ??; unfold dec; decide equality. cbn. discriminate.
       - depelim phi2; cbn; try destruct b0; try discriminate.
-        inversion H. apply Eqdep.EqdepTheory.inj_pair2 in H1 as ->; eauto. congruence.
+        inversion H. apply @inj_right_pair in H1 as ->; eauto. 2: intros ??; unfold dec; decide equality.  congruence.
     Qed.
 
     Lemma enumerable_equiv X (P Q : X -> Prop) :

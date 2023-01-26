@@ -2,7 +2,7 @@
 
 From Undecidability Require Import Shared.ListAutomation.
 From Undecidability.Synthetic Require Import Definitions DecidabilityFacts EnumerabilityFacts ListEnumerabilityFacts ReducibilityFacts.
-Import ListAutomationNotations.
+Import ListAutomationNotations ListAutomationFacts ListAutomationHints ListAutomationInstances.
 From FOL Require Import FragmentSyntax Theories.
 From FOL.Deduction Require Export FragmentSequent.
 
@@ -248,20 +248,22 @@ Section Gentzen.
       repeat split.
       - rename x into phi. induction 1; try congruence; subst.
         + destruct IHsprv as [m]. exists (S m). cbn. in_app 2.
-          eapply in_concat_iff. eexists. split. 2: in_collect phi... all: eauto.
+          eapply in_concat. eexists. split. 2: eapply H1. eapply in_map_iff. eexists; repeat split; try apply H0.
         + destruct IHsprv as [m1], (el_T phi) as [m2]. exists (1 + m1 + m2). cbn. in_app 3.
-          eapply in_concat_iff. eexists. split. 2: in_collect phi... in_collect psi...
+          eapply in_concat. eexists. split. 1: eapply in_map.
+          2: eapply in_map. 1:idtac... idtac...
         + destruct IHsprv as [m]. exists (S m). cbn. in_app 4. in_collect phi...
         + destruct IHsprv as [m1], (el_T phi) as [m2]. exists (1 + m1 + m2). cbn. in_app 5. in_collect phi...
         + exists 0. now left.
         + destruct IHsprv1 as [m1], IHsprv2 as [m2]. exists (1 + m1 + m2). cbn. in_app 2. in_collect xi...
-        + destruct IHsprv as [m1], (el_T t) as [m2]. exists (1 + m1 + m2). cbn. in_app 2. eapply in_concat_iff.
-          eexists. split. 2: in_collect t... in_collect psi...
+        + destruct IHsprv as [m1], (el_T t) as [m2]. exists (1 + m1 + m2). cbn. in_app 2. eapply in_concat.
+          eexists. split. 1: eapply in_map_iff. 1: eexists; repeat split. 1: idtac...
+          in_collect psi...
       - intros [m]. induction m in A, psi, x, H |-*; destruct psi; cbn in *.
         + destruct H as [-> | []]. apply Ax.
         + eauto.
-        + destruct f as [|b P v|b [] phi psi|b [] phi]; inv_collect; eauto.
-        + destruct b; inv_collect; eauto.
+        + destruct f as [|b P v|b [] phi psi|b [] phi]; repeat invert_list_in'; intuition; eauto.
+        + destruct b; repeat invert_list_in'; intuition; eauto.
     Qed.
 
     Fixpoint L_tseq {b : falsity_flag} (L : nat -> list form) (n : nat) : list form :=
@@ -274,8 +276,9 @@ Section Gentzen.
     Proof with try (eapply cum_ge'; eauto; lia).
       intros He Hcml psi. repeat split.
       - intros (A & [m1] % (enum_el (enum_containsL Hcml He)) & [m2] % (enum_el (enum_sprv A None))).
-        exists (1 + (m1 + m2)). cbn. in_app 2. eapply in_concat_iff. eexists. split. 2: in_collect A... idtac...
-      - intros [m]. induction m in psi, H |-*; cbn in *. 1: contradiction. inv_collect. exists x0. split.
+        exists (1 + (m1 + m2)). cbn. in_app 2. eapply in_concat. eexists. split.
+        1: eapply in_map_iff; eexists; repeat split. all: idtac...
+      - intros [m]. induction m in psi, H |-*; cbn in *. 1: contradiction. repeat invert_list_in'; intuition. exists x0. split.
         + eapply (enum_p (enum_containsL Hcml He)); eassumption.
         + eapply (enum_p (enum_sprv x0 None)); eassumption.
     Qed.

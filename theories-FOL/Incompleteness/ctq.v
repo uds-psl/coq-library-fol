@@ -1,4 +1,4 @@
-From Undecidability.Shared Require Import embed_nat Dec.
+From Undecidability.Shared Require Import Dec.
 From Undecidability.Synthetic Require Import Definitions EnumerabilityFacts.
 
 From FOL Require Import FullSyntax Arithmetics.
@@ -6,7 +6,7 @@ From FOL.Proofmode Require Import Theories ProofMode.
 
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu.
 
-Require Import Lia String List.
+Require Import Lia String List Cantor.
 Import ListNotations.
 
 (** ** Church's Thesis for Q *)
@@ -93,14 +93,14 @@ Section ctq_epf.
       intros x. unshelve eexists.
       { intros k. 
         destruct (f_form c) as [φ|]. 2: exact None.
-        destruct (unembed k) as [l y].
+        destruct (of_nat k) as [l y].
         destruct (f_prv (∀ φ[num x .: $0 ..] ↔ $0 == num y) l).
         - exact (Some y).
         - exact None. }
       intros y1 y2 k1 k2. destruct (f_form c) as [φ|] eqn:Hc; cbn.
       2: congruence. 
-      destruct (unembed k1) as [l1 y'1].
-      destruct (unembed k2) as [l2 y'2].
+      destruct (of_nat k1) as [l1 y'1].
+      destruct (of_nat k2) as [l2 y'2].
       destruct (f_prv _ l1) eqn:H1, (f_prv _ l2) eqn:H2.  2-4: congruence. intros [= <-] [= <-].
       assert (Qeq ⊢ ∀ φ[num x .: $0..] ↔ $0 == num y'1) as H1'. 
       { apply Hprv. eauto. }
@@ -116,11 +116,11 @@ Section ctq_epf.
     destruct (Hform φ) as [c Hc]. exists c.
     intros x y. setoid_rewrite Hφ. cbn. split.
     - intros H. apply Hprv in H as [l Hl].
-      exists (embed (l, y)). cbn.
-      rewrite Hc. rewrite embedP. rewrite Hl.
+      exists (to_nat (l, y)).
+      rewrite Hc. cbn -[to_nat of_nat]. rewrite cancel_of_to. rewrite Hl.
       reflexivity.
     - intros [k H3]. cbn in H3.
-      rewrite Hc in H3. destruct (unembed k) as [l y'].
+      rewrite Hc in H3. destruct (of_nat k) as [l y'].
       destruct f_prv eqn:H.
       + apply Hprv. exists l. now injection H3 as ->.
       + congruence.
@@ -435,14 +435,14 @@ Section ctq.
 
   Context `{pei : peirce}.
 
-  Definition embed' t := embed t * 2.
-  Definition unembed' c := unembed (Nat.div c 2).
+  Definition embed' t := to_nat t * 2.
+  Definition unembed' c := of_nat (Nat.div c 2).
 
   Lemma unembed'_embed' x y : unembed' (embed' (x, y)) = (x, y).
   Proof.
     unfold unembed', embed'.
     rewrite PeanoNat.Nat.div_mul.
-    - apply embedP.
+    - apply cancel_of_to.
     - lia.
   Qed.
   Lemma gaussian_sum x : 2 * nat_rec (fun _ : nat => nat) 0 (fun i m : nat => S i + m) x = 
@@ -453,7 +453,7 @@ Section ctq.
 
   Lemma embed'_expl x y : embed' (x, y) = y * 2 + (y + x) * (y + x + 1).
   Proof.
-    unfold embed', embed.
+    unfold embed', to_nat.
     rewrite <-gaussian_sum. lia.
   Qed.
   Lemma compress_free φ n : bounded (S n) φ -> exists ρ,
@@ -520,18 +520,18 @@ Section ctq.
     unshelve eexists.
     { intros [[c x]%unembed' y]%unembed' k.
       destruct ((theta_mu c x).(core) k) as [y'|].
-      - exact (nat_eq_dec y y').
+      - exact (if nat_eq_dec y y' then true else false).
       - exact false. }
     intros t.
     destruct (unembed' t) as [t' y] eqn:H1, (unembed' t') as [c x] eqn:H2.
     split.
     - intros [k Hk]. exists k. cbv zeta match beta.
-      rewrite H2. rewrite Hk. now apply Dec_reflect.
+      rewrite H2. rewrite Hk. destruct nat_eq_dec; lia.
     - intros [k Hk]. exists k.
       cbv zeta match beta in Hk.
       rewrite H2 in Hk.
       destruct core.
-      + now apply Dec_reflect in Hk.
+      + destruct nat_eq_dec; try congruence.
       + discriminate.
   Qed.
 

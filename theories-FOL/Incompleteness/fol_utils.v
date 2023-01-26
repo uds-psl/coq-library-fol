@@ -112,14 +112,14 @@ Section n.
     - exists 0. cbn. cbn in v. enough (func Zero v = zero) as -> by fapply ax_refl.
       f_equal. apply vec_0_nil.
     - destruct (vec_1_inv v) as [t ->]. destruct (X t) as [n Hn].
-      + left.
+      + now left.
       + revert H. invert_bounds. apply H1. left.
       + exists (S n). fapply ax_succ_congr. apply Hn.
     - destruct (vec_2_inv v) as (t1 & t2 & ->). 
       destruct (X t1, X t2) as [[n1 Hn1] [n2 Hn2]].
-      + left.
+      + now left.
       + revert H. invert_bounds. apply H1. left.
-      + right. left.
+      + right. now left.
       + revert H. invert_bounds. apply H1. right. left.
       + exists (n1 + n2).
         pose proof num_add_homomorphism as H'.
@@ -129,9 +129,9 @@ Section n.
         fapply ax_add_congr; assumption.
     - destruct (vec_2_inv v) as (t1 & t2 & ->). 
       destruct (X t1, X t2) as [[n1 Hn1] [n2 Hn2]].
-      + left.
+      + now left.
       + revert H. invert_bounds. apply H1. left.
-      + right. left.
+      + right. now left.
       + revert H. invert_bounds. apply H1. right. left.
       + exists (n1 * n2).
         pose proof num_mult_homomorphism as H'.

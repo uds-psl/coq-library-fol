@@ -13,8 +13,7 @@ Section ReificationExample.
   Context {D_ext : extensional I}. (* Furthermore, we assume that a i= b -> a = b, i.e. equality is extensional*)
   Context {D_fulfills : forall f rho, PAeq f -> rho ⊨ f}.
 
-  Open Scope string_scope.
-
+  Open Scope bs_scope.
 
 
   Fixpoint inum n := match n with 0 => iO | S n => iσ (inum n) end.
@@ -46,13 +45,13 @@ Section ReificationExample.
     Definition reifyCoqEq : baseConnectiveReifier := fun tct qff l fuel envTerm env fPR fTR => match l with (tv::x::y::nil) => if maybeD tct tv then
                                                xr <- fTR tct qff x envTerm env ;;
                                                yr <- fTR tct qff y envTerm env ;; let '((xt,xp),(yt,yp)) := (xr,yr) in
-                                               ret (tApp qMergeFormEq (xt::yt::nil), tApp qMergeEqProp (envTerm::x::y::xt::yt::xp::yp::nil)) else fail "Eq applied to wrong type" | _ => fail "Eq constructor applied to != 2 terms" end.
+                                               ret (tApp qMergeFormEq (xt::yt::nil), tApp qMergeEqProp (envTerm::x::y::xt::yt::xp::yp::nil)) else fail "Eq applied to wrong type"%bs | _ => fail "Eq constructor applied to != 2 terms"%bs end.
     Definition varsCoqEq : baseConnectiveVars := fun lst fuel tct _ fUVT => match lst with tv::x::y::nil => if maybeD tct tv then
                                                xr <- fUVT x;;
                                                yr <- fUVT y;;
                                                ret (List.app xr yr) else fail "Eq applied to wrong type" | _ => fail "Eq constructor applied to != 2 terms" end.
-    Definition reifyBLC (s:string) : baseConnectiveReifier := match s with "eq"%string => reifyCoqEq | _ => fun _ _ _ _ _ _ _ _ => fail ("Unknown connective " ++ s) end.
-    Definition varsBLC (s:string) : baseConnectiveVars := match s with "eq"%string => varsCoqEq | _ => fun _ _ _ _ _ => fail ("Unknown connective " ++ s) end.
+    Definition reifyBLC s : baseConnectiveReifier := match s with "eq" => reifyCoqEq | _ => fun _ _ _ _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
+    Definition varsBLC s : baseConnectiveVars := match s with "eq" => varsCoqEq | _ => fun _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
     Definition findVarsTerm : termFinderVars := fun fuel t fUVT => match t with (tApp qMu (k::nil)) => ret nil | _ => fail "Fail" end.
     Definition reifyTerm : termFinderReifier := fun tct qff fuel t envTerm env fTR => match t with tApp qMu (k::nil) => ret (tApp qMergeTermNum (k::nil), tApp qMergeNum (envTerm::k::nil)) | _ => fail "Fail" end.
   End ReflectionExtension.

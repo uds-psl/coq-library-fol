@@ -4,7 +4,7 @@ From FOL Require Import FullSyntax.
 
 Require Import List Arith.PeanoNat Eqdep_dec.
 
-Import ListAutomationNotations.
+Import ListAutomationNotations ListAutomationFacts ListAutomationHints ListAutomationInstances.
 
 Local Notation vec := Vector.t.
 

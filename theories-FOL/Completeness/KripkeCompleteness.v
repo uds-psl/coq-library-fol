@@ -1,11 +1,12 @@
 (** ** Kripke Completeness **)
 
 From FOL Require Import FragmentSyntax Theories Deduction.FragmentSequentFacts.
-From Undecidability.Synthetic Require Import Definitions DecidabilityFacts MPFacts EnumerabilityFacts ListEnumerabilityFacts ReducibilityFacts.
+From Undecidability.Synthetic Require Import Definitions DecidabilityFacts EnumerabilityFacts ListEnumerabilityFacts ReducibilityFacts.
 From Undecidability Require Import Shared.ListAutomation Shared.Dec.
-From Undecidability Require Import Shared.Libs.PSL.Vectors.Vectors Shared.Libs.PSL.Vectors.VectorForall.
-Import ListAutomationNotations.
+From Coq Require Import Vector List.
+Import ListAutomationNotations ListAutomationHints ListAutomationInstances ListAutomationFacts.
 From FOL.Completeness Require Export TarskiCompleteness.
+From FOL.Utils Require Import MPFacts.
 
 (* ** Universal Models *)
 
@@ -88,7 +89,7 @@ Section KripkeCompleteness.
       rewrite <- subst_falsity_comm. cbn.
       rewrite (ksat_comp A var rho).
       apply ksat_ext. intros x. unfold funcomp. induction (rho x); cbn; try easy.
-      erewrite <- map_ext_forall. 2: apply Forall_in, IH. 
+      erewrite <- Vector.map_ext_in. 2: apply IH.
       now rewrite Vector.map_id.
     Qed.
 
@@ -146,7 +147,7 @@ Section KripkeCompleteness.
     Proof.
       rewrite (ksat_comp A var rho).
       apply ksat_ext. intros x. unfold funcomp. induction (rho x); cbn; try easy.
-      erewrite <- map_ext_forall. 2: apply Forall_in, IH. 
+      erewrite <- Vector.map_ext_in. 2: apply IH.
       now rewrite Vector.map_id.
     Qed.
 

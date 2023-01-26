@@ -7,6 +7,7 @@ From FOL.Proofmode Require Import Theories.
 
 Require Import List Lia String.
 Import ListNotations.
+Import ListAutomationNotations ListAutomationFacts ListAutomationHints ListAutomationInstances.
 
 Open Scope string_scope.
 
@@ -999,6 +1000,7 @@ Ltac fintro_pat intro_pat :=
     | _ => match eval cbn in (parse_intro_pattern intro_pat) with
             | Some ?p => p
             | None => let msg := eval cbn in ("Invalid intro pattern: " ++ intro_pat) in fail 2 msg
+            | ?q => idtac "AAA" q
             end
   end in fintro_pat' pat.
 

@@ -1,5 +1,5 @@
 From Undecidability.Synthetic Require Import DecidabilityFacts EnumerabilityFacts ReducibilityFacts.
-From Undecidability.Shared Require Import Dec embed_nat.
+From Undecidability.Shared Require Import Dec.
 
 From FOL Require Import FullSyntax Arithmetics.
 From FOL.Proofmode Require Import Theories ProofMode.

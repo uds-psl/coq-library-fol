@@ -2,7 +2,11 @@ From Equations Require Import Equations.
 From Coq Require Import Arith Lia List Program.Equality.
 From FOL Require Import FullSyntax.
 From FOL Require Import Semantics.Heyting.Heyting Completeness.HeytingMacNeille.
+From Undecidability Require Import Shared.ListAutomation Shared.Dec.
 Import ListNotations.
+From Coq Require Import Vector List.
+Import ListAutomationNotations ListAutomationHints ListAutomationInstances ListAutomationFacts.
+
 
 Section Lindenbaum.
 Context {Σ_funcs : funcs_signature}.
@@ -29,20 +33,20 @@ Section Completeness.
     - intros phi psi. exact (phi → psi).
     - intros phi. apply Ctx. now left.
     - intros phi psi theta H1 H2. apply IE with (phi:=psi); trivial.
-      apply Weak with (A:=[]); auto. 2: firstorder. econstructor. apply H2.
+      apply Weak with (A:=[]); auto. econstructor. apply H2.
     - intros phi. cbn. apply Exp, Ctx. now left.
     - intros phi psi theta. cbn. split.
       + intros [H1 H2]. now apply CI.
       + intros H. split; [apply (CE1 H) | apply (CE2 H)].
     - intros phi psi theta. cbn. split.
-      + intros [H1 H2]. eapply DE. apply Ctx; auto. 1: now left.
+      + intros [H1 H2]. eapply DE. apply Ctx; auto.
         eapply Weak. exact H1. firstorder.
         eapply Weak. exact H2. firstorder.
       + intros H; split.
         * apply (IE (phi := phi ∨ psi)). 2: try apply DI1, Ctx. 2: now left.
-          apply II. eapply Weak; eauto. 1: firstorder. 
+          apply II. eapply Weak; eauto.
         * apply (IE (phi := phi ∨ psi)); try apply DI2, Ctx; try now left.
-          apply II. eapply Weak; eauto. firstorder.
+          apply II. eapply Weak; eauto.
     - intros phi psi theta. cbn. split.
       + intros H. apply II. apply (IE (phi := theta ∧ phi)).
         * apply II. eapply Weak. 1: apply H. firstorder.
@@ -55,7 +59,7 @@ Section Completeness.
     Top <= phi <-> [] ⊢E phi.
   Proof.
     cbn. split; intros H.
-    - apply (IE (phi := ¬ ⊥)); apply II; eauto using Ctx. apply Ctx. now left.
+    - apply (IE (phi := ¬ ⊥)); apply II; eauto using Ctx.
     - eapply Weak; eauto; firstorder.
   Qed.
 
@@ -86,13 +90,13 @@ Section Completeness.
         destruct (@nameless_equiv_ex _ _ _ intu ([psi]) f2 theta) as [t Ht]. apply Ht.
         assert (exists i : term, equiv_HA (hsat lb_Pr f2[t..]) (hsat lb_Pr f2[i..])) by now eexists.
         specialize (HX (hsat lb_Pr f2[t..]) H0).
-        apply Weak with (A:=[f2[t..]]); auto. 2: now apply ListAutomation.incl_shift.
+        apply Weak with (A:=[f2[t..]]); auto.
         apply HT, HX. rewrite <- H. apply Ctx. now left.
       + specialize (H' (down (∃ f2))). apply H'.
         exists (@down_normal lb_alg (∃ f2)). intros X [t ?].
         intros ? ?. eapply H0 in H1.
         revert x H1. fold (hset_sub (proj1_sig (hsat lb_Pr f2[t..])) (down (∃ f2))).
-        rewrite <- H. apply down_mono. eapply ExI, Ctx; eauto. now left.
+        rewrite <- H. apply down_mono. eapply ExI, Ctx; eauto.
   Qed.
 
   Lemma lindenbaum_eqH phi :
@@ -160,24 +164,24 @@ Section Completeness.
     - intros phi psi. exact (phi → psi).
     - intros phi. apply gCtx. now left.
     - intros phi psi theta H1 H2. apply gIE with (phi:=psi); trivial.
-      apply gWeak with (A:=[]); auto. firstorder.
+      apply gWeak with (A:=[]); auto.
     - intros phi. cbn. apply gExp, gCtx. now left.
     - intros phi psi theta. cbn. split.
       + intros [H1 H2]. now apply gCI.
       + intros H. split; [apply (gCE1 H) | apply (gCE2 H)].
     - intros phi psi theta. cbn. split.
-      + intros [H1 H2]. eapply gDE. apply gCtx; auto. 1: now left.
+      + intros [H1 H2]. eapply gDE. apply gCtx; auto.
         eapply gWeak. exact H1. firstorder.
         eapply gWeak. exact H2. firstorder.
       + intros H; split.
         * apply (gIE (phi := phi ∨ psi)); try apply gDI1, gCtx.
-          apply gII. eapply gWeak; eauto. 1: firstorder. now left.
+          apply gII. eapply gWeak; eauto. 1: firstorder.
         * apply (gIE (phi := phi ∨ psi)); try apply gDI2, gCtx.
-          apply gII. eapply gWeak; eauto. 1: firstorder. now left.
+          apply gII. eapply gWeak; eauto. 1: firstorder.
     - intros phi psi theta. cbn. split.
       + intros H. apply gII. apply (gIE (phi := theta ∧ phi)).
-        * apply gII. eapply gWeak; eauto. firstorder.
-        * apply gCI; apply gCtx; auto. 1: right; now left. now left.
+        * apply gII. eapply gWeak; eauto.
+        * apply gCI; apply gCtx; auto.
       + intros H. apply (gIE (phi:=phi)). 2: eapply gCE2, gCtx; now left.
         eapply gIE. 1: eapply gII, gWeak. 1: apply H. 2: eapply gCE1, gCtx; now left.
         firstorder.
@@ -188,7 +192,7 @@ Section Completeness.
   Proof.
     cbn. split; intros H.
     - apply (gIE (phi := ¬ ⊥)); apply gII. 2: apply gCtx; now left. apply H.
-    - eapply gWeak; eauto. firstorder.
+    - eapply gWeak; eauto.
   Qed.
 
   Instance glb_calg : CompleteHeytingAlgebra :=
@@ -224,12 +228,12 @@ Section Completeness.
         assert (exists i : term, equiv_HA (hsat glb_Pr phi[t..]) (hsat glb_Pr phi[i..])) by now eexists.
         specialize (HX (hsat glb_Pr phi[t..]) H0).
         apply gWeak with (A:=[phi[t..]]); auto.
-        apply HT, HX. rewrite <- H. apply gCtx. now left. apply ListAutomation.incl_shift. easy.
+        apply HT, HX. rewrite <- H. apply gCtx. now left.
       + specialize (H' (down (∃ phi))). apply H'.
         exists (@down_normal glb_alg (∃ phi)). intros X [t ?].
         intros ? ?. eapply H0 in H1.
         revert x H1. fold (hset_sub (proj1_sig (hsat glb_Pr phi[t..])) (down (∃ phi))).
-        rewrite <- H. apply down_mono. eapply gExI, gCtx; eauto. now left.
+        rewrite <- H. apply down_mono. eapply gExI, gCtx; eauto.
   Qed.
 
   Lemma glindenbaum_eqH phi :

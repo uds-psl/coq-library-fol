@@ -5,7 +5,7 @@ From Undecidability.Synthetic Require Import Definitions DecidabilityFacts Enume
 From FOL Require Import FullSyntax Theories.
 From FOL.Deduction Require Export FullSequent.
 From Undecidability Require Import Shared.ListAutomation.
-Import ListAutomationNotations.
+Import ListAutomationNotations ListAutomationFacts ListAutomationHints ListAutomationInstances.
 Local Set Implicit Arguments.
 Local Unset Strict Implicit.
 Require Import Lia.
@@ -67,7 +67,7 @@ Section Sequent_def.
     - apply AL, (IHfprv (phi :: psi :: B)). intuition.
     - apply OL; [apply (IHfprv1 (phi :: B)) | apply (IHfprv2 (psi :: B))]; intuition.
     - refine (AllL _ (IHfprv (phi [t..] :: B) _)). intuition.
-    - apply ExL, (IHfprv (phi :: [p[↑] | p ∈ B])). now apply incl_shift, incl_map.
+    - apply ExL, (IHfprv (phi :: [p[↑] | p ∈ B])). now apply cons_incl_proper, incl_map.
     - now apply AllR,IHfprv, incl_map.
   Qed.
 

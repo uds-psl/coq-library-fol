@@ -1,6 +1,6 @@
 
 From Undecidability.Synthetic Require Import Definitions Undecidability.
-From Undecidability.Synthetic Require Import DecidabilityFacts EnumerabilityFacts ReducibilityFacts.
+From Undecidability.Synthetic Require Import DecidabilityFacts EnumerabilityFacts ReducibilityFacts MoreReducibilityFacts.
 From Undecidability.Synthetic Require Import ListEnumerabilityFacts MoreEnumerabilityFacts.
 From Undecidability.Shared Require Import Dec.
 From Equations Require Import Equations.
@@ -229,10 +229,15 @@ Section Instantiation.
     unfold closed. destruct bounded_dec; intuition congruence.
   Qed.
 
+  Lemma dec_help_1 X Y : dec X -> (X <-> Y) -> dec Y.
+  Proof.
+    intros [H|H]; [left|right]; tauto.
+  Qed.
+
   Lemma closed_dec phi :
     dec (closed phi).
   Proof.
-    eapply dec_transfer; try apply bounded_closed. apply bounded_dec.
+    eapply dec_help_1; try apply bounded_closed. apply bounded_dec.
   Qed.
 
   Lemma bot_closed :
@@ -246,7 +251,7 @@ Section Instantiation.
   Proof.
     apply decidable_iff. constructor. intros [[phi H1] [psi H2]].
     unfold dec.
-    destruct dec_form with falsity_on phi psi as [->|H]; eauto.
+    destruct dec_form with falsity_on phi psi as [->|H]; eauto. 1-2: intros ??; unfold dec; decide equality.
     - left. f_equal. apply uip.
     - right. injection. apply H.
   Qed.
@@ -273,6 +278,7 @@ Section Instantiation.
     - right. intros phi. congruence.
     - destruct b0. 1,2: right; intros phi; congruence.
       destruct dec_form with falsity_on phi2 ⊥ as [->|H]; eauto.
+      1-2: intros ??; unfold dec; decide equality.
       right. intros psi. intros Heq. injection Heq. intros H1%Eqdep_dec.inj_pair2_eq_dec _. 2:decide equality. tauto.
     - right. intros psi. congruence.
   Qed.

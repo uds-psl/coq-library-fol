@@ -1,7 +1,6 @@
 (* ** Arithmetical Hierarchy in Type Theory *)
 
-From Undecidability.Shared Require Import embed_nat.
-Require Import Lia Vector Fin List.
+Require Import Lia Vector Fin List Arith.Cantor.
 Import Vector.VectorNotations.
 From Undecidability.Synthetic Require Import Definitions.
 
@@ -157,16 +156,16 @@ Section ArithmeticalHierarchySemantic.
   Proof.
     intros H.
     unshelve eapply isΣsem_m_red_closed in H.
-    2: exact (fun v => let (x, y) := unembed (VectorDef.hd v) in p (x :: y :: VectorDef.tl v)).
+    2: exact (fun v => let (x, y) := of_nat (VectorDef.hd v) in p (x :: y :: VectorDef.tl v)).
     2: {
-      exists (fun v => let (x, y) := unembed (VectorDef.hd v) in x :: y :: Vector.tl v).
-      intros v. destruct unembed. reflexivity.
+      exists (fun v => let (x, y) := of_nat (VectorDef.hd v) in x :: y :: Vector.tl v).
+      intros v. destruct of_nat. reflexivity.
     }
     apply isΣsemS in H. erewrite PredExt. { apply H. }
     intros v. cbv beta. split.
-    - intros [y [x Hp]]. exists (embed (x, y)).
-      now rewrite eqhd, eqtl, embedP.
-    - intros [m Hp]. destruct (unembed m) as [x y] eqn:eq. exists y, x.
+    - intros [y [x Hp]]. exists (to_nat (x, y)).
+      now rewrite eqhd, eqtl, cancel_of_to.
+    - intros [m Hp]. destruct (of_nat m) as [x y] eqn:eq. exists y, x.
       now rewrite eqhd, eqtl, eq in Hp.
   Qed.
 
@@ -182,17 +181,17 @@ Section ArithmeticalHierarchySemantic.
   Proof.
     intros H.
     unshelve eapply isΣsem_m_red_closed in H.
-    2: exact (fun v => let (x, y) := unembed (VectorDef.hd v) in p (x :: y :: VectorDef.tl v)).
+    2: exact (fun v => let (x, y) := of_nat (VectorDef.hd v) in p (x :: y :: VectorDef.tl v)).
     2: {
-      exists (fun v => let (x, y) := unembed (VectorDef.hd v) in x :: y :: Vector.tl v).
-      intros v. destruct unembed. reflexivity.
+      exists (fun v => let (x, y) := of_nat (VectorDef.hd v) in x :: y :: Vector.tl v).
+      intros v. destruct of_nat. reflexivity.
     }
     apply isΠsemS in H. erewrite PredExt. { apply H. }
     intros v. cbv beta. split.
     - intros Hp m. rewrite eqhd, eqtl.
-      now destruct (unembed m) as [x y] eqn:eq.
-    - intros Hp y x. specialize (Hp (embed (x, y))).
-      now rewrite eqhd, eqtl, embedP in Hp.
+      now destruct (of_nat m) as [x y] eqn:eq.
+    - intros Hp y x. specialize (Hp (to_nat (x, y))).
+      now rewrite eqhd, eqtl, cancel_of_to in Hp.
   Qed.
 
   Lemma isΠsemA k n (p : vec nat (S k) -> Prop):

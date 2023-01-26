@@ -1,10 +1,10 @@
 (* Enumeration Utils for Tarski Completeness *)
 
 From FOL Require Import FragmentSyntax Theories.
-From Undecidability.Synthetic Require Import Definitions DecidabilityFacts MPFacts EnumerabilityFacts ListEnumerabilityFacts ReducibilityFacts.
+From Undecidability.Synthetic Require Import Definitions DecidabilityFacts EnumerabilityFacts ListEnumerabilityFacts ReducibilityFacts.
 From Undecidability Require Import Shared.ListAutomation Shared.Dec.
-From Undecidability Require Import Shared.Libs.PSL.Vectors.Vectors Shared.Libs.PSL.Vectors.VectorForall.
-Import ListAutomationNotations.
+From Coq Require Import Vector List.
+Import ListAutomationNotations ListAutomationHints ListAutomationInstances ListAutomationFacts.
 From FOL.Completeness Require Export TarskiConstructions.
 
 Section Enumeration.

@@ -9,11 +9,9 @@ Section ReificationExample.
   Context {I : interp D'}.
   Context {D_fulfills : forall f rho, PAeq f -> rho ⊨ f}.
 
-  Open Scope string_scope.
-
   Instance PA_reflector : tarski_reflector := buildDefaultTarski 
                         (iO) (* we need a point in D *)
-                        (anyVariableOf ("D'" :: nil)). (* We need to know when some type is D *)
+                        (anyVariableOf ("D'"%bs :: nil)). (* We need to know when some type is D *)
   Arguments D_fulfills _ _ _ : clear implicits.
   Lemma ieq_refl d : d i= d.
   Proof. apply (D_fulfills ax_refl (fun _ => iO)). apply PAeq_FA. now left. Qed.

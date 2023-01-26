@@ -1,9 +1,11 @@
 From FOL Require Import FullSyntax.
 From MetaCoq.Template Require Import utils All Pretty Checker.
+Require Export MetaCoq.Template.utils.bytestring.
 Require Import List String Lia.
 
 (* Both metacoq and FOL have terms. *)
 Notation term := Core.term.
+Notation string := String.t.
 (* * Reification
       Please read the PDF file giving a detailed description.
       
@@ -17,8 +19,9 @@ Section FailureMonad.
   Arguments fail {_} _.
   Definition bind {A B : Type} (k:FailureMonad A) (f:A -> FailureMonad B) := match k return FailureMonad B with fail x => fail x | ret k => f k end.
   Notation "x <- c1 ;; c2" := (bind c1 (fun x => c2)) (at level 100, c2 at level 100, c1 at next level).
+
   (* "Converts" from our monad to the TemplateMonad of MetaCoq. This is used to pass error messages back to the user *)
-  Definition f2t {T:Type} (a:FailureMonad T) : TemplateMonad T := match a with ret k => monad_utils.ret k | fail s => tmFail s end.
+  Definition f2t {T:Type} (a:FailureMonad T) : TemplateMonad T := match a with ret k => monad_utils.ret k | fail s => tmFail (s) end.
   (* Structurally recursive definition of a monadic map *)
   Fixpoint flatten_monad {A:Type} (l:list (FailureMonad A)) : FailureMonad (list A) := match l with nil => ret nil | x::xr => (xm <- x;; (xrm <- flatten_monad xr;; ret (xm::xrm))) end.
   Definition map_monad {A B:Type} (f:A -> FailureMonad B) (l:list A) : FailureMonad (list B) := flatten_monad (map f l).
@@ -410,11 +413,12 @@ Section TarskiMerging.
                                              ret (tApp qMergeFormNot ([tct;xt]),tApp qMergeNot ([tct;envTerm;x;xt;xp])) | _ => fail "not applied to != 1 terms" end.
   Definition reifyTrue : baseConnectiveReifier := fun tct qff l fuel envTerm env fPR _ => match l with nil =>
                                              ret (tApp qMergeFormTrue ([tct]), tApp qMergeTrue ([tct;envTerm]))| _ => fail "True applied to terms" end.
+
   (* The main handler. Given the name of the base type, call the respective helper. If nothing matches, call the extension point *)
   Definition reifyBase (s:string): baseConnectiveReifier 
                             := match s with "and" => reifyAnd | "or" => reifyOr | "ex" => reifyExist |  "False" => reifyFalse | "True" => reifyTrue |
                                        _ => match baseLogicConnHelper with 
-                                             None =>fun _ _ _ _ _ _ _ _ => fail ("Unknown connective "++s) | 
+                                             None =>fun _ _ _ _ _ _ _ _ => fail (String.append "Unknown connective " s) | 
                                              Some k => k s end end.
   (* The same development for no-proof mode. Similar, except we don't build proofs *)
   Definition baseConnectiveReifierNP := Ast.term -> Ast.term -> list Ast.term -> nat -> Ast.term -> (Ast.term -> FailureMonad nat) -> 
@@ -438,11 +442,12 @@ Section TarskiMerging.
                                              ret (tApp qMergeFormNot ([tct;xt]))| _ => fail "not applied to != 1 terms" end.
   Definition reifyTrueNP : baseConnectiveReifierNP := fun tct qff l fuel envTerm env fPR _ => match l with nil =>
                                              ret (tApp qMergeFormTrue ([tct]))| _ => fail "True applied to terms" end.
+
   (* The helper is a bit more interesting, since it calls the extension point, building a recursive "dummy proof" helper and discarding the resulting proof *)
   Definition reifyBaseNP (s:string): baseConnectiveReifierNP 
                             := match s with "and" => reifyAndNP | "or" => reifyOrNP | "ex" => reifyExistNP |  "False" => reifyFalseNP |  "True" => reifyTrueNP | 
                                        _ => match baseLogicConnHelper with 
-                                             None =>fun _ _ _ _ _ _ _ _ => fail ("Unknown connective "++s) | 
+                                             None =>fun _ _ _ _ _ _ _ _ => fail (String.append "Unknown connective " s) | 
                                              Some k => fun tct qff lst fuel envTerm env fPR fTR => both <- k s tct qff lst fuel envTerm env 
                                                                                                         (fun qff P n et e => rr <- fPR qff P n et e;; ret (rr, noProofDummy)) 
                                                                                                         (fun tct qff t eT env => rr <- fTR tct qff t eT env;; ret (rr, noProofDummy));; 
@@ -492,7 +497,7 @@ Section EnvHelpers.
   (* Appends d to the env *)
   Definition raiseEnvTerm (tct:Ast.term) (d:Ast.term) (env:Ast.term) : Ast.term := tApp (qScons) ([tApp qD ([tct]);d;env]).
   (* The env helper for the empty environ, which always fails *)
-  Definition unboundEnv := (fun a:Ast.term => @fail nat ("unbound " ++ string_of_term a)).
+  Definition unboundEnv := (fun a:Ast.term => @fail nat (String.append "unbound " (string_of_term a))).
 End EnvHelpers.
 
 Section EnvConstructor.
@@ -542,14 +547,14 @@ Section EnvConstructor.
 
   Definition findUBBase (s:string) : baseConnectiveVars 
           := match s with "and" => findUBAnd | "or" => findUBOr | "ex" => findUBExists | "False" => findUBFalse | "True" => findUBTrue | _ => 
-                match @baseLogicVarHelper tr te with None => fun _ _ _ _ _ => fail ("Unknown connective "++s) | Some k => k s end end.
+                match @baseLogicVarHelper tr te with None => fun _ _ _ _ _ => fail (String.append "Unknown connective " s) | Some k => k s end end.
   MetaCoq Quote Definition qIff := @iff.
   MetaCoq Quote Definition qNot := @not.
   (* Checks whether a term is the type of theory terms in Coq. *)
   Definition maybeD : Ast.term -> Ast.term -> bool := fun tct mD => if @isD tr mD then true else Checker.eq_term init_graph mD (tApp qD ([tct])).
   (* Finds the unbound variables in a form *)
   Fixpoint findUnboundVariablesForm (tct:Ast.term) (fuel:nat) (t:Ast.term) (frees:nat) {struct fuel}: (FailureMonad (list Ast.term)) := 
-  let ffail := fail ("Cannot introspect form "++ string_of_term t) in match fuel with 0 => fail "Out of fuel" | S fuel => 
+  let ffail := fail (String.append"Cannot introspect form " (string_of_term t)) in match fuel with 0 => fail "Out of fuel" | S fuel => 
     match (frees,t) with
     (0,(baseLogicConn name nil)) => findUBBase name nil fuel tct (findUnboundVariablesForm tct fuel) (findUnboundVariablesTerm fuel)
   | (0,(tApp (baseLogicConn name nil) lst)) => findUBBase name lst fuel tct (findUnboundVariablesForm tct fuel) (findUnboundVariablesTerm fuel)
@@ -631,7 +636,7 @@ Section MainReificationFunctions.
     Fixpoint findPropRepresentation (tct:Ast.term) (fuel:nat) (qff:Ast.term) (t:Ast.term) (frees:nat) (envTerm:Ast.term) (env:Ast.term -> FailureMonad nat) {struct fuel}: (FailureMonad (prod Ast.term Ast.term)) := 
     match fuel with 0 => fail "Out of fuel" | S fuel => 
       let ffail := orelse (match @formReifierReifyHelper _ te with None => fail "none" | Some k => k tct qff fuel t frees envTerm env (findPropRepresentation tct fuel) (fun l => findTermRepresentation l fuel) end) 
-                        (fail ("Cannot represent form " ++ string_of_term t)) in match (frees,t) with
+                        (fail (String.append "Cannot represent form " (string_of_term t))) in match (frees,t) with
       (0,(baseLogicConn name nil)) => reifyBase name tct qff nil fuel envTerm env (findPropRepresentation tct fuel) (fun tct => findTermRepresentation tct fuel)
     | (0,(tApp (baseLogicConn name nil) lst)) => reifyBase name tct qff lst fuel envTerm env (findPropRepresentation tct fuel) (fun tct => findTermRepresentation tct fuel)
     | (0,(tApp arg lst)) => if Checker.eq_term init_graph arg qI_P then match popNElements lst 4 with
@@ -658,7 +663,7 @@ Section MainReificationFunctions.
     Fixpoint findPropRepresentationNP (tct:Ast.term) (fuel:nat) (qff:Ast.term) (t:Ast.term) (frees:nat) (envTerm:Ast.term) (env:Ast.term -> FailureMonad nat) {struct fuel}: (FailureMonad (Ast.term)) := 
     match fuel with 0 => fail "Out of fuel" | S fuel => 
       let ffail := orelse (match @formReifierReifyHelper _ te with None => fail "none" | Some k => rr <- k tct qff fuel t frees envTerm env (fun qff' t f et e => v <- findPropRepresentationNP tct fuel qff' t f et e;; ret (v,noProofDummy)) (fun l qff' t et e => v <- findTermRepresentationNP l fuel qff' t et e;;ret (v,noProofDummy));;let '(trm,_) := rr in ret trm end)  
-                          (fail ("Cannot represent form " ++ string_of_term t)) in match (frees,t) with
+                          (fail (String.append "Cannot represent form " (string_of_term t))) in match (frees,t) with
       (0,(baseLogicConn name nil)) => reifyBaseNP name tct qff nil fuel envTerm env (findPropRepresentationNP tct fuel) (fun tct => findTermRepresentationNP tct fuel)
     | (0,(tApp (baseLogicConn name nil) lst)) => reifyBaseNP name tct qff lst fuel envTerm env (findPropRepresentationNP tct fuel) (fun tct => findTermRepresentationNP tct fuel)
     | (0,(tApp arg lst)) => if Checker.eq_term init_graph arg qI_P then match popNElements lst 4 with

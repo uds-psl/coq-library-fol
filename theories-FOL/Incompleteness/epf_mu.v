@@ -4,9 +4,9 @@ From Undecidability.H10 Require Import DPRM dio_single.
 
 From Equations Require Import Equations.
 Require Import String List.
-From Undecidability.L.Reductions Require Import MuRec.
-From Undecidability.MuRec Require Import recalg enumerable.
+From Undecidability.MuRec.Util Require Import recalg enumerable.
 Require Import Undecidability.L.Reductions.MuRec.MuRec_extract.
+Require Import Undecidability.L.Reductions.HaltMuRec_to_HaltL.
 From Undecidability.H10 Require Import DPRM.
 Require Import Undecidability.Synthetic.EnumerabilityFacts.
 From Coq.Logic Require Import ConstructiveEpsilon.
@@ -33,7 +33,7 @@ Section recalg_enum.
   Definition recalg_nat : recalg 1 -> nat.
   Proof.
     intros c. destruct (constructive_indefinite_ground_description_nat_Acc (fun n => nat_recalg n = c)) as [y _].
-    - intros n. apply recalg_dec.
+    - intros n. apply ra_eq_dec.
     - destruct (projT2 (enumeratorT_recalg 1) c) as [x H]. 
       exists x. unfold nat_recalg, nat_recalg'. now rewrite H.
     - exact y.

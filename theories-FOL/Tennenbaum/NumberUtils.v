@@ -230,23 +230,35 @@ Section PrimeDec.
     intros x. apply impl_dec; apply dec_eq_nat.
   Defined.
 
+  Lemma dec_help_1 P Q : dec P -> dec Q -> ~(P /\ Q) -> ~P \/ ~Q.
+  Proof.
+    intros H1 H2 H3.
+    destruct H1, H2; tauto.
+  Qed.
+
+  Lemma dec_help_2 P Q : dec P -> dec Q -> ~(P -> Q) -> P /\ ~Q.
+  Proof.
+    intros H1 H2 H3.
+    destruct H1, H2; tauto.
+  Qed.
+
   Lemma irred1 N :
     irred N + (N > 1 -> {x & x < N /\ Mod x N = 0 /\ x <> 1}).
   Proof.
     destruct (Dec_sigT_irred N) as [|H]; auto.
     right. intros HN. apply Witnessing_nat.
-    intros x. apply and_dec; eauto. apply lt_dec.
+    intros x. repeat apply and_dec; try apply not_dec; try eapply dec_eq_nat. apply lt_dec.
     unfold irred in *.
-    apply dec_DM_and in H.
+    apply dec_help_1 in H.
     - destruct H. tauto.
       apply neg_lt_bounded_forall in H.
       destruct H as [n []].
       exists n. split. tauto.
-      apply dec_DM_impl in H0; eauto. intros x.
+      apply dec_help_2 in H0; eauto; try eapply dec_eq_nat. intros x.
       apply impl_dec; apply dec_eq_nat.
     - apply lt_dec.
     - apply dec_lt_bounded_forall.
-      intros n. apply impl_dec; eauto.
+      intros n. apply impl_dec; eapply dec_eq_nat.
   Qed.
 
   Lemma dec_irred_factor N :

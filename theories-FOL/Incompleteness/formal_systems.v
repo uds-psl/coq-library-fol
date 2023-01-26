@@ -1,7 +1,7 @@
 From FOL.Incompleteness Require Import utils.
 
 From Undecidability.Synthetic Require Import Definitions.
-From Undecidability.Synthetic Require Import ReducibilityFacts.
+From Undecidability.Synthetic Require Import ReducibilityFacts MoreReducibilityFacts.
 
 
 Local Set Implicit Arguments.
@@ -43,6 +43,7 @@ Section facts.
   (* Refutability is semi decidable *)
   Lemma refutable_semi_decidable : semi_decidable (fun s => fs ⊢F neg s).
   Proof.
+    
     eapply semi_decidable_red. 2: apply fs.(P_semi_decidable).
     exists neg. firstorder.
   Qed.

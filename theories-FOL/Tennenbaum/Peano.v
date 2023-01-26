@@ -1,9 +1,9 @@
 From FOL Require Import FullSyntax Arithmetics Theories.
 From FOL.Tennenbaum Require Import NumberUtils SyntheticInType.
 From Undecidability.Shared Require Import ListAutomation.
-Require Import List Lia.
+Require Import Vector List Lia.
 Import Vector.VectorNotations.
-Import ListNotations ListAutomationNotations.
+Import ListNotations ListAutomationNotations ListAutomationInstances ListAutomationHints.
 
 Require Import Setoid Morphisms.
 
@@ -61,8 +61,9 @@ Section Models.
   Definition in_theory (T : theory) phi := T phi.
 
   Notation "phi ∈ T" := (in_theory T phi) (at level 70).
-  Notation "A ⊏ T" := (forall phi, In phi A -> phi ∈ T) (at level 20).
-  Definition PAsat phi := exists A, A ⊏ PAeq /\ forall ρ, (forall α, In α A -> ρ ⊨ α) -> ρ ⊨ phi.
+  Notation "A ⊏ T" := (forall phi, List.In phi A -> phi ∈ T) (at level 20).
+
+  Definition PAsat phi := exists A : list _, A ⊏ PAeq /\ forall ρ, (forall α, List.In α A -> ρ ⊨ α) -> ρ ⊨ phi.
 
   Fixpoint inu n := 
     match n with
@@ -715,7 +716,7 @@ Section StandartModel.
       In ax PA_compatible_Qeq -> sat interp_nat ρ ax.
   Proof.
     intros ρ ax H.
-    repeat (destruct H as [<-| H]); cbn ; try congruence. 2:eauto.
+    repeat (destruct H as [<-| H]); cbn ; try congruence. 2: eauto.
     intros H H2 n. destruct n; try congruence; right; econstructor; reflexivity.
   Qed.
 
@@ -741,6 +742,7 @@ Section ND.
   Variable p : peirce.
 
   Definition exist_times n (phi : form) := iter (fun ψ => ∃ ψ) n phi.
+
 
 
   Lemma up_decompose sigma phi : 
@@ -984,11 +986,21 @@ Section Q_prv.
   Variable G : incl PA_compatible_Qeq Gamma.
   Notation Qeq := PA_compatible_Qeq.
 
+  Lemma vec_de_nil {T} (v : Vector.t T 0) : v = Vector.nil T.
+  Proof.
+    revert v. now refine (case0 _ _).
+  Qed.
+
+
+  Lemma vec_de_cons {T} n (v : Vector.t T (S n)) : {vh & { vt & v = Vector.cons T vh n vt}}.
+  Proof.
+    revert n v. apply caseS. intros ? ? ?; do 2 eexists; reflexivity.
+  Qed.
   (** Closed terms are numerals. *)
   Ltac vecelim vx := let rec go v := let k := type of v in match k with
-    Vector.t ?t 0 => pose proof (@Vectors.destruct_vector_nil t v) as ?; subst v
+    Vector.t ?t 0 => pose proof (@vec_de_nil t v) as ?; subst v
   | Vector.t ?t (S ?n) => let vh := fresh "vh" in let vt := fresh "vt" in 
-                     destruct (@Vectors.destruct_vector_cons t n v) as (vh & vt & ?); subst v; go vt end in go vx.
+                     destruct (@vec_de_cons t n v) as (vh & vt & ?); subst v; go vt end in go vx.
 
   Lemma closed_term_is_num s : 
     bounded_t 0 s -> { n & Gamma ⊢ s == num n }.
@@ -1000,17 +1012,17 @@ Section Q_prv.
         now apply reflexivity.
       + vecelim v.
         destruct (N vh) as [n Hn].
-        1: econstructor.
+        1: now econstructor.
         inversion H. subst.
         apply Eqdep_dec.inj_pair2_eq_dec in H2 as ->.
         apply H1. econstructor. decide equality.
         exists (S n); cbn. now apply eq_succ.
       + vecelim v.
-        destruct (N vh) as [n Hn]. econstructor.
+        destruct (N vh) as [n Hn]. now econstructor.
         inversion H. subst.
         apply Eqdep_dec.inj_pair2_eq_dec in H2 as ->.
         apply H1. econstructor. decide equality.
-        destruct (N vh0) as [m Hm]. do 2 econstructor.
+        destruct (N vh0) as [m Hm]. do 2 econstructor; try easy.
         inversion H. subst.
         apply Eqdep_dec.inj_pair2_eq_dec in H2 as ->.
         apply H1. do 2 econstructor. decide equality.
@@ -1020,11 +1032,11 @@ Section Q_prv.
         all: try assumption.
         now apply eq_add.
       + vecelim v.
-        destruct (N vh) as [n Hn]. econstructor.
+        destruct (N vh) as [n Hn]. now econstructor.
         inversion H. subst.
         apply Eqdep_dec.inj_pair2_eq_dec in H2 as ->.
         apply H1. econstructor. decide equality.
-        destruct (N vh0) as [m Hm]. do 2 econstructor.
+        destruct (N vh0) as [m Hm]. do 2 econstructor; try easy.
         inversion H. subst.
         apply Eqdep_dec.inj_pair2_eq_dec in H2 as ->.
         apply H1. do 2 econstructor. decide equality.

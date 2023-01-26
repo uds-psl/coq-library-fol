@@ -1,5 +1,5 @@
 From Undecidability.Synthetic Require Import Definitions.
-From Undecidability.Shared Require Import embed_nat Dec.
+From Undecidability.Shared Require Import Dec.
 
 Require Import Vector.
 Import VectorNotations.
