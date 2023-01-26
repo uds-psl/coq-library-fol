@@ -12,7 +12,8 @@
 *.vos
 
 theories/.vscode
-theories-FOL/.vscode
 *.#*
 *#*#
 *.crashcoqide
+
+_opam

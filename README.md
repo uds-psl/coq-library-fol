@@ -12,6 +12,7 @@ First, we recommend that you create a new OPAM switch, although this is optional
 
 ```
 opam switch create coq-library-fol-8-16 --packages=ocaml-variants.4.14.0+options,ocaml-option-flambda
+opam switch link coq-library-fol-8-16 .
 eval $(opam env)
 ```
 
@@ -30,7 +31,7 @@ In order to compile the library for development, use the above manual installati
 opam install . --deps-only
 ```
 
-Compile the library using `make`.
+Compile the library using `make` or using `opam build`.
 
 To contribute, fork the project on GitHub, add a new subdirectory for your project and your files, then file a pull request.
 
