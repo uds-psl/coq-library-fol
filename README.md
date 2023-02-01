@@ -64,6 +64,8 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 
 ## Publications
 
+### Conference and Journal Papers
+
 - On Synthetic Undecidability in Coq, with an Application to the Entscheidungsproblem. Yannick Forster, Dominik Kirst, Gert Smolka. CPP'19.
 - Completeness Theorems for First-Order Logic Analysed in Constructive Type Theory. Yannick Forster, Dominik Kirst, Dominik Wehr. LFCS'20
 - Trakhtenbrot's Theorem in Coq - A Constructive Approach to Finite Model Theory. Dominik Kirst and Dominique Larchey-Wendling. IJCAR'20.
