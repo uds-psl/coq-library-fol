@@ -4,7 +4,7 @@ A library for First-Order Logic in Coq
 
 ## Installation
 
-We are currently planning to release this as an OPAM package.
+We are currently planning to release this library as an OPAM package.
 
 Until then, the library can be installed manually.
 
@@ -16,7 +16,7 @@ opam switch link coq-library-fol-8-16 .
 eval $(opam env)
 ```
 
-then, install the library using:
+Then, install the library using:
 
 ```
 opam repo add coq-released https://coq.inria.fr/opam/released
@@ -24,9 +24,9 @@ opam update
 opam install .
 ```
 
-### Contribuing
+## Contributing
 
-In order to compile the library for development, use the above manual installation instructions (preferably creating a new switch), but replace the last command with
+In order to compile the library for development, use the above manual installation instructions (preferrably creating a new switch), but replace the last command with
 ```
 opam install . --deps-only
 ```
@@ -58,6 +58,14 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 - Completeness Theorems for First-Order Logic Analysed in Constructive Type Theory (Extended Version). Yannick Forster, Dominik Kirst, Dominik Wehr. JLC'21.
 - Synthetic Undecidability and Incompleteness of First-Order Axiom Systems in Coq. Dominik Kirst, Marc Hermes. ITP'21.
 - Trakhtenbrot's Theorem in Coq: Finite Model Theory through the Constructive Lens. Dominik Kirst, Dominique Larchey-Wendling. LMCS'22.
-- Synthetic Undecidability and Incompleteness of First-Order Axiom Systems in Coq. Dominik Kirst, Marc Hermes. JAR'22.
 - Undecidability of Dyadic First-Order Logic in Coq. Johannes Hostert, Andrej Dudenhefner, Dominik Kirst. ITP'22.
 - An Analysis of Tennenbaum's Theorem in Constructive Type Theory. Marc Hermes, Dominik Kirst. FSCD'22.
+- Gödel's Theorem Without Tears: Essential Incompleteness in Synthetic Computability. Dominik Kirst, Benjamin Peters. CSL'23.
+- Synthetic Undecidability and Incompleteness of First-Order Axiom Systems in Coq. Dominik Kirst, Marc Hermes. JAR'23.
+
+### Workshop Abstracts
+
+- A Toolbox for Mechanised First-Order Logic. Johannes Hostert, Mark Koch, Dominik Kirst. The Coq Workshop, 2021.
+- Synthetic Versions of the Kleene-Post and Post's Theorem. Dominik Kirst, Niklas Mück, Yannick Forster. TYPES, 2022.
+- Strong, Synthetic, and Computational Proofs of Gödel's First Incompleteness Theorem. Benjamin Peters, Dominik Kirst. TYPES, 2022.
+- A Coq Library for Mechanised First-Order Logic. Dominik Kirst, Johannes Hostert, Andrej Dudenhefner, Yannick Forster, Marc Hermes, Mark Koch, Dominique Larchey-Wendling, Niklas Mück, Benjamin Peters, Gert Smolka, Dominik Wehr. The Coq Workshop, 2022.
