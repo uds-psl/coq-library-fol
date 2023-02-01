@@ -1,12 +1,24 @@
 # Coq Library for First-Order Logic
 
-A library for First-Order Logic in Coq
+This library collects several results about concerning first-order logic (FOL) that have been mechanised over the span of several projects. To get started, follow the installation instructions below and import one of the summary files in the [theories](theories) folder, for instance the file [FullSyntax.v](theories/FullSyntax.v) providing all necessary definitions regarding syntax, natural deduction systems, and semantics. There are also summary files for specific theories, for instance [Arithmetics.v](theories/Arithmetics.v) providing the usual systems like PA and Q. Don't hesitate to contact the maintainers if you need help!
+
+Note that the core definitions and results of FOL are included in the [Coq library of undecidability proofs](https://github.com/uds-psl/coq-library-undecidability), specifically the [theories/FOL](https://github.com/uds-psl/coq-library-undecidability/tree/coq-8.16/theories/FOL) folder and its subfolders on [Syntax](https://github.com/uds-psl/coq-library-undecidability/tree/coq-8.16/theories/FOL/Syntax), [Deduction](https://github.com/uds-psl/coq-library-undecidability/tree/coq-8.16/theories/FOL/Deduction), and [Semantics](https://github.com/uds-psl/coq-library-undecidability/tree/coq-8.16/theories/FOL/Semantics). With this distribution, all content regarding undecidability is natively placed in the undecidability library.
+
+The FOL library currently extends this core with the following content:
+
+- [Deduction](Deduction): More deduction systems not included in the core library.
+- [Semantics](Semantics): More semantics not included in the core library.
+- [Completeness](Completeness): Completeness results for Tarski, Kripke, and algebraic semantics, constructive where possible.
+- [Incompleteness](Incompleteness): An abstract and synthetic version of the first incompleteness theorem, instantiated to Robinson's Q.
+- [Tennenbaum](Tennenbaum): Tennenbaum's theorem stating that the natural numbers are the only computable model of PA, constructivised.
+- [ArithmeticalHierachy](ArithmeticalHierarchy): Semantic and syntactic characterisations of the arithmetical hierarchy and an equivalence proof.
+- [Proofmode](Proofmode): A tool easing derivations in a deduction system, including a HOAS input language hiding de Bruijn encoded syntax.
+- [Reification](Reification): A tactic automating representability proofs of Coq predicates as first-order formulas.
+- [Utils](Utils): A collection of additional results needed in various projects.
 
 ## Installation
 
-We are currently planning to release this library as an OPAM package.
-
-Until then, the library can be installed manually.
+We are currently planning to release this library as an OPAM package. Until then, the library can be installed manually.
 
 First, we recommend that you create a new OPAM switch, although this is optional:
 
@@ -52,7 +64,7 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 
 ## Publications
 
-- On Synthetic Undecidability in Coq, with an Application to the Entscheidungsproblem. Yannick Forster, Dominik Kirst, and Gert Smolka. CPP'19.
+- On Synthetic Undecidability in Coq, with an Application to the Entscheidungsproblem. Yannick Forster, Dominik Kirst, Gert Smolka. CPP'19.
 - Completeness Theorems for First-Order Logic Analysed in Constructive Type Theory. Yannick Forster, Dominik Kirst, Dominik Wehr. LFCS'20
 - Trakhtenbrot's Theorem in Coq - A Constructive Approach to Finite Model Theory. Dominik Kirst and Dominique Larchey-Wendling. IJCAR'20.
 - Completeness Theorems for First-Order Logic Analysed in Constructive Type Theory (Extended Version). Yannick Forster, Dominik Kirst, Dominik Wehr. JLC'21.
