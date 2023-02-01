@@ -6,15 +6,15 @@ Note that the core definitions and results of FOL are included in the [Coq libra
 
 The FOL library currently extends this core with the following content:
 
-- [Deduction](Deduction): More deduction systems not included in the core library.
-- [Semantics](Semantics): More semantics not included in the core library.
-- [Completeness](Completeness): Completeness results for Tarski, Kripke, and algebraic semantics, constructive where possible.
-- [Incompleteness](Incompleteness): An abstract and synthetic version of the first incompleteness theorem, instantiated to Robinson's Q.
-- [Tennenbaum](Tennenbaum): Tennenbaum's theorem stating that the natural numbers are the only computable model of PA, constructivised.
-- [ArithmeticalHierachy](ArithmeticalHierarchy): Semantic and syntactic characterisations of the arithmetical hierarchy and an equivalence proof.
-- [Proofmode](Proofmode): A tool easing derivations in a deduction system, including a HOAS input language hiding de Bruijn encoded syntax.
-- [Reification](Reification): A tactic automating representability proofs of Coq predicates as first-order formulas.
-- [Utils](Utils): A collection of additional results needed in various projects.
+- [Deduction](theories/Deduction): More deduction systems not included in the core library.
+- [Semantics](theories/Semantics): More semantics not included in the core library.
+- [Completeness](theories/Completeness): Completeness results for Tarski, Kripke, and algebraic semantics, constructive where possible.
+- [Incompleteness](theories/Incompleteness): An abstract and synthetic version of the first incompleteness theorem, instantiated to Robinson's Q.
+- [Tennenbaum](theories/Tennenbaum): Tennenbaum's theorem stating that the natural numbers are the only computable model of PA, constructivised.
+- [ArithmeticalHierachy](theories/ArithmeticalHierarchy): Semantic and syntactic characterisations of the arithmetical hierarchy and an equivalence proof.
+- [Proofmode](theories/Proofmode): A tool easing derivations in a deduction system, including a HOAS input language hiding de Bruijn encoded syntax.
+- [Reification](theories/Reification): A tactic automating representability proofs of Coq predicates as first-order formulas.
+- [Utils](theories/Utils): A collection of additional results needed in various projects.
 
 ## Installation
 
