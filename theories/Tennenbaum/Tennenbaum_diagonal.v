@@ -46,7 +46,7 @@ Section Model.
 
   (** * Enumerable and discrete PA models have decidable divisibility. *)
 
-  Lemma nat_eq_dec (n m : nat) : {n=m} + {n <> m}.
+  Lemma nat_eq_dec (n m : nat) : {n = m} + {n <> m}.
   Proof. decide equality. Qed.
 
   Lemma dec_div :
@@ -74,10 +74,13 @@ Section Model.
         { now apply inu_inj in iE. }
         enough ((g q) = k /\ inu r = inu 0) by tauto.
         eapply (@iFac_unique D I axioms).
-        -- pose (@lt_equiv D I) as lt_equiv. unfold I'. rewrite <- inu_I. apply lt_equiv. easy. apply H.
-        -- pose (@lt_equiv D I axioms 0 (S n)) as lt_equiv. unfold I'. rewrite <- inu_I.
+        -- pose (@lt_equiv D I) as lt_equiv. unfold I'.
+           rewrite <- inu_I. apply lt_equiv. easy. apply H.
+        -- pose (@lt_equiv D I axioms 0 (S n)) as lt_equiv.
+           unfold I'. rewrite <- inu_I.
            apply lt_equiv. lia.
-        -- rewrite add_zero. rewrite add_comm. unfold I' in *. rewrite <- inu_I. rewrite <- ! inu_I in Hr.
+        -- rewrite add_zero. rewrite add_comm. unfold I' in *.
+           rewrite <- inu_I. rewrite <- ! inu_I in Hr.
            rewrite <- Hr. rewrite mult_comm. all:eauto.
     * intros x y. apply and_dec; [apply Compare_dec.lt_dec|apply eq].
     Unshelve. lia.
@@ -109,10 +112,14 @@ Section Model.
           { now apply inu_inj in iE. }
           enough (a = k /\ inu r = inu 0) by tauto.
           unshelve eapply (@iFac_unique D I axioms (inu (S n))).
-          -- pose (@lt_equiv D I) as lt_equiv. unfold I'. rewrite <- inu_I. apply lt_equiv. easy. apply H.
-          -- pose (@lt_equiv D I axioms 0 (S n)) as lt_equiv. unfold I'. rewrite <- inu_I.
+          -- pose (@lt_equiv D I) as lt_equiv. unfold I'.
+             rewrite <- inu_I. apply lt_equiv. easy. apply H.
+          -- pose (@lt_equiv D I axioms 0 (S n)) as lt_equiv.
+             unfold I'. rewrite <- inu_I.
              apply lt_equiv. lia.
-          -- rewrite add_zero. rewrite add_comm. unfold I' in *. rewrite <- inu_I. rewrite <- ! inu_I. rewrite <- Hr. rewrite mult_comm. all:eauto.
+          -- rewrite add_zero. rewrite add_comm. unfold I' in *.
+             rewrite <- inu_I. rewrite <- ! inu_I. rewrite <- Hr.
+             rewrite mult_comm. all:eauto.
       * intros x. apply and_dec; [apply Compare_dec.lt_dec|apply eq].
     - intros ?. apply dec_lt_bounded_exist.
       intros ?. apply eq.
@@ -130,8 +137,8 @@ Section Model.
       it allows decidable predicates to be coded.
    *)
   Lemma Coding_Dec p :
-    WCT_Q -> Stable std -> ~ stdModel D ->
-    Dec p -> ~~ exists c, forall n, p n <-> div_pi n c.
+    WCT_Q -> Stable std -> ~ stdModel D -> Dec p ->
+    ~~ exists c, forall n, p n <-> div_pi n c.
   Proof.
     intros wrt%WCT_WRTs ? notStd Dec_p.
     apply (DN_remove (wrt _ Dec_p)).
@@ -174,7 +181,7 @@ Section Model.
         destruct Hd as [_ [k Hk]]. exists k.
         now rewrite Hk.
   Qed.
-  
+
   Lemma Coding_Dec_ct p :
     CT_Q -> Stable std -> ~ stdModel D ->
     Dec p -> ~~ exists c, forall n, p n <-> div_pi n c.
@@ -182,7 +189,8 @@ Section Model.
 
   (*  We can now use the above coding lemma in combination with RT to
       give a diagonal argument which shows that enumerable and discrete
-      PA models must potentially be standard. The double negation can actually also be eliminated, and this is done in Variants.v,
+      PA models must potentially be standard. The double negation can
+      actually also be eliminated, and this is done in Variants.v,
       where the needed lemmas are shown.
    *)
   (*  We can still establish the result with the weaker
@@ -214,5 +222,6 @@ Section Model.
   Theorem Tennenbaum_diagonal_ct :
     CT_Q -> MP -> Enumerable D -> Discrete D -> ~~ forall e, std e.
   Proof. now intros ?%CT_WCT; apply Tennenbaum_diagonal. Qed.
+
 
 End Model.
