@@ -151,14 +151,18 @@ Section Model.
   Qed.
 
   Lemma equiv_subst {p: peirce} {Γ α β ρ} :
+    map (subst_form ρ) Γ = Γ -> 
     Γ ⊢ α ↔ β -> Γ ⊢ α[ρ] -> Γ ⊢ β[ρ].
   Proof.
-    intros Heq Ha.
-    (*  Below is the Lemma I will need to use on order to show this.
-        Note also that it will only work like this for closed Γ, which
-        is fine, since I only use it for Γ:=Q.                        *)
-    (* Check subst_Weak. *)
-  Admitted.
+    intros HΓ Heq Ha.
+    fassert ((α→ β)[ρ]).
+    - rewrite <-HΓ.
+      eapply subst_Weak. fintros. fapply Heq.
+      apply Ctx; now left.
+    - cbn. eapply IE.
+      + apply Ctx; now left.
+      + eapply Weak; eauto. now right.
+  Qed.
 
   Fact prv_iff_symmetry {p: peirce} {Γ α β} :
     Γ ⊢ α ↔ β -> Γ ⊢ β ↔ α.
@@ -176,12 +180,14 @@ Section Model.
         (forall n, Q ⊢I (∃β)[(num n)..] -> ~ D n) ->
         False).
   Proof.
+    assert (forall ρ, map (subst_form ρ) Q = Q) as HQ.
+    { intros ρ. reflexivity. }
     intros (α' & β' & HBa & HSa & HBb & HSb & Disj & H).
     destruct (Σ1_compression HBa HSa) as [α (? & ? & Hα)].
     destruct (Σ1_compression HBb HSb) as [β (? & ? & Hβ)].
     exists α, β. repeat split; try tauto.
     - intros n [Ha Hb]. apply (Disj n).
-      split; eapply equiv_subst.
+      split; eapply equiv_subst; auto.
       2 : apply Ha. 3 : apply Hb.
       all : apply prv_iff_symmetry; auto.
     - intros G Dec_G Ha Hb. apply (H G Dec_G).
