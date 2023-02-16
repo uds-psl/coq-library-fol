@@ -8,12 +8,12 @@ Import ListNotations ListAutomationNotations ListAutomationInstances ListAutomat
 Require Import Setoid Morphisms.
 
 Definition sless x y := (∃ y`[↑] == σ (x`[↑] ⊕ $0)).
-Notation "x '⧀' y" := (sless x y)  (at level 40) : PA_Notation.
+Notation "x '⧀' y" := (sless x y) (at level 40) : PA_Notation.
 
 Fact unfold_sless x y :
   sless x y = ∃ y`[↑] == σ (x`[↑] ⊕ $0).
 Proof. reflexivity. Qed.
- 
+
 Fact sless_subst x y s :
   (sless x y)[s] = sless (x`[s]) (y`[s]).
 Proof. cbn. now rewrite !up_term. Qed.
@@ -25,16 +25,6 @@ Proof.
   - intros [] v. exact (Vector.hd v = Vector.hd (Vector.tl v)).
 Defined.
 
-Definition ax_cases_raw := $0 == zero ∨ (∃ $1 == σ $0).
-Definition PA_compatible_Q := (FA ++ [ax_zero_succ; ax_succ_inj; ax_induction ax_cases_raw])%list.
-Definition PA_compatible_Qeq := (EQ ++ PA_compatible_Q)%list.
-
-Lemma PA_compatible_Qeq_PAeq ψ : 
-  ψ el PA_compatible_Qeq -> PAeq ψ.
-Proof.
-  intros Hin.
-  repeat (destruct Hin as [<-| Hin]); cbn; try (econstructor; cbn; eauto 15; fail).
-Qed.
 
 (** ** PA Models *)
 
@@ -43,7 +33,7 @@ Section Models.
   Variable D : Type.
   Variable I : interp D.
 
-  Local Definition I' : interp D := extensional_model I.
+  Definition I' : interp D := extensional_model I.
   Existing Instance I | 100.
   Existing Instance I' | 0.
 
@@ -65,13 +55,13 @@ Section Models.
 
   Definition PAsat phi := exists A : list _, A ⊏ PAeq /\ forall ρ, (forall α, List.In α A -> ρ ⊨ α) -> ρ ⊨ phi.
 
-  Fixpoint inu n := 
+  Fixpoint inu n :=
     match n with
     | 0 => i0
     | S x => iσ (inu x)
     end.
 
-  Fact eval_num sigma n : 
+  Fact eval_num sigma n :
     eval sigma (num n) = inu n.
   Proof.
     induction n.
@@ -79,7 +69,7 @@ Section Models.
     - cbn. now rewrite IHn.
   Qed.
 
-  Lemma num_subst : 
+  Lemma num_subst :
     forall n ρ, (num n)`[ρ] = num n.
   Proof.
     induction n.
@@ -87,15 +77,15 @@ Section Models.
     - intros ρ. cbn. now rewrite IHn.
   Qed.
 
-  Lemma switch_num alpha ρ n : 
+  Lemma switch_num alpha ρ n :
     ρ ⊨ alpha[(num n)..] <-> ((inu n).:ρ) ⊨ alpha.
-  Proof.    
+  Proof.
     split; intros H.
     - erewrite <-eval_num. apply sat_single, H.
     - apply sat_single. now rewrite eval_num.
   Qed.
 
-  Lemma switch_up_num α ρ x d : 
+  Lemma switch_up_num α ρ x d :
     (d.:ρ) ⊨ (α [up (num x)..]) <-> (d.:((inu x).:ρ)) ⊨ α.
   Proof.
     rewrite sat_comp. apply sat_ext.
@@ -104,30 +94,25 @@ Section Models.
   Qed.
 
 
+  Lemma eq_sym : 
+    forall ρ a b, ρ ⊨ (a == b) -> ρ ⊨ (b == a).
+  Proof. intros. cbn in *. now cbn in *. Qed.
 
-  Lemma eq_sym : forall ρ a b, ρ ⊨ (a == b) -> ρ ⊨ (b == a).
-  Proof.
-    intros. cbn in *. now cbn in *.
-  Qed.
-  
-  Lemma eq_trans : forall ρ a b c, ρ ⊨ (a == b) /\ ρ ⊨ (b == c) -> ρ ⊨ (a == c).
-  Proof.
-    intros ????. cbn in *. intros []. congruence.
-  Qed.
+  Lemma eq_trans : 
+    forall ρ a b c, ρ ⊨ (a == b) /\ ρ ⊨ (b == c) -> ρ ⊨ (a == c).
+  Proof. intros ????. cbn in *. intros []. congruence. Qed.
 
   Notation "⊨ phi" := (forall ρ, ρ ⊨ phi) (at level 21).
 
 
 
-
   Section PA_Model.
 
-    Context {axioms : forall ax, PAeq ax -> ⊨ ax}. 
-
+    Context {axioms : forall ax, PAeq ax -> ⊨ ax}.
 
     (* provide all axioms in a more useful form *)
 
-    Lemma zero_succ x : 
+    Lemma zero_succ x :
       i0 = iσ x -> False.
     Proof.
       assert (⊨ ax_zero_succ) as H.
@@ -136,7 +121,7 @@ Section Models.
       apply H.
     Qed.
 
-    Lemma succ_inj x y : 
+    Lemma succ_inj x y :
       iσ y = iσ x -> y = x.
     Proof.
       assert (⊨ ax_succ_inj ) as H.
@@ -145,15 +130,14 @@ Section Models.
       apply H.
     Qed.
 
-    Lemma succ_inj' x y : 
+    Lemma succ_inj' x y :
       iσ y = iσ x <-> y = x.
     Proof.
       split.
       apply succ_inj. now intros ->.
     Qed.
 
-
-    Lemma add_zero d : 
+    Lemma add_zero d :
       i0 i⊕ d = d.
     Proof.
       assert (⊨ ax_add_zero) as H.
@@ -163,8 +147,8 @@ Section Models.
       apply H.
     Qed.
 
-    Lemma add_rec n d : 
-      (iσ n) i⊕ d = iσ (n i⊕ d). 
+    Lemma add_rec n d :
+      (iσ n) i⊕ d = iσ (n i⊕ d).
     Proof.
       assert (⊨ ax_add_rec) as H.
       apply axioms; constructor.
@@ -173,7 +157,7 @@ Section Models.
       apply H.
     Qed.
 
-    Lemma mult_zero d : 
+    Lemma mult_zero d :
       i0 i⊗ d = i0.
     Proof.
       assert (⊨ ax_mult_zero) as H.
@@ -183,7 +167,7 @@ Section Models.
       apply H.
     Qed.
 
-    Lemma mult_rec n d : 
+    Lemma mult_rec n d :
       (iσ d) i⊗ n = n i⊕ (d i⊗ n).
     Proof.
       assert (⊨ ax_mult_rec) as H.
@@ -193,16 +177,15 @@ Section Models.
       apply H.
     Qed.
 
-
-
+    
     Section Induction.
-      
+
       Notation "phi [[ d ]] " := (forall ρ, (d.:ρ) ⊨ phi) (at level 19).
 
       Variable phi : form.
       Variable pred : bounded 1 phi.
-      
-      Lemma induction1 : 
+
+      Lemma induction1 :
         phi[[i0]] -> ⊨ phi[zero..].
       Proof.
         intros H0 ρ.
@@ -222,22 +205,48 @@ Section Models.
         reflexivity. lia.
       Qed.
 
-      Theorem induction : 
+      Theorem induction :
         phi[[i0]] -> (forall n, phi[[n]] -> phi[[iσ n]] ) -> forall n, phi[[n]].
       Proof.
         assert (⊨ ax_induction phi) as H.
         apply axioms. apply PAeq_induction; trivial.
         intros ??? ρ.
-        specialize (H ρ). 
+        specialize (H ρ).
         apply H.
         now apply induction1.
         now apply induction2.
-      Qed.  
+      Qed.
 
     End Induction.
 
+    Lemma zero_or_succ :
+      forall d, d = i0 \/ exists x, d = iσ x.
+    Proof.
+      pose (phi := $0 == zero ∨ ∃ $1 == σ $0).
+      assert (forall n ρ, (n.:ρ) ⊨ phi).
+      apply induction. repeat solve_bounds.
+      - intros ρ. cbn. now left.
+      - intros n IH ρ. cbn. right. exists n. reflexivity.
+      - intros d. now specialize (H d (fun _ => i0)); cbn in *.
+    Qed.
 
-    Lemma inu_inj x y : 
+    Lemma sat_Q_axioms :
+      forall ρ, ρ ⊫ Robinson.Qeq.
+    Proof.
+      intros ?? H. unfold Q, FA in H.
+      repeat (destruct H as [<-| H]); simpl; intros *; try congruence.
+      - apply add_zero.
+      - apply add_rec.
+      - apply mult_zero.
+      - apply mult_rec.
+      - apply zero_succ.
+      - apply succ_inj.
+      - apply zero_or_succ.
+      - destruct H.
+    Qed.  
+
+
+    Lemma inu_inj x y :
       inu x = inu y <-> x = y.
     Proof.
       split.
@@ -248,7 +257,7 @@ Section Models.
       - congruence.
     Qed.
 
-    Lemma inu_add_hom x y : 
+    Lemma inu_add_hom x y :
       inu (x + y) = inu x i⊕ inu y.
     Proof.
       induction x; cbn.
@@ -256,7 +265,7 @@ Section Models.
       - now rewrite add_rec, IHx.
     Qed.
 
-    Lemma inu_mult_hom x y : 
+    Lemma inu_mult_hom x y :
       inu (x * y) = inu x i⊗ inu y.
     Proof.
       induction x; cbn.
@@ -264,34 +273,34 @@ Section Models.
       - now rewrite inu_add_hom, IHx, mult_rec.
     Qed.
 
-    Lemma add_zero_r n : 
+    Lemma add_zero_r n :
       n i⊕ i0 = n.
     Proof.
-      pose (phi := $0 ⊕ zero == $0). 
+      pose (phi := $0 ⊕ zero == $0).
       assert (forall n ρ, (n.:ρ) ⊨ phi).
-      apply induction. repeat solve_bounds. 
+      apply induction. repeat solve_bounds.
       - intros ?. cbn. now rewrite add_zero.
-      - intros x IH ρ. 
+      - intros x IH ρ.
         specialize (IH (fun _ => i0)); cbn in *.
-        now rewrite add_rec, IH. 
-      - now specialize (H n (fun _ => i0)). 
-    Qed. 
+        now rewrite add_rec, IH.
+      - now specialize (H n (fun _ => i0)).
+    Qed.
 
-    Lemma mult_zero_r n : 
+    Lemma mult_zero_r n :
       n i⊗ i0 = i0.
     Proof.
-      pose (phi := $0 ⊗ zero == zero). 
+      pose (phi := $0 ⊗ zero == zero).
       assert (forall n ρ, (n.:ρ) ⊨ phi).
-      apply induction. repeat solve_bounds. 
+      apply induction. repeat solve_bounds.
       - intros ?. cbn. now rewrite mult_zero.
-      - intros x IH ρ. 
+      - intros x IH ρ.
         specialize (IH (fun _ => i0)); cbn in *.
-        now rewrite mult_rec, IH, add_zero. 
+        now rewrite mult_rec, IH, add_zero.
       - now specialize (H n (fun _ => i0)).
-    Qed. 
+    Qed.
 
-    Lemma add_rec_r n d : 
-      n i⊕ (iσ d) = iσ (n i⊕ d). 
+    Lemma add_rec_r n d :
+      n i⊕ (iσ d) = iσ (n i⊕ d).
     Proof.
       pose (phi := ∀ $1 ⊕ (σ $0) == σ ($1 ⊕ $0) ).
       assert (forall n ρ, (n.:ρ) ⊨ phi).
@@ -303,7 +312,7 @@ Section Models.
       - now specialize (H n (fun _ => i0) d); cbn in *.
     Qed.
 
-    Lemma add_comm n d : 
+    Lemma add_comm n d :
       n i⊕ d = d i⊕ n.
     Proof.
       pose (phi := ∀ $0 ⊕ $1 == $1 ⊕ $0).
@@ -316,7 +325,7 @@ Section Models.
       - now specialize (H n (fun _ => i0) d); cbn in *.
     Qed.
 
-    Lemma add_asso x y z : 
+    Lemma add_asso x y z :
       (x i⊕ y) i⊕ z = x i⊕ (y i⊕ z).
     Proof.
       pose (phi := ∀∀ ($2 ⊕ $1) ⊕ $0 == $2 ⊕ ($1 ⊕ $0) ).
@@ -329,8 +338,8 @@ Section Models.
       - now specialize (H x (fun _ => i0) y z); cbn in *.
     Qed.
 
-    Lemma mult_rec_r n d : 
-      n i⊗ (iσ d) = n i⊕ (n i⊗ d) . 
+    Lemma mult_rec_r n d :
+      n i⊗ (iσ d) = n i⊕ (n i⊗ d) .
     Proof.
       pose (phi := ∀ $1 ⊗ (σ $0) == $1 ⊕ ($1 ⊗ $0) ).
       assert (forall n ρ, (n.:ρ) ⊨ phi).
@@ -344,7 +353,7 @@ Section Models.
     Qed.
 
 
-    Lemma mult_comm n d : 
+    Lemma mult_comm n d :
       n i⊗ d = d i⊗ n.
     Proof.
       pose (phi := ∀ $0 ⊗ $1 == $1 ⊗ $0).
@@ -358,7 +367,7 @@ Section Models.
     Qed.
 
 
-    Lemma distributive x y z : 
+    Lemma distributive x y z :
       (x i⊕ y) i⊗ z = (x i⊗ z) i⊕ (y i⊗ z).
     Proof.
       pose (phi := ∀∀ ($1 ⊕ $0) ⊗ $2 == ($1 ⊗ $2) ⊕ ($0 ⊗ $2) ).
@@ -376,7 +385,7 @@ Section Models.
       - now specialize (H z (fun _ => i0) x y); cbn in *.
     Qed.
 
-    Lemma mult_asso x y z : 
+    Lemma mult_asso x y z :
       (x i⊗ y) i⊗ z = x i⊗ (y i⊗ z).
     Proof.
       pose (phi := ∀∀ ($2 ⊗ $1) ⊗ $0 == $2 ⊗ ($1 ⊗ $0) ).
@@ -392,18 +401,7 @@ Section Models.
     Lemma nolessthen_zero d : ~ (d i⧀ i0).
     Proof. now intros [? []%zero_succ]. Qed.
 
-    Lemma zero_or_succ : 
-      forall d, d = i0 \/ exists x, d = iσ x.
-    Proof.
-      pose (phi := $0 == zero ∨ ∃ $1 == σ $0).
-      assert (forall n ρ, (n.:ρ) ⊨ phi).
-      apply induction. repeat solve_bounds.
-      - intros ρ. cbn. now left.
-      - intros n IH ρ. cbn. right. exists n. reflexivity.
-      - intros d. now specialize (H d (fun _ => i0)); cbn in *.
-    Qed.
-
-    Lemma D_eq_dec : 
+    Lemma D_eq_dec :
       (forall x y : D, x = y \/ x <> y).
     Proof.
       pose (phi := ∀ $1 == $0 ∨ ($1 == $0 → ⊥)).
@@ -419,11 +417,11 @@ Section Models.
         + destruct (IH (fun _ => i0) x); cbn in H.
           left. now rewrite H.
           right. intros ?%succ_inj. auto.
-      - intros x y. 
+      - intros x y.
         now specialize (H x (fun _ => i0) y); cbn in *.
     Qed.
 
-    Lemma sum_is_zero x y : 
+    Lemma sum_is_zero x y :
       x i⊕ y = i0 -> x = i0 /\ y = i0.
     Proof.
       intros H.
@@ -434,15 +432,15 @@ Section Models.
       - split; rewrite add_rec in H; symmetry in H; now apply zero_succ in H.
     Qed.
 
-    Lemma lt_SS x y : 
+    Lemma lt_SS x y :
       (iσ x) i⧀ (iσ y) <-> x i⧀ y.
     Proof.
       split; intros [k Hk]; exists k.
       - apply succ_inj in Hk. now rewrite <-add_rec.
-      - now rewrite Hk, add_rec. 
+      - now rewrite Hk, add_rec.
     Qed.
 
-    Lemma trichotomy x y : 
+    Lemma trichotomy x y :
       x i⧀ y \/ x = y \/ y i⧀ x.
     Proof.
       pose (phi := ∀ ($1 ⧀ $0) ∨ ($1 == $0 ∨ $0 ⧀ $1)).
@@ -454,13 +452,13 @@ Section Models.
       - intros n IH ρ d. cbn. destruct (zero_or_succ d) as [-> | [k ->] ].
         + right; right. exists n. now rewrite add_zero.
         + specialize (IH (fun _ => i0) k); cbn in IH.
-          rewrite !lt_SS. intuition congruence. 
+          rewrite !lt_SS. intuition congruence.
       - now specialize (H x (fun _ => i0) y); cbn in H.
     Qed.
 
 
 
-    Lemma add_eq x y t : 
+    Lemma add_eq x y t :
       x i⊕ t = y i⊕ t -> x = y.
     Proof.
       pose (phi := ∀∀ $0 ⊕ $2 == $1 ⊕ $2 → $0 == $1  ).
@@ -474,7 +472,7 @@ Section Models.
     Qed.
 
 
-    Lemma lt_neq x y : 
+    Lemma lt_neq x y :
       x i⧀ y -> x = y -> False.
     Proof.
       intros [k Hk] ->. revert Hk.
@@ -486,7 +484,7 @@ Section Models.
 
     Notation "x 'i≤' y" := (exists d : D, y = x i⊕ d)  (at level 80).
 
-    Lemma lt_le_equiv1 x y : 
+    Lemma lt_le_equiv1 x y :
       (x i⧀ iσ y) <-> x i≤ y.
     Proof.
       split; intros [k Hk].
@@ -495,7 +493,7 @@ Section Models.
     Qed.
 
 
-    Lemma lt_S d e : 
+    Lemma lt_S d e :
       d i⧀ (iσ e) <-> d i⧀ e \/ d = e.
     Proof.
       pose (Φ := ∀ $0 ⧀ σ $1 ↔ $0 ⧀ $1 ∨ $0 == $1).
@@ -517,39 +515,39 @@ Section Models.
       - specialize (H e (fun _ => d) d). apply H.
     Qed.
 
-    Lemma lt_le_trans {x z} y : 
+    Lemma lt_le_trans {x z} y :
       x i⧀ y -> y i≤ z -> x i⧀ z.
     Proof.
       intros [k1 H1] [k2 H2]. exists (k1 i⊕ k2). rewrite H2, H1.
       now rewrite add_rec, add_asso.
     Qed.
 
-    Lemma le_le_trans {x z} y : 
+    Lemma le_le_trans {x z} y :
       x i≤ y -> y i≤ z -> x i≤ z.
     Proof.
       intros [k1 H1] [k2 H2]. exists (k1 i⊕ k2). rewrite H2, H1.
       now rewrite add_asso.
     Qed.
 
-    Lemma add_lt_mono x y t : 
+    Lemma add_lt_mono x y t :
       x i⧀ y -> x i⊕ t i⧀ y i⊕ t.
     Proof.
       intros [k Hk]. exists k. rewrite Hk.
       now rewrite add_rec, !add_asso, (add_comm k t).
     Qed.
 
-    Lemma add_le_mono x y t : 
+    Lemma add_le_mono x y t :
       x i≤ y -> x i⊕ t i≤ y i⊕ t.
     Proof.
       intros [k Hk]. exists k. rewrite Hk.
       now rewrite !add_asso, (add_comm k t).
     Qed.
 
-    Lemma mult_le_mono x y t : 
+    Lemma mult_le_mono x y t :
       x i≤ y -> x i⊗ t i≤ y i⊗ t.
     Proof.
       intros [k Hk]. exists (k i⊗ t). rewrite Hk.
-      now rewrite distributive. 
+      now rewrite distributive.
     Qed.
 
 
@@ -558,7 +556,7 @@ Section Models.
 
       (** *** Euclidean Lemma *)
 
-      Lemma iEuclid : 
+      Lemma iEuclid :
         forall x q, exists d r, x = d i⊗ q i⊕ r /\ (i0 i⧀ q -> r i⧀ q).
       Proof.
         intros x q.
@@ -592,9 +590,9 @@ Section Models.
             exists d, r. split; auto.
       Qed.
 
-      Lemma iFac_unique1 d q1 r1 q2 r2 : 
+      Lemma iFac_unique1 d q1 r1 q2 r2 :
         r1 i⧀ d ->
-        r1 i⊕ q1 i⊗ d = r2 i⊕ q2 i⊗ d -> 
+        r1 i⊕ q1 i⊗ d = r2 i⊕ q2 i⊗ d ->
         q1 i⧀ q2 -> False.
       Proof.
         intros H1 E H. revert E. apply lt_neq.
@@ -613,11 +611,11 @@ Section Models.
 
 
       (** Uniqueness for the Euclidean Lemma *)
-      
-      Lemma iFac_unique q d1 r1 d2 r2 : 
-        r1 i⧀ q -> 
+
+      Lemma iFac_unique q d1 r1 d2 r2 :
+        r1 i⧀ q ->
         r2 i⧀ q ->
-        r1 i⊕ d1 i⊗ q = r2 i⊕ d2 i⊗ q -> 
+        r1 i⊕ d1 i⊗ q = r2 i⊕ d2 i⊗ q ->
         d1 = d2 /\ r1 = r2.
       Proof.
         intros H1 H2 E.
@@ -630,11 +628,11 @@ Section Models.
       Qed.
 
 
-    End Euclid. 
+    End Euclid.
 
 
-    Lemma lessthen_num : 
-      forall n d, d i⧀ inu n -> 
+    Lemma lessthen_num :
+      forall n d, d i⧀ inu n ->
       exists k, k < n /\ d = inu k.
     Proof.
       induction n ; intros d H.
@@ -648,7 +646,7 @@ Section Models.
     Qed.
 
 
-    Lemma iEuclid' : 
+    Lemma iEuclid' :
       forall x y, 0 < y -> exists a b, b < y /\ x = a i⊗ inu y i⊕ inu b.
     Proof.
       intros x y.
@@ -681,6 +679,8 @@ Notation "'PA⊨' phi" := (forall D (I : interp D) ρ, (forall ψ : form, PAeq �
 
 Section StandartModel.
 
+  Notation Q := Qeq.
+
   Definition interp_nat_noeq : interp nat.
   Proof.
     split.
@@ -698,7 +698,7 @@ Section StandartModel.
 
   (* We now show that there is a model in which all of PA's axioms hold. *)
   Lemma PA_std_axioms :
-    forall ρ ax, PAeq ax -> sat interp_nat ρ ax. 
+    forall ρ ax, PAeq ax -> sat interp_nat ρ ax.
   Proof.
     intros ρ ax Hax. inversion Hax; subst.
     - repeat (destruct H as [<-| H]); cbn ; try congruence. easy.
@@ -706,23 +706,21 @@ Section StandartModel.
     - cbn. intros ? ?; now injection 1.
     - intros H1 IH. intros d. induction d.
       + apply sat_single in H1. apply H1.
-      + apply IH in IHd. 
+      + apply IH in IHd.
         eapply sat_comp, sat_ext in IHd.
         apply IHd. intros []; now cbn.
   Qed.
 
   Lemma Q_std_axioms :
-    forall ρ ax, 
-      In ax PA_compatible_Qeq -> sat interp_nat ρ ax.
+    forall ρ ax, ax el Q -> sat interp_nat ρ ax.
   Proof.
-    intros ρ ax H.
-    repeat (destruct H as [<-| H]); cbn ; try congruence. 2: eauto.
-    intros H H2 n. destruct n; try congruence; right; econstructor; reflexivity.
+    intros ρ ax H. unfold Q, FA in *.
+    repeat (destruct H as [<-| H]); cbn ; try congruence || easy.
+    intros []; [left|right; eexists]; reflexivity.
   Qed.
 
 
-
-  Fact inu_nat_id : 
+  Fact inu_nat_id :
     forall n, @inu nat interp_nat n = n.
   Proof.
     induction n; cbn; congruence.
@@ -745,7 +743,7 @@ Section ND.
 
 
 
-  Lemma up_decompose sigma phi : 
+  Lemma up_decompose sigma phi :
     phi[up (S >> sigma)][(sigma 0)..] = phi[sigma].
   Proof.
     rewrite subst_comp. apply subst_ext.
@@ -756,7 +754,7 @@ Section ND.
 
 
   Lemma subst_exist_prv {sigma N Gamma} phi :
-    Gamma ⊢ phi[sigma] -> bounded N phi -> Gamma ⊢ exist_times N phi. 
+    Gamma ⊢ phi[sigma] -> bounded N phi -> Gamma ⊢ exist_times N phi.
   Proof.
     induction N in phi, sigma |-*; intros; cbn.
     - erewrite <-(subst_bounded 0); eassumption.
@@ -790,16 +788,13 @@ Fixpoint join {X n} (v : Vector.t X n) (ρ : nat -> X) :=
 
 Notation "v '∗' ρ" := (join v ρ) (at level 20).
 
- 
+
 Section Q_prv.
 
-  Variable p : peirce.
-
-  Variable Gamma : list form.
-  Notation Q := PA_compatible_Qeq.
-  Notation Qeq := PA_compatible_Qeq.
-  Notation PA := PAeq.
-  Variable G : incl Q Gamma.
+  Context {p : peirce}(Gamma : list form).
+  
+  Notation Q := Qeq.
+  Context (G : incl Q Gamma).
   Arguments Weak {_ _ _ _}, _.
 
 
@@ -809,7 +804,7 @@ Section Q_prv.
     pose (sigma := [t] ∗ var ).
     change (Q ⊢ _) with (Q ⊢ ($0 == $0)[sigma]).
     eapply (@subst_forall_prv _ _ 1).
-    apply Ctx. 
+    apply Ctx.
     - cbn in *. unfold Q. now left.
     - repeat solve_bounds.
     - assumption.
@@ -886,7 +881,7 @@ Section Q_prv.
     - assumption.
   Qed.
 
-  Lemma Zero_succ x : 
+  Lemma Zero_succ x :
     Gamma ⊢ ¬ zero == σ x.
   Proof.
     apply Weak with Q.
@@ -900,7 +895,7 @@ Section Q_prv.
   Qed.
 
 
-  Lemma Succ_inj x y : 
+  Lemma Succ_inj x y :
     Gamma ⊢ σ x == σ y -> Gamma ⊢ x == y.
   Proof.
     intros H; eapply IE. 2: apply H.
@@ -916,14 +911,14 @@ Section Q_prv.
 
 
 
-  Lemma Add_rec x y : 
+  Lemma Add_rec x y :
     Gamma ⊢ ( (σ x) ⊕ y == σ (x ⊕ y) ).
   Proof.
     apply Weak with Q.
     pose (sigma := [y ; x] ∗ var).
     change (Q ⊢ _) with (Q ⊢ (σ $0 ⊕ $1 == σ ($0 ⊕ $1))[sigma]).
     apply (@subst_forall_prv _ _ 2).
-    apply Ctx. 
+    apply Ctx.
     - firstorder.
     - repeat solve_bounds.
     - assumption.
@@ -931,7 +926,7 @@ Section Q_prv.
 
   (** Homomorphism Properties of Numerals *)
 
-  Lemma num_add_homomorphism  x y : 
+  Lemma num_add_homomorphism  x y :
     Gamma ⊢ ( num x ⊕ num y == num (x + y) ).
   Proof.
     induction x; cbn.
@@ -946,21 +941,21 @@ Section Q_prv.
   Qed.
 
 
-  Lemma Mult_rec x y : 
+  Lemma Mult_rec x y :
     Gamma ⊢ ( (σ x) ⊗ y == y ⊕ (x ⊗ y) ).
   Proof.
     apply Weak with Q.
     pose (sigma := [x ; y] ∗ var).
     change (Q ⊢ _) with (Q ⊢ ((σ $1) ⊗ $0 == $0 ⊕ ($1 ⊗ $0))[sigma]).
     eapply (@subst_forall_prv _ _ 2).
-    apply Ctx. 
+    apply Ctx.
     - firstorder.
     - repeat solve_bounds.
-    - assumption. 
+    - assumption.
   Qed.
 
 
-  Lemma num_mult_homomorphism (x y : nat) : 
+  Lemma num_mult_homomorphism (x y : nat) :
     Gamma ⊢ ( num x ⊗ num y == num (x * y) ).
   Proof.
     induction x; cbn.
@@ -980,11 +975,10 @@ End Q_prv.
 
 Section Q_prv.
 
-  Variable p : peirce.
-
-  Variable Gamma : list form.
-  Variable G : incl PA_compatible_Qeq Gamma.
-  Notation Qeq := PA_compatible_Qeq.
+  Context {p : peirce}(Gamma : list form).
+    
+  Notation Q := Qeq.
+  Context (G : incl Q Gamma).
 
   Lemma vec_de_nil {T} (v : Vector.t T 0) : v = Vector.nil T.
   Proof.
@@ -999,10 +993,10 @@ Section Q_prv.
   (** Closed terms are numerals. *)
   Ltac vecelim vx := let rec go v := let k := type of v in match k with
     Vector.t ?t 0 => pose proof (@vec_de_nil t v) as ?; subst v
-  | Vector.t ?t (S ?n) => let vh := fresh "vh" in let vt := fresh "vt" in 
+  | Vector.t ?t (S ?n) => let vh := fresh "vh" in let vt := fresh "vt" in
                      destruct (@vec_de_cons t n v) as (vh & vt & ?); subst v; go vt end in go vx.
 
-  Lemma closed_term_is_num s : 
+  Lemma closed_term_is_num s :
     bounded_t 0 s -> { n & Gamma ⊢ s == num n }.
   Proof.
     pattern s; revert s. apply term_rect.
@@ -1048,13 +1042,13 @@ Section Q_prv.
   Qed.
 
 
-  Fact num_eq x y : 
+  Fact num_eq x y :
     x = y -> Gamma ⊢ num x == num y.
   Proof.
     intros ->. now apply reflexivity.
   Qed.
 
-  Lemma num_neq x : 
+  Lemma num_neq x :
     forall y, x <> y -> Gamma ⊢ ¬ num x == num y.
   Proof.
     induction x as [| x IHx].
@@ -1068,27 +1062,27 @@ Section Q_prv.
         apply symmetry; [now right; apply G|].
         apply Ctx. now left.
       + apply II. eapply IE with (phi := num x == num y).
-        { eapply Weak with Gamma. apply IHx. 
-          - lia. 
+        { eapply Weak with Gamma. apply IHx.
+          - lia.
           - now right. }
-        apply Succ_inj. 
+        apply Succ_inj.
         ++ now right; apply G.
         ++ apply Ctx. now left.
-  Qed. 
+  Qed.
 
 
-  Lemma num_eq_dec x y : 
+  Lemma num_eq_dec x y :
     { Gamma ⊢ num x == num y } + { Gamma ⊢ ¬ num x == num y }.
   Proof.
     destruct (PeanoNat.Nat.eq_dec x y); [left|right].
     - now apply num_eq.
     - now apply num_neq.
-  Qed.  
+  Qed.
 
 
   (** Provability of equality for closed terms is decidable. *)
-  
-  Lemma term_eq_dec s t : 
+
+  Lemma term_eq_dec s t :
     bounded_t 0 s -> bounded_t 0 t -> { Gamma ⊢ s == t } + { Gamma ⊢ ¬ s == t }.
   Proof.
     intros Hs Ht.
@@ -1116,7 +1110,7 @@ Section Q_prv.
 
   Lemma num_lt x y :
     x < y -> Gamma ⊢ num x ⧀ num y.
-  Proof. 
+  Proof.
     intros [k Hk]%lt_nat_equiv.
     apply ExI with (t := num k). cbn.
     rewrite !num_subst, <-Hk. cbn.
@@ -1171,9 +1165,9 @@ Section Q_prv.
           2 : {apply Add_rec. right; now right. }
           apply Succ_inj. right; now right.
           apply Ctx. now left.
-  Qed. 
-  
-  
+  Qed.
+
+
   Lemma num_lt_dec x y :
     { Gamma ⊢ num x ⧀ num y } + { Gamma ⊢ ¬ num x ⧀ num y }.
   Proof.
@@ -1192,7 +1186,7 @@ Section Q_prv.
     - left. eapply ExE. apply H.
       apply ExI with (t:=$0).
       rewrite !num_subst, HG. cbn. asimpl.
-      repeat rewrite (bounded_t_0_subst _ Ht), (bounded_t_0_subst _ Hs); auto. 
+      repeat rewrite (bounded_t_0_subst _ Ht), (bounded_t_0_subst _ Hs); auto.
       eapply transitivity.
       2 : { eapply Weak. asimpl. apply Hm. now right. }
       now right; apply G.
@@ -1218,7 +1212,7 @@ Section Q_prv.
       now right; right; apply G.
       apply symmetry. now right; right; apply G.
       pose (j := σ (s ⊕ $0)).
-      eapply transitivity with (y:= j); unfold j. 
+      eapply transitivity with (y:= j); unfold j.
       now right; right; apply G.
       apply eq_succ. now right; right; apply G.
       apply eq_add. now right; right; apply G.
@@ -1266,9 +1260,9 @@ Section stdModel.
   Notation "'i0'" := (i_func (Σ_funcs:=PA_funcs_signature) (f:=Zero) []) (at level 2) : PA_Notation.
   Notation "x 'i⧀' y" := (exists d : D, y = iσ (x i⊕ d) ) (at level 40).
 
-  Definition nat_hom (f : nat -> D) := 
+  Definition nat_hom (f : nat -> D) :=
     f 0 = @inu D I 0
-    /\ forall n, f (S n) = iσ (f n). 
+    /\ forall n, f (S n) = iσ (f n).
   Definition stdModel' := exists f, nat_hom f /\ bij f.
 
   Lemma hom_agree_inu f :
@@ -1292,7 +1286,6 @@ Section stdModel.
   Qed.
 
 End stdModel.
-
 
 
 Lemma inu_I D I n : @inu D I n = @inu D (extensional_model I) n.

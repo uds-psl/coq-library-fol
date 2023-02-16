@@ -1,6 +1,8 @@
 From FOL Require Import FullSyntax Arithmetics Theories.
 From Undecidability.Shared Require Import ListAutomation.
+
 From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano.
+From FOL.Incompleteness Require Import qdec sigma1 ctq.
 
 Require Import Lia.
 Import Vector.VectorNotations.
@@ -10,9 +12,6 @@ Notation "x 'el' A" := (List.In x A) (at level 70).
 Notation "A '<<=' B" := (List.incl A B) (at level 70).
 Notation "x ∣ y" := (exists k, x * k = y) (at level 50).
 
-Definition unary α := bounded 1 α.
-Definition binary α := bounded 2 α.
-
 Lemma unary_ext {D} {I: interp D} {α ρ ρ' x} :
   unary α -> sat I (x .: ρ) α -> (x .: ρ') ⊨ α.
 Proof.
@@ -21,31 +20,19 @@ Proof.
   intros []; [reflexivity|lia].
 Qed.
 
-Lemma Qeq_incl_PA α :
-  α el Qeq -> PA α.
-Proof.
-  unfold Qeq. intros H.
-  repeat try destruct H as [<-|H].
-  1-10: constructor; firstorder.
-  {constructor 2. }
-  {constructor 3. }
-  {constructor 4. }
-  firstorder.
-Qed.
-
 
 Section Model.
 
-  Context {Δ1 : Delta1}.
+Existing Instance PA_preds_signature.
+Existing Instance PA_funcs_signature.
 
   Variable D : Type.
   Variable I : interp D.
-  Local Definition I' : interp D := extensional_model I.
-  Existing Instance I | 100.
-  Existing Instance I' | 0.
-  Notation "⊨ phi" := (forall rho, rho ⊨ phi) (at level 21).
-  Notation "N⊨ phi" := (forall rho, @sat interp_nat rho phi) (at level 40).
-  Variable axioms : forall ax, PA ax -> ⊨ ax.
+  Definition I' := (Peano.I' I).
+  Existing Instance I'.
+  Notation Q := Qeq.
+
+  Context (axioms : forall ax, PAeq ax -> forall ρ, sat (Peano.I' I) ρ ax).
 
   Notation "x 'i=' y"  := (@i_atom PA_funcs_signature PA_preds_signature D I Eq ([x ; y])) (at level 40).
   Notation "'iσ' x" := (@i_func PA_funcs_signature PA_preds_signature D I Succ ([x])) (at level 37).
@@ -66,7 +53,7 @@ Section Model.
    *)
   Hypothesis obj_Coding :
     forall α, unary α ->
-      PA ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+      PAeq ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
 
   (* Lastly, we will assume the existence of a pair of unary inseparable
     formulas which are furthermore disjoint on the object level. This
@@ -75,7 +62,7 @@ Section Model.
    *)
   Definition def_HA_Insep α β :=
     unary α /\ unary β /\
-      ( PA ⊢TI ¬ ∃ α ∧ β ) /\
+      ( PAeq ⊢TI ¬ ∃ α ∧ β ) /\
       (forall G, Dec G ->
         (forall n, Q ⊢I α[(num n)..] ->   G n) ->
         (forall n, Q ⊢I β[(num n)..] -> ~ G n) ->
@@ -118,14 +105,14 @@ Section Model.
     intros (Ha1 & Hb1 & Disj & Insepa) Hdec.
     apply (Insepa _ Hdec); intros n H%soundness.
     - intros *; apply H.
-      now intros; apply axioms, Qeq_incl_PA.
+      now apply sat_Q_axioms.
     - intros Hα.
       specialize Disj as [Γ [HΓ1 HΓ2%soundness]].
       unshelve refine (let H' := HΓ2 _ _ (fun _ => iO) _ in H' _).
       { intros ? ?%HΓ1. now apply axioms. }
       eexists; split; apply switch_num.
       + apply Hα.
-      + apply H. now intros; apply axioms, Qeq_incl_PA.
+      + now apply H, sat_Q_axioms.
   Qed.
 
 

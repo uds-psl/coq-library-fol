@@ -1,11 +1,10 @@
 From FOL Require Import FullSyntax Arithmetics Theories.
 From Undecidability.Shared Require Import ListAutomation.
+
 From FOL.Tennenbaum Require Import NumberUtils DN_Utils Formulas SyntheticInType Peano CantorPairing.
+From FOL.Incompleteness Require Import qdec sigma1 ctq.
 
-(* Require Import FOL Peano Tarski Deduction CantorPairing NumberTheory Synthetic Formulas DecidabilityFacts Church. *)
 Require Import Lia.
-From Equations Require Import Equations.
-
 Import Vector.VectorNotations.
 
 
@@ -18,14 +17,16 @@ Definition binary α := bounded 2 α.
 
 
 Section Model.
+  Existing Instance PA_preds_signature.
+  Existing Instance PA_funcs_signature.
 
   Variable D : Type.
   Variable I : interp D.
-  Local Definition I' : interp D := extensional_model I.
-  Existing Instance I | 100.
-  Existing Instance I' | 0.
-  Notation "⊨ phi" := (forall rho, rho ⊨ phi) (at level 21).
-  Variable axioms : forall ax, PAeq ax -> ⊨ ax.
+  Definition I' := (Peano.I' I).
+  Existing Instance I'.
+  Notation Q := Qeq.
+
+  Variable axioms : forall ax, PAeq ax -> forall ρ, sat (Peano.I' I) ρ ax.
 
   Notation "N⊨ phi" := (forall rho, @sat _ _ nat (extensional_model interp_nat) _ rho phi) (at level 40).
 
@@ -133,9 +134,9 @@ End Facts.
 
 
 Section Pred.
-  Variable P : D -> Prop.
-  Hypothesis P0 : P i0.
-  Hypothesis PS : forall n, P n -> P (iσ n).
+  Context (P : D -> Prop)
+          (P0 : P i0)
+          (PS : forall n, P n -> P (iσ n)).
 
   Lemma predicate_equiv :
     (forall e, P e) <->
@@ -158,35 +159,64 @@ Section Pred.
 End Pred.
 
 
-
-
-(** * Overspill *)
-
 Section Overspill.
 
-  Variable α : form.
-  Hypothesis Hα : unary α.
-  Hypothesis nonstd : @nonStd D I.
+  Context (alpha : form)
+          (Halpha : unary alpha)
+          (nStd : ~ stdModel D).
 
-  Lemma Overspill :
-    (forall e, std e -> forall ρ, ~ ~ (e .: ρ) ⊨ α) ->
-    (forall e, (forall ρ, (e .: ρ) ⊨ α) -> ~ ~ std e) -> False.
+  Corollary Overspill :
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) ->
+    ~ (forall e, (forall rho, (e.:rho) ⊨ alpha) -> std e ).
   Proof.
-    intros H1 H2. revert nonstd.
-    unfold nonStd.
-    enough (forall e, ~ ~ std e) by firstorder.
-    apply predicate_equiv.
-    - DN.ret. exists 0; reflexivity.
-    - intros n Hn. DN.bind Hn. DN.ret.
-      destruct Hn as [k <-].
-      exists (S k); reflexivity.
-    - exists (¬ ¬ α). repeat split.
-      + unfold unary. now solve_bounds.
-      + firstorder.
-      + intros e H. apply H2.
-  Admitted.
+    intros ??. apply nStd. 
+    unfold stdModel. apply predicate_equiv. 
+    - now exists 0.
+    - intros d [n <-]. now exists (S n).
+    - exists alpha; auto.
+  Qed.
 
+
+  Lemma Overspill_DN' :
+    (forall x, stable (std x)) ->
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha) ) ->
+    ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+  Proof.
+    intros stable_std H1 H2. apply Overspill in H1. apply H1. intros e.
+    intros H. apply stable_std. intros He. apply H2. now exists e.
+  Qed.
+
+
+  Lemma on_std_equiv :
+    (forall n rho, ((inu n).:rho) ⊨ alpha) <->
+    (forall e, std e -> (forall rho, (e.:rho) ⊨ alpha)).
+  Proof.
+    split; intros H.
+    - intros e [n <-]. apply H.
+    - intros n. apply H. exists n; reflexivity.
+  Qed.
+
+  Lemma Overspill_DN :
+    (forall x, stable (std x)) ->
+    (forall n rho, ((inu n).:rho) ⊨ alpha) ->
+    ~ ~ exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+  Proof.
+    intros dne.
+    setoid_rewrite on_std_equiv.
+    now apply Overspill_DN'.
+  Qed.
+
+
+  Lemma Overspill_DNE :
+    DNE ->
+    (forall n rho, ((inu n).:rho) ⊨ alpha) ->
+    exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
+  Proof.
+    intros dne H.
+    now apply dne, Overspill_DN.
+  Qed.
 End Overspill.
+
 
 
 
@@ -207,15 +237,6 @@ Section Coding.
   Definition Div_nat (d : D) := fun n => div_num n d.
   Definition div_pi n a := (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
 
-  Lemma sat_Qeq ax : (ax el Qeq -> ⊨ ax).
-  Proof using axioms. cbn.
-    intros H. repeat try destruct H as [<-|H].
-    1-10: apply axioms; apply PAeq_FA; cbn; eauto 15; fail.
-    - apply axioms. apply PAeq_discr.
-    - apply axioms. apply PAeq_inj.
-    - apply axioms. apply PAeq_induction.
-    - destruct H.
-  Qed.
 
   Lemma ψ_repr x d rho :
     (d .: inu x .: rho) ⊨ ψ <-> d = inu (Irred x).
@@ -226,8 +247,7 @@ Section Coding.
     specialize (H D I'). cbn -[Q] in H.
     setoid_rewrite eval_num in H.
     rewrite <-(@switch_up_num D I).
-    apply H.
-    intros ax Hax. apply sat_Qeq. easy.
+    now apply H, sat_Q_axioms.
   Qed.
 
 
@@ -389,10 +409,11 @@ Section Coding.
   Qed.
 
 
+
   Lemma Coding_model_binary α :
     binary α ->
     forall n rho, rho ⊨
-      ∀ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → α[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+      ∀ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → α[$0 .: $2 ..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros binary_α n rho b. cbn.
     apply (@DN_chaining _ _
@@ -425,55 +446,6 @@ Section Coding.
     Unshelve. intros _. exact i0.
   Qed.
 
-  (*  We specialize the above results for the case where the formulas
-      are definite. It is then possible to get rid of the double negations.
-   *)
-  Lemma Coding_model_binary_Definite α :
-    binary α ->
-    (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ α )) ->
-    forall n rho, rho ⊨
-      ∀ ∃ ∀ $0 ⧀ (num n) → α[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
-  Proof.
-    intros binary_α Def_α n rho b.
-    refine (
-      let Ha := @Coding_nat_Definite
-                (fun u => forall rho, (b .: rho) ⊨ α[(num u)..] ) n _
-      in _).
-    destruct Ha as [a Ha].
-    exists (inu a).
-    intros u' Hu. cbn in Hu.
-    rewrite num_subst in Hu.
-    setoid_rewrite eval_num in Hu.
-    apply lessthen_num in Hu. 2: apply axioms.
-    destruct Hu as [u [Hu ->]]. split.
-    + intros α_u.
-      exists (inu (Irred u)).
-      split; [now apply ψ_repr| ].
-      apply Divides_num.
-      apply Ha; [apply Hu|].
-      intros ?. pose (@switch_num D I) as switch_num.
-      cbn in switch_num. rewrite switch_num.
-      rewrite sat_comp in α_u.
-      eapply bound_ext. eauto.
-      2 : apply α_u.
-      intros [|[]]; now cbn; try lia.
-    + intros [d [->%ψ_repr H]].
-      eapply Divides_num, (proj1 (Ha u)) in H; auto.
-      pose (@switch_num D I) as switch_num.
-      cbn in switch_num. rewrite switch_num in H. rewrite sat_comp.
-      eapply bound_ext. eauto.
-      2 : apply H.
-      intros [|[]]; now cbn; try lia.
-    Unshelve.
-    - intros u. destruct (Def_α b u) as [h|h].
-      * left. now setoid_rewrite switch_num.
-      * right. now setoid_rewrite switch_num.
-    - intros _. exact i0.
-  Qed.
-
-
-
-
 Section notStd.
 
   (** In a non-standard model. *)
@@ -497,104 +469,110 @@ Section notStd.
     specialize (@Coding_model_unary _ unary_α) as H.
     assert (forall n rho, (inu n .: rho) ⊨
       ¬ ¬ ∃ ∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
-    intros n rho. pose (@switch_num D I) as switch_num.
-    cbn in switch_num.
-    rewrite <-switch_num. cbn -[sat].
-    specialize (H n rho).
-    rewrite !num_subst in *.
-    assert (ψ[var] = ψ[up (up (up (num n)..))] ) as <-.
-    { eapply bounded_subst. apply Hψ.
-    intros [|[]]; try now intros. lia. }
-    assert (α[var] = α[up (up (num n)..)] ) as E.
-    { eapply bounded_subst. apply unary_α.
-    intros []; try now intros. lia. }
-    setoid_rewrite <-E. rewrite !subst_var.
-    rewrite unfold_sless, !num_subst in *.
-    apply H.
-    apply Overspill_DN in H'; auto.
-    2 : { unfold unary. solve_bounds.
-          all: eapply bounded_up; try apply binary_α; try apply Hψ.
-          all: eauto; lia. }
-    rewrite <-NNN_N.
-    apply (DN_chaining H'), DN. clear H' H.
-      intros (e & He1 & He2).
-      specialize (He2 (fun _ => i0)).
-      cbn in He2. apply (DN_chaining He2), DN.
-      intros [a Ha].
-      exists a. intros n rho.
-      assert (inu n i⧀ e) as Hne;  [now apply num_lt_nonStd|].
-      specialize (Ha _ Hne) as [Ha1 Ha2].
-      split; cbn.
-    + intros H. destruct Ha1 as [d Hd].
-      eapply bound_ext. apply unary_α. 2: apply H.
-      intros []; try now intros. lia.
-      exists d. split.
-      eapply bound_ext. apply Hψ. 2: apply Hd.
-      intros [|[]]; try now intros. lia.
-      apply Hd.
-    + intros [k Hk].
-      eapply bound_ext. apply unary_α. 2: apply Ha2.
-      intros []; try now intros. lia.
-      exists k. split.
-      eapply bound_ext. apply Hψ. 2: apply Hk.
-      intros [|[]]; try now intros. lia.
-      apply Hk.
+    - intros n rho. pose (@switch_num D I) as switch_num.
+      cbn in switch_num.
+      rewrite <-switch_num. cbn -[sat].
+      specialize (H n rho).
+      rewrite !num_subst in *.
+      assert (ψ[var] = ψ[up (up (up (num n)..))] ) as <-.
+      { eapply bounded_subst. 1: apply Hψ.
+        intros [|[]]; try now intros. }
+      assert (α[var] = α[up (up (num n)..)] ) as E.
+      { eapply bounded_subst. 1: apply unary_α.
+        intros []; try now intros. }
+      setoid_rewrite <-E. rewrite !subst_var.
+      rewrite unfold_sless, !num_subst in *.
+      apply H.
+    - apply Overspill_DN in H'; auto.
+      2 : { unfold unary. solve_bounds.
+            all: eapply bounded_up; try apply binary_α; try apply Hψ.
+            all: eauto; lia. }
+      rewrite <-NNN_N.
+      apply (DN_chaining H'), DN. clear H' H.
+        intros (e & He1 & He2).
+        specialize (He2 (fun _ => i0)).
+        cbn in He2. apply (DN_chaining He2), DN.
+        intros [a Ha].
+        exists a. intros n rho.
+        assert (inu n i⧀ e) as Hne;  [now apply num_lt_nonStd|].
+        specialize (Ha _ Hne) as [Ha1 Ha2].
+        split; cbn.
+      + intros H. destruct Ha1 as [d Hd].
+        eapply bound_ext. apply unary_α. 2: apply H.
+        intros []; try now intros.
+        exists d. split.
+        eapply bound_ext. apply Hψ. 2: apply Hd.
+        intros [|[]]; try now intros.
+        apply Hd.
+      + intros [k Hk].
+        eapply bound_ext. apply unary_α. 2: apply Ha2.
+        intros []; try now intros.
+        exists k. split.
+        eapply bound_ext. apply Hψ. 2: apply Hk.
+        intros [|[]]; try now intros.
+        apply Hk.
   Qed.
 
 
-  Theorem Coding_nonstd_binary_Definite α :
+  Theorem Coding_nonstd_binary α :
     binary α ->
-    (forall b u, definite (forall rho, (inu u .: b .: rho) ⊨ α ) ) ->
-     ~ ~ forall b, exists a, forall u rho, (inu u .: b .: a .: rho) ⊨
+    forall e, ~ ~ exists c, forall u ρ, (inu u .: e .: c .: ρ) ⊨
       (α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $4)).
   Proof.
-    intros binary_α Def_A.
-    specialize (@Coding_model_binary_Definite _ binary_α Def_A) as H.
+    intros binary_α.
     assert (forall n rho, (inu n .: rho) ⊨
-      ∀ ∃ ∀ $0 ⧀ $3 → α[up $1..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
-    intros n rho. pose (@switch_num D I) as switch_num.
-    cbn in switch_num.
-    rewrite <-switch_num. cbn -[sat]. rewrite !num_subst.
-    assert (ψ[var] = ψ[up (up (up (up (num n)..)))] ) as <-.
-    eapply bounded_subst. apply Hψ.
-    intros [|[]]; try now intros. lia.
-    assert (α[up $1..][var] = α[up $1..][up (up (up (num n)..))] ) as E.
-    rewrite !subst_comp.
-    eapply bounded_subst. apply binary_α.
-    intros [|[]]; cbn; try reflexivity; lia.
-    setoid_rewrite <-E. rewrite !subst_var.
-    specialize (H n).
-    rewrite unfold_sless, !num_subst in H.
-    apply H.
-    apply Overspill_DN in H'; auto.
-    2 : { unfold unary. solve_bounds.
-          2, 3: try eapply bounded_up; try apply binary_α;
-                try apply Hψ; lia.
-          all: eapply subst_bound; eauto.
-          all: intros [|[]] ?; solve_bounds. }
-    apply (DN_chaining H'), DN. clear H' H.
-      intros (e & He1 & He2). intros b.
-      cbn in He2. specialize (He2 (fun _ => i0) b) as [a Ha].
-      exists a. intros n rho.
-      assert (inu n i⧀ e) as Hne;  [now apply num_lt_nonStd|].
-      specialize (Ha _ Hne) as [Ha1 Ha2].
-      split; cbn.
-    + intros H. destruct Ha1 as [d Hd].
-      rewrite sat_comp.
-      eapply bound_ext. apply binary_α. 2: apply H.
-      intros [|[]]; try now intros. lia.
-      exists d. split.
-      eapply bound_ext. apply Hψ. 2: apply Hd.
-      intros [|[]]; try now intros. lia.
-      apply Hd.
-    + intros [k Hk].
-      rewrite sat_comp in Ha2.
-      eapply bound_ext. apply binary_α. 2: apply Ha2.
-      intros [|[]]; try now intros. lia.
-      exists k. split.
-      eapply bound_ext. apply Hψ. 2: apply Hk.
-      intros [|[]]; try now intros. lia.
-      apply Hk.
+      ∀ ¬ ¬ ∃ ∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)) as H'.
+    - intros n ρ.
+      specialize (@Coding_model_binary _ binary_α n ρ) as H.
+      fold sat in H.
+      rewrite <-(@switch_num D I). cbn -[sat].
+      rewrite !num_subst.
+      assert (ψ[var] = ψ[up (up (up (up (num n)..)))] ) as <-; [shelve|].
+      assert (α[$0 .: $2..][var] = α[$0 .: $2..][up (up (up (num n)..))] ) as E; [shelve|].
+      rewrite <-E, !subst_var.
+      rewrite unfold_sless, !num_subst in *.
+      apply H.
+    - apply Overspill_DN in H'; auto; [|shelve].
+      intros e. DN.bind H'. destruct H' as [e' [He' Hcoded]].
+      specialize (Hcoded (fun _ => e') e); fold sat in Hcoded.
+      change 
+        ((e .: e' .: (fun _ : nat => e')) ⊨ (¬ (¬ (∃ (∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))))
+        with
+        (~ ~ (e .: e' .: (fun _ : nat => e')) ⊨ (∃ (∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))
+        in Hcoded. 
+      DN.bind Hcoded. DN.ret.
+      destruct Hcoded as [c Hc].
+      exists c. intros u ρ.
+      unshelve refine (let Hc' := Hc (inu u) _ in _); fold sat in *.
+      { cbn. now apply num_lt_nonStd. }
+      specialize Hc' as [H1 H2].
+      split.
+      + intros Ha. destruct H1 as [k Hk]; fold sat.
+        * apply sat_comp. eapply bound_ext; [eauto| |apply Ha].
+          intros [|[]]; reflexivity || lia.
+        * fold sat in Hk; cbn in Hk |- *. 
+          exists k. cbn. split; try tauto.
+          eapply bound_ext; [apply Hψ| |apply Hk].
+          intros [|[]]; reflexivity || lia.
+      + intros [k Hk]. 
+        unshelve refine (let H := H2 _ in _); fold sat in *.
+        * cbn. exists k. split; [|apply Hk].
+          eapply bound_ext; [apply Hψ| |apply Hk].
+          intros [|[]]; reflexivity || lia.
+        * apply sat_comp in H. 
+          eapply bound_ext; [eauto| |apply H].
+          intros [|[]]; reflexivity || lia.
+      Unshelve.
+      { eapply bounded_subst. 1: apply Hψ.
+        intros [|[]]; try now intros. }
+      { eapply @bounded_subst with (n:=3).
+        - eapply subst_bound; eauto.
+          intros [|[]]; cbn; try lia; intros _; constructor; lia.
+        - intros [|[|[]]]; now intros ?. }
+      { unfold unary. solve_bounds.
+        2, 3: eapply bounded_up; try apply Hψ; lia.
+        all: eapply subst_bound; eauto.
+        all: intros [|[]]; cbn; try lia; intros _; constructor; lia. }
   Qed.
 
 End notStd.

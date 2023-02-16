@@ -8,7 +8,7 @@ Definition dne_ X : ~~(~~X -> X).                          tauto. Defined.
 Ltac ret := apply ret_.
 
 Ltac bind H := try match goal with
-  | H : ~ ~ _ |- ~ ~ _ => apply (bind_ H); clear H; intros H; try tauto
+  | h : _ |- ~ ~ _ => apply (bind_ H); clear H; intros H; try tauto
   end.
 
 Ltac lem P := apply (bind_ (lem_ P)); try tauto.

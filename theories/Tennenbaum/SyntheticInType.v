@@ -84,6 +84,15 @@ Proof.
     now intros ?%decf.
 Qed.
 
+Fact Dec_transport {X} p q :
+  Dec p -> (forall x : X, p x <-> q x) -> Dec q.
+Proof.
+intros [Dec_p] Equiv. constructor. intros x.
+destruct (Dec_p x) as [H|H];
+[left | right]; firstorder.
+Qed.
+
+
 Fact Dec_decider_nat p :
   Dec p -> exists f : nat -> nat, forall x : nat, p x <-> f x = 0.
 Proof.
