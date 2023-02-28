@@ -2,9 +2,6 @@
 *.vo
 *.v.d
 *.glob
-*Makefile.coq
-*Makefile.coq.d
-*Makefile.coq.conf
 *.coqdeps.d
 *.lia.cache
 *.nia.cache
