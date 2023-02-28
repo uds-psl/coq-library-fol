@@ -197,59 +197,6 @@ Section Model.
         eapply equiv_subst; eauto.
   Qed.
 
-
-  Lemma bounded_definite_binary' ϕ rho :
-    bounded 2 ϕ -> forall x b, ~ ~ forall y, y i⧀ x -> (y .: b .: rho) ⊨ ϕ \/ ~ (y .: b .: rho) ⊨ ϕ.
-  Proof.
-    intros b2.
-    pose (Φ := ∀ ¬¬ ∀ $0 ⧀ $2 → ϕ ∨ ¬ ϕ).
-    assert (forall d rho, (d .: rho) ⊨ Φ) as H.
-    apply induction.
-    - apply axioms.
-    - repeat solve_bounds; eapply bounded_up; try apply b2; try lia.
-    - intros sigma b. cbn. apply DN.
-      now intros y Hy%nolessthen_zero.
-    - intros x IHx. cbn -[Q] in *.
-      intros sigma b. specialize (IHx sigma b).
-      assert (~~ ((x .: b .: b .: sigma) ⊨ ϕ \/ ~ (x .: b .: b .: sigma) ⊨ ϕ) ) as H' by tauto.
-      apply (DN_chaining IHx), (DN_chaining H'), DN.
-      intros H IH y.
-      rewrite lt_S; auto.
-      intros [LT| <-].
-      + destruct (IH _ LT) as [h|h].
-        * left. eapply bound_ext. apply b2. 2 : apply h.
-          intros [|[]]; reflexivity || lia.
-        * right. intros h1. apply h. 
-          eapply bound_ext. apply b2. 2 : apply h1.
-          intros [|[]]; reflexivity || lia.
-      + destruct H as [h|h]. 
-        * left. eapply bound_ext. apply b2. 2 : apply h.
-          intros [|[]]; reflexivity || lia.
-        * right. intros h1. apply h. 
-          eapply bound_ext. apply b2. 2 : apply h1.
-          intros [|[]]; reflexivity || lia.
-    - intros x b.
-      specialize (H x (fun _ => i0)). cbn in H.
-      specialize (H b).
-      apply (DN_chaining H), DN. clear H; intros H.
-      intros y Hy. destruct (H _ Hy) as [h|h].
-      + left. eapply bound_ext. apply b2. 2: apply h.
-        intros [|[]]; reflexivity || lia.
-      + right. intros G. apply h. 
-        eapply bound_ext. apply b2. 2: apply G.
-        intros [|[]]; reflexivity || lia.
-  Qed.
-
-  Corollary bounded_definite_binary ϕ b rho n :
-    bounded 2 ϕ -> 
-    ~ ~ forall x, x i⧀ n -> (x .: b .: rho) ⊨ ϕ \/ ~ (x .: b .: rho) ⊨ ϕ.
-  Proof.
-    intros b2; now apply bounded_definite_binary'.
-  Qed.
-
-
-
-
   Lemma num_le_nonStd n e :
     ~ std e -> exists d : D, e = @inu D I n i⊕ d. 
   Proof.
@@ -259,7 +206,7 @@ Section Model.
       now apply num_lt_nonStd.
   Qed. 
 
-  Ltac solve_damn_bounded_sat H :=
+  Ltac solve_bounded_sat H :=
     try apply sat_comp; try apply sat_comp in H;
     match goal with
     H : _ ⊨ ?a , B : bounded _ ?a |- _ ⊨ ?a 
@@ -310,7 +257,6 @@ Section Model.
       pose (γ := ∃ $0 ⧀= $2 ∧ α).
       pose (G n := forall ρ, (@inu D I n .: e' .: ρ) ⊨ γ).
       assert (bounded 2 γ) as Hγ; [shelve|].
-      (* It is at this point here, that I also need to get the code for the formula that is used to define G. *)
       refine (let Hcoded := 
         @Coding_nonstd_binary _ _ _ _ Hψ _ Hmp γ _ e' in _).
       DN.remove_dn.
@@ -339,7 +285,7 @@ Section Model.
         unshelve refine (let Hw' := Hw _ _ (fun _ => e') _ in _).
           { now apply sat_Q_axioms. }
         apply switch_num in Hw'.
-        solve_damn_bounded_sat Hw'.
+        solve_bounded_sat Hw'.
         intros [|[]]; [..|lia]; intros _; auto.
         cbn. rewrite num_subst. symmetry. apply eval_num.
       + intros n [w Hw%soundness]%Σ1_witness Gn; [|shelve|shelve].
@@ -350,12 +296,12 @@ Section Model.
         1, 3: cbn; now apply num_le_nonStd.
         1: apply Hk.
         * destruct Hk as [_ Hk].
-          solve_damn_bounded_sat Hk.
+          solve_bounded_sat Hk.
           intros [|[]]; [..|lia]; intros _; auto.
         * unshelve refine (let Hw' := Hw _ _ (fun _ => e') _ in _).
           { now apply sat_Q_axioms. }
           asimpl in Hw'.
-          solve_damn_bounded_sat Hw'.
+          solve_bounded_sat Hw'.
           intros [|[]]; [..|lia]; intros _; symmetry; apply eval_num.
     
     (*  We now settle all of the side conditions that we shelved away
