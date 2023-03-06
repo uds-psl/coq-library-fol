@@ -43,6 +43,10 @@ Section Model.
   Definition Div_nat (d : D) := fun n => div_num n d.
   Definition div_pi n a :=  (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
 
+
+  (** * Tennenbaum's Teorem via inseparable predicates *)
+
+
   Context (surj_form_ : { Φ : nat -> form & surj Φ })
           (enumerable_Q_prv :
               forall Φ, enumerable (fun n : nat => Q ⊢I (Φ n))).
@@ -51,8 +55,7 @@ Section Model.
   Definition surj_form := projT2 (surj_form_).
   Definition A n := Q ⊢I ¬(Φ n)[(num n)..].
   Definition B n := Q ⊢I (Φ n)[(num n)..].
-  (*  We need to work with the intuitionistic deduction system ⊢I here,
-      since we want to make use of soundness to prove the next lemma. *)
+  (*  We need to work with the intuitionistic deduction system ⊢I here, since we want to make use of soundness to prove the next lemma. *)
   Lemma Disjoint_AB : forall n, ~(A n /\ B n).
   Proof.
     unfold A, B. intros n [A_n B_n].
@@ -97,6 +100,7 @@ Section Model.
     tauto.
   Qed.
 
+  (** ** Existence of inseparable predicates *)
   Lemma CT_Inseparable :
     @CT_Q intu -> Insep.
   Proof.
@@ -136,7 +140,7 @@ Section Model.
   Lemma WCT_Inseparable :
     @WCT_Q intu -> ~~ Insep.
   Proof.
-    intros wct.
+    (* intros wct.
     destruct (WInsep_ (WCT_WRTs wct)) as (A & B & HA & HB & disj & H).
     apply (DN_chaining ((WCT_WRTw wct) B HB)),
           (DN_chaining ((WCT_WRTw wct) A HA)), DN.
@@ -147,8 +151,8 @@ Section Model.
       now rewrite Ha, Hb.
     - setoid_rewrite <-Ha.
       setoid_rewrite <-Hb.
-      apply H.
-  Qed.
+      apply H. *)
+  Abort.
 
   Lemma equiv_subst {p: peirce} {Γ α β ρ} :
     map (subst_form ρ) Γ = Γ -> 
@@ -213,7 +217,7 @@ Section Model.
         => eapply (bound_ext _ B); [|apply H]
     end.
 
-  (** Potential existence of undecidable predicates. *)
+  (** ** Tennenbaum's Theorem via Inseparability *)
   Lemma Tennenbaum_inseparable :
     Insep -> Stable std ->
     (forall d, ~~ Dec (fun n => div_pi n d)) ->

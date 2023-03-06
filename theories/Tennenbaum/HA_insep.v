@@ -10,6 +10,7 @@ Import ListNotations.
 
 Open Scope string_scope.
 
+
 Section prv_utils.
   Existing Instance PA_preds_signature.
   Existing Instance PA_funcs_signature.
@@ -108,7 +109,7 @@ Section Rosser.
       + apply (IH y). split.
         * revert H1. lia.
         * revert H2. lia.
-  Qed. 
+  Qed.
 
   Lemma prv_0_leq_x :
     Qeq ⊢ ∀ zero ⧀= $0.
@@ -160,6 +161,12 @@ Section Rosser.
     fapply prv_lt_lt_bottom in "Hww'". ctx.
   Qed.
 
+  Lemma PA_extends_Q' φ :
+    Q ⊢ φ -> PA ⊢T φ.
+  Proof.
+   Set Printing All.
+  Admitted.
+  
   Lemma PA_extends_Q φ Γ :
     (Γ ++ Qeq) ⊢ φ ->
     (forall α, List.In α Γ -> PAeq α) ->
@@ -203,20 +210,39 @@ Section HA_insep.
     Qeq ⊢ (∃α)[(num n)..] -> Qeq ⊢ (rosser α β)[(num n)..].
   Proof.
     intros H. simpl in H.
-    apply Σ1_witness in H.
+    apply Σ1_witness in H. 2, 3: shelve.
     specialize H as [w Aw].
-    - unfold rosser. cbn.
-      fexists (num w). fsplit; auto.
-      apply Σ1_completeness.
-      { constructor. apply Qdec_impl; [|apply Qdec_bot].
-        apply Qdec_bounded_exists.
-        asimpl. now apply Qdec_subst. }
-      { admit. }
-      intros ρ H. apply (@Disj n).
-      + admit.
-      + 
-    - constructor. now apply Qdec_subst.
-    - admit. }
-  Admitted.
-
+    unfold rosser. cbn.
+    fexists (num w). fsplit; auto.
+    apply Σ1_completeness. 1, 2: shelve.
+    intros ρ H. apply (@Disj n).
+    { unfold α'. fexists (num w). apply Aw. }
+    destruct H as [v [_ Hv]]. cbn in Hv.
+    apply Σ1_completeness. 1, 2: shelve.
+    intros ρ'. exists v.
+    rewrite ->!sat_comp in Hv. apply sat_comp.
+    eapply (bound_ext _ HB2); [|apply Hv].
+    intros [|[]]; try lia || reflexivity.
+    intros _. cbn. now rewrite !num_subst, !eval_num. 
+    Unshelve. 
+    { constructor. now apply Qdec_subst. }
+    { eapply subst_bounded_max; eauto. 
+      intros [|[]]; cbn; try lia; intros _.
+      - solve_bounds. 
+      - rewrite num_subst. apply num_bound. }
+    { constructor. apply Qdec_impl; [|apply Qdec_bot].
+      apply Qdec_bounded_exists.
+      asimpl. now apply Qdec_subst. }
+    { solve_bounds.
+      - rewrite !num_subst. apply num_bound.
+      - rewrite !subst_comp.
+        eapply subst_bounded_max; eauto. 
+        intros [|[]]; cbn; try lia; intros _. 
+        + solve_bounds. 
+        + rewrite !num_subst. apply num_bound. }
+    { unfold β'. do 2 constructor. now apply Qdec_subst. }
+    { eapply subst_bounded_max with (n:=1).
+      - intros []; try lia. intros _. apply num_bound.
+      - now constructor. }
+  Qed.
 End HA_insep.

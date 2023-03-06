@@ -29,7 +29,7 @@ Instance ff : falsity_flag := falsity_on.
 
 (** ** CT_Q  *)
 
-(*  CT_Q internalizes computability, by claiming that every function
+(** CT_Q internalizes computability, by claiming that every function
     nat -> nat is computable in a model of computation. In this case,
     the model of computaion is based on arithmetic: It represents
     functions by formulas in the language of PA in such a way that a
@@ -41,7 +41,7 @@ Notation Q := Qeq.
 
 Definition represents φ f := forall x, Q ⊢ ∀ φ[num x .: $0..] ↔ $0 == num (f x).
 Definition CT_Q := forall f : nat -> nat, exists φ, bounded 2 φ /\ Σ1 φ /\ represents φ f.
-(*  Weaker Version of CT_Q, where the existence of the formula
+(** WCT_Q is a weaker Version of CT_Q, where the existence of the formula
     is only given potentially (i.e. behing a double negation).
  *)
 Definition WCT_Q := forall f : nat -> nat, ~~exists φ, bounded 2 φ /\ Σ1 φ /\ represents φ f.
@@ -205,7 +205,7 @@ Proof.
       apply b2. 2: apply Hnd.
       intros [|[|[]]]; cbn; rewrite ?num_subst, ?eval_num, ?inu_nat_id in *.
       all: try lia; reflexivity. *)
-Admitted.
+Abort.
 
 
 End ChurchThesis.

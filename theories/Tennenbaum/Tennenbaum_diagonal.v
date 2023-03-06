@@ -37,7 +37,9 @@ Section Model.
   Definition div_num n (d : D) := @Coding.div_num D I n d.
   Definition div_pi n a := @Coding.div_pi D I ψ n a.
 
-  (** * Enumerable and discrete PA models have decidable divisibility. *)
+  (** * Diagonal Proof of Tennenbaum's Theorem *)
+
+  (** ** Enumerable and discrete PA models have decidable divisibility. *)
 
   Lemma nat_eq_dec (n m : nat) : {n = m} + {n <> m}.
   Proof. decide equality. Qed.
@@ -76,8 +78,7 @@ Section Model.
   Qed.
 
 
-  (*  We can show the same for types that are witnessing and discrete.
-      This is a bit more general, since every enumerable type is witnessing.
+  (**  We can show the same for types that are witnessing and discrete. This is a bit more general, since every enumerable type is witnessing.
    *)
   Lemma dec_div_2 :
     Witnessing D -> Discrete D -> Dec (fun '(n, d) => div_num n d).
@@ -112,13 +113,13 @@ Section Model.
   Qed.
 
 
-  (** * Tennenbaum's Theorem via a diagnoal argument. *)
+  (** ** Tennenbaum's Theorem via a diagnoal argument. *)
 
   Fact dec_contraposition A B :
     dec B -> (~B -> ~A) -> (A -> B).
   Proof. intros HB nB a. destruct HB; tauto. Qed.
 
-  (*  This lemma is similar to the coding lemmas in Coding.v as
+  (**  This lemma is similar to the coding lemmas in Coding.v as
       it allows decidable predicates to be coded.
    *)
   Lemma Coding_Dec p :

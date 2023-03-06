@@ -224,7 +224,7 @@ End Overspill.
 
 Section Coding.
 
-  (*  We assume that we have a formula ψ representing an injective
+  (** We assume that we have a formula ψ representing an injective
       function which only produces prime numbers.
    *)
   Variable ψ : form.
@@ -259,8 +259,8 @@ Section Coding.
   Qed.
 
 
-  (** In the standard model, up to some bound. *)
-  (*  This shows that we can potentially get a code representing any
+  (** ** Coding in the standard model *)
+  (** This shows that we can potentially get a code representing any
       predicate on natural numbers up to some bound.
    *)
   Lemma Coding_nat A n :
@@ -277,50 +277,6 @@ Section Coding.
       apply (DN_chaining Dec_An), (DN_chaining IHn), DN.
       clear IHn Dec_An.
       intros [a Ha] [A_n | NA_n].
-      + exists (a * Irred n). intros u.
-        assert (u < S n <-> u < n \/ u = n) as -> by lia.
-        split.
-        ++ intros [| ->]. split.
-           +++ intros A_u%Ha.
-               rewrite Mod_mult_hom, A_u.
-               now rewrite Mod0_is_0.
-               apply H.
-           +++ intros [|H']%irred_integral_domain.
-               apply Ha; assumption.
-               apply irred_Mod_eq, inj_Irred in H'. lia.
-               all: apply irred_Irred.
-           +++ intuition. apply Mod_divides.
-               now exists a.
-        ++ intros [H |H]%irred_integral_domain.
-           apply Ha in H. auto.
-           apply irred_Mod_eq, inj_Irred in H. lia.
-           all: apply irred_Irred.
-      + exists a. intros u.
-        assert (u < S n <-> u < n \/ u = n) as -> by lia.
-        split.
-        ++ intros Hu. destruct Hu as [| ->].
-           now apply Ha.
-           split. now intros ?%NA_n.
-           intros H%Ha. lia.
-        ++ intros H%Ha. tauto.
-  Qed.
-
-  (*  The same as above, but if the predicate is definite, we get not
-      only potential existence of a code, but actual existence.
-   *)
-  Lemma Coding_nat_Definite A n :
-    Definite A ->
-    exists c, forall u,
-      (u < n -> A u <-> Mod (Irred u) c = 0) /\
-      (Mod (Irred u) c = 0 -> u < n).
-  Proof.
-    intros Def_A.
-    induction n.
-    - exists 1. intros u. split. lia.
-      intros [k ]%Mod_divides.
-      assert (Irred u > 1). apply irred_Irred.
-      destruct k; lia.
-    - destruct IHn as [a Ha], (Def_A n) as [A_n | NA_n].
       + exists (a * Irred n). intros u.
         assert (u < S n <-> u < n \/ u = n) as -> by lia.
         split.
@@ -371,8 +327,8 @@ Section Coding.
       all: apply axioms.
   Qed.
 
-  (** In an arbitrary model, up to some bound. *)
-  (*  By using the coding lemma for natural numbers, we can now
+  (** ** Coding in an arbitrary model, up to some bound. *)
+  (**  By using the coding lemma for natural numbers, we can now
       similarly verify that formulas can be coded in arbitrary models
       of PA. Here, we show this for unary and binary formulas.
    *)
@@ -448,7 +404,7 @@ Section Coding.
 
 Section notStd.
 
-  (** In a non-standard model. *)
+  (** ** Coding in a non-standard model *)
 
   (*  Above we have established coding results for arbitrary PA models.
       We will now focus on the special case where the model is not

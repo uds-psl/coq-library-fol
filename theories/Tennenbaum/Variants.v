@@ -48,14 +48,14 @@ Existing Instance PA_funcs_signature.
   Variable Hψ :
     binary ψ /\ (forall x, Q ⊢I ∀ ψ[up (num x)..] ↔ $0 == num (Irred x) ).
 
-  (*  We assume that this formula ψ can be used to give an object level
+  (*  We assume that this formula ψ can be used to give an object level 
       proof of the coding theorem that we showed in the standard model.
    *)
   Hypothesis obj_Coding :
     forall α, unary α ->
       PAeq ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
 
-  (* Lastly, we will assume the existence of a pair of unary inseparable
+  (* Lastly, we will assume the existence of a pair of unary inseparable 
     formulas which are furthermore disjoint on the object level. This
     is quite the strong disjointness property, and critically enables
     the fairly short proofs that will follow.
@@ -96,7 +96,7 @@ Existing Instance PA_funcs_signature.
     refine (proj2 (ψ_repr _ _ _ _ _) _); auto.
   Qed.
 
-  (*  Given a pair of object HA-inseparable formulas, we can easily
+  (** Given a pair of object HA-inseparable formulas, we can easily
       show that one of them must be undecidable.
    *)
   Lemma HA_Insep_undec α β :
@@ -115,7 +115,7 @@ Existing Instance PA_funcs_signature.
       + now apply H, sat_Q_axioms.
   Qed.
 
-
+  (** * Makholms Proof of Tennenbaum's Theorem *)
   Theorem Makholm :
     nonStd D -> ~~ exists d, ~ Dec(Div_nat d).
   Proof.
@@ -151,6 +151,7 @@ Qed.
 
 Section McCarty.
 
+  (** * McCarty Proof of Tennenbaum's Theorem *)
   Lemma unary_DN_bounded_definite ϕ :
     bounded 1 ϕ ->
     forall x, ~ ~ forall y, y i⧀ x -> (fun _ => y) ⊨ ϕ \/ ~ (fun _ => y) ⊨ ϕ.
