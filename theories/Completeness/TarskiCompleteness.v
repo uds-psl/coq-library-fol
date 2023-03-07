@@ -335,6 +335,248 @@ Section Completeness.
     Qed.
   End LEM_Equivalence.
 
+  Section MP_prop_Equivalence.
+
+    Definition Sigma_0_1 {X} (p : X -> Prop) :=
+      exists A : X -> nat -> Prop, (forall x n, A x n \/ ~ A x n) /\ forall x, p x <-> exists n, A x n.
+
+    Definition MP_prop := forall A : nat -> Prop, (forall n, A n \/ ~ A n) -> ~~ (exists n, A n) -> exists n, A n.
+
+    Definition MP_pred :=
+      forall X, forall p : X -> Prop, Sigma_0_1 p ->
+                        forall x, ~~ p x -> p x.
+
+    Lemma MP_prop_to_MP_pred :
+      MP_prop -> MP_pred.
+    Proof.
+      intros mp X p [A [HA H]] x Hx.
+      rewrite H in *. eapply mp; eauto.
+    Qed.
+
+    Definition completeness_Sigma_0_1 :=
+      forall (T : @theory _ _ _ falsity_on) (phi : @form _ _ _ falsity_on),
+             closed_T T -> closed phi -> Sigma_0_1 T ->
+             valid_theory_C (classical (ff := falsity_on)) T phi -> T ⊢TC phi.
+
+    Lemma bot_deriv_stable_Sigma_0_1 (T : @theory _ _ _ falsity_on) : completeness_Sigma_0_1 -> closed_T T -> Sigma_0_1 T -> stable (@tprv _ _ _ class T ⊥).
+    Proof.
+      intros Hcomp Hclosed Hsig Hc. apply (Hcomp T ⊥). 1: eauto. 1: econstructor. auto.
+      apply bot_valid_stable. 1:easy. intros Hd. apply Hc. intros [L [HT HL]]. apply Hd.
+      intros D I rho Hclass Harg.
+      eapply sound_for_classical_model; try easy. 1: exact HL.
+      intros l Hl. apply Harg. now apply HT.
+    Qed.
+
+    Existing Instance falsity_on.
+    Lemma arbitrary_completeness_is_MP_prop : completeness_Sigma_0_1 -> MP_prop.
+    Proof.
+      intros HC A HA Hneg.
+      pose (fun x : form => x = ⊥ /\ exists n, A n) as T.
+      assert (closed_T T) as Hclosed. { intros k [-> ?]. econstructor. }
+      pose proof (@bot_deriv_stable_Sigma_0_1 T HC Hclosed).
+      enough (T ⊢TC ⊥) as [[|lx lr] [HL HL']].
+      - exfalso. eapply consistent_ND. apply HL'.
+      - subst T. cbn in HL.
+        intros. eapply HL. now left.
+      - apply H. { exists (fun x n => x = ⊥ /\ A n). split. 2: firstorder.
+                   intros x n. destruct (HA n). 2: firstorder.
+                   revert x n H0. clear.
+                   induction x using form_ind_falsity; cbn; intros; firstorder congruence.
+        }
+        intros Hc. apply Hneg. intros Hc2. apply Hc. exists [⊥]. split; try (apply Ctx; now left).
+        intros ? [<- | []]. cbv. split; try apply Hc2. econstructor.
+    Qed.
+
+    Section T_sigma.
+
+      Notation ldec A := (A \/ ~ A).
+
+      Lemma dec_in_ex {X} (p : X -> Prop) L :
+        eq_dec X ->
+        (forall x, ldec (p x)) ->
+        ldec (exists x : X, In x L /\ p x).
+      Proof using.
+        intros eX dp.
+        induction L; cbn.
+        - firstorder.
+        - destruct IHL. 1: firstorder.
+          destruct (dp a).
+          + firstorder.
+          + right. intros (? & [-> | ] & ?); firstorder.
+      Qed.
+
+      Lemma ldec_forall {X} (p : X -> Prop) L :
+        eq_dec X ->
+        (forall x, ldec (p x)) ->
+        ldec (forall x : X, In x L -> p x).
+      Proof.
+        intros eX dp.
+        induction L; cbn.
+        - firstorder.
+        - destruct IHL.
+          + destruct (dp a). 1: left; now firstorder subst. 
+            firstorder.
+          + firstorder.
+      Qed.
+
+      Lemma ldec_bounded (p : nat -> Prop) n :
+        (forall m, m <= n -> ldec (p m)) ->
+        ldec (exists m, m <= n /\ p m).
+      Proof.
+        intros dp.
+        induction n; cbn.
+        - destruct (dp 0). lia. left. exists 0. eauto.
+          right. intros (? & ? & ?). inversion H0; subst. auto.
+        - destruct IHn.
+          + intros. eapply dp. lia.
+          + destruct H as (? & ? & ?). left. exists x. split. lia. auto.
+          + destruct (dp (S n)). lia.
+            left. exists (S n). split. lia. auto.
+            right. intros (? & ? & ?). inversion H1; subst. auto.
+            apply H. exists x. auto.
+      Qed.
+
+      Context {Σ_funcs : funcs_signature} {Σ_preds : preds_signature} [list_Funcs : nat -> list Σ_funcs] (enum_Funcs' : list_enumerator__T list_Funcs Σ_funcs)
+        [list_Preds : nat -> list Σ_preds] (enum_Preds' : list_enumerator__T list_Preds Σ_preds) (eq_dec_Funcs : eq_dec Σ_funcs) (eq_dec_Preds : eq_dec Σ_preds)
+        {b : falsity_flag} [T : form -> Prop] [L : nat -> list form]  (enum_form : list_enumerator__T L form).
+      Context
+        { ed_binop : eq_dec binop}
+        {ed_quantop : eq_dec quantop}.
+
+      Existing Instance class.
+
+      Hypothesis T_cls : closed_T T.
+      Hypothesis A_T : form -> nat -> Prop.
+      Hypothesis A_T_cumul : (forall x n1 n2, A_T x n1 -> n2 >= n1 -> A_T x n2).
+      Hypothesis HA_T : (forall (x : form) (n : nat), A_T x n \/ ~ A_T x n).
+      Hypothesis A_matches_T : (forall x, T x <-> (exists n : nat, A_T x n)).
+
+      Fixpoint A phi n :=
+        match n with
+        | 0 => False
+        | S n => A phi n \/ exists G, In G (L_list L n) /\ (forall phi, In phi G -> exists m, m <= n /\ A_T phi m) /\ In phi (cumul (L_ded enum_Funcs' enum_Preds' eq_dec_Funcs eq_dec_Preds G) n)
+        end.
+
+      Lemma or_ldec A B : ldec A -> ldec B -> ldec (A \/ B).
+      Proof.
+        tauto.
+      Qed.
+
+      Lemma and_ldec A B : ldec A -> ldec B -> ldec (A /\ B).
+      Proof.
+        tauto.
+      Qed.
+
+      Lemma cumul_list_max {X} {A : X -> nat -> Prop} L' :
+        (forall x n1 n2, A x n1 -> n2 >= n1 -> A x n2) ->
+        (forall x, In x L' -> exists n, A x n) ->
+        exists m, forall x, In x L' -> A x m.
+      Proof using.
+        intros Hcumul Hall.
+        induction L'.
+        - exists 0. firstorder.
+        - destruct IHL' as [m Hm].
+          + firstorder.
+          + destruct (Hall a) as [n Hn]. auto.
+            exists (n + m). intros ? [-> | ? % Hm].
+            eapply Hcumul. exact Hn. lia.
+            eapply Hcumul. exact H. lia.
+      Qed.
+      
+      Theorem T_prv_sig : Sigma_0_1 (fun phi : form => exists A : list form, (forall psi : form, psi el A -> T psi) /\ A ⊢C phi).
+      Proof.
+        exists A. split.
+        - intros x n. revert x.
+          induction n; intros x.
+          + tauto.
+          + eapply or_ldec. eauto.
+            eapply dec_in_ex. exact _. intros. eapply and_ldec.
+            * eapply ldec_forall.
+              eapply dec_form; auto.
+              intros. eapply ldec_bounded with (p := A_T x1).
+              intros. eapply HA_T.
+            * clear - ed_binop ed_quantop. induction n; cbn.
+              -- auto.
+              --rewrite in_app_iff.
+                eapply or_ldec. auto.
+                edestruct in_dec.
+                2:{ left. exact i. }
+                2: auto.
+                eapply dec_form; auto.
+        - intros phi. split.
+          + intros [G [HG H]].
+            unshelve edestruct (enumerator__T_list L) as [n Hn].
+            exact G. auto.
+            setoid_rewrite A_matches_T in HG.
+            eapply enum_prv in H as [k Hk].
+            eapply cumul_list_max in HG as [m Hm].
+            exists (S (S (n + k + m))).  (* add all of the n from HG here *)
+            right. exists G. repeat split; auto.
+            eapply cum_ge'; eauto. lia.
+            intros ? ? % Hm.
+            exists m. split; auto. lia.
+            eapply cum_ge'. eapply to_cumul_cumulative.
+            eapply cumul_In. exact Hk.
+            lia. auto.
+          + intros [n HA].
+            induction n; cbn in *. 
+            * auto.
+            * destruct HA. 1: eapply IHn; auto.
+              destruct H as (G & Gn & Gall & Hphi).
+              exists G. split.
+              -- intros ? (m & H1 & H2) % Gall.
+                 eapply A_matches_T; eauto.
+              -- eapply In_cumul in Hphi.
+                 eapply enum_prv; eauto.
+      Qed.
+
+    End T_sigma.
+    
+    Lemma Sigma_0_1_cumul X p :
+      Sigma_0_1 p ->
+      exists A : X -> nat -> Prop,
+        (forall x n1 n2, A x n1 -> n2 >= n1 -> A x n2) /\    
+        (forall (x : X) (n : nat), A x n \/ ~ A x n) /\
+          (forall x : X, p x <-> (exists n : nat, A x n)).
+    Proof.
+      intros [A [HA Hsig]]. exists (fun x n => exists m, m <= n /\ A x m).
+      repeat split.
+      - firstorder. eexists. split. 2: eauto. lia.
+      - intros. induction n.
+        + destruct (HA x 0). 1: firstorder.
+          right. intros (? & ? & ?).
+          destruct x0; try lia. auto.
+        + destruct IHn. left. firstorder lia.
+          destruct (HA x (S n)). left. firstorder.
+          right. intros (? & ? & ?).
+          inversion H1; subst. auto.
+          firstorder.
+      - rewrite Hsig. firstorder. exists x0. firstorder.
+      - rewrite Hsig. firstorder.
+    Qed.
+
+    Lemma MP_prop_is_arbitrary_completeness : MP_prop -> completeness_Sigma_0_1.
+    Proof.
+      intros mp % MP_prop_to_MP_pred T' phi HT Hphi Hvalid.
+      edestruct enumT_form' as [eform Hform].
+      eexists; eauto.
+      eexists; eauto.
+      exists (fun _ => Some Impl). red. intros []. now exists 0.
+      exists (fun _ => Some All). red. intros []. now exists 0.
+      apply completeness_classical_stability; eauto.
+      intros H. eapply mp; auto. revert Hvalid.
+      unfold tprv. intros.
+      eapply Sigma_0_1_cumul in Hvalid.
+      destruct Hvalid as [A [Hcumul [HA Hsig]]].
+      eapply T_prv_sig; auto.
+      1-3: eapply enumerator__T_of_list; eauto.
+      exact _.
+      exact _.
+      auto.
+    Qed.
+
+  End MP_prop_Equivalence.
+
   Section MP_Equivalence.
     Definition completeness_enumerable := 
       forall (T : @theory _ _ _ falsity_on) (phi : @form _ _ _ falsity_on),
