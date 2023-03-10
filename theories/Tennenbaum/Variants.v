@@ -1,8 +1,9 @@
 From FOL Require Import FullSyntax Arithmetics Theories.
 From Undecidability.Shared Require Import ListAutomation.
 
-From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano.
+From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano Tennenbaum_insep HA_insep.
 From FOL.Incompleteness Require Import qdec sigma1 ctq.
+
 
 Require Import Lia.
 Import Vector.VectorNotations.
@@ -69,7 +70,6 @@ Existing Instance PA_funcs_signature.
         False).
 
   Hypothesis HA_Insep : exists α β, def_HA_Insep α β.
-
 
   Definition Div_nat (d : D) := fun n => @Coding.div_num D I n d.
   Definition div_pi := (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).

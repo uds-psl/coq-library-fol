@@ -1,6 +1,6 @@
 From FOL Require Import FullSyntax Arithmetics.
 
-From FOL.Tennenbaum Require Import SyntheticInType.
+From FOL.Tennenbaum Require Import SyntheticInType Church Tennenbaum_insep.
 From FOL.Incompleteness Require Import utils fol_utils qdec sigma1.
 From FOL.Proofmode Require Import Theories ProofMode.
 
@@ -52,9 +52,9 @@ Section Rosser.
   
   Definition rosser ϕ ψ := ∃ ϕ ∧ ¬ ∃ $0 ⧀= $1 ∧ ψ[$0 .: $2 ..].
 
-  (* 
+  
   Fact unary_rosser ϕ ψ :
-    bounded 2 ϕ -> bounded 2 ψ -> 
+    bounded 2 ϕ -> bounded 2 ψ ->
     bounded 1 (rosser ϕ ψ).
   Proof.
     intros Hϕ Hψ. unfold rosser.
@@ -62,7 +62,7 @@ Section Rosser.
     eapply subst_bounded_max; eauto.
     intros [|[]]; try lia; intros _; solve_bounds.
   Qed. 
-  *)
+
 
   Lemma rosser_equiv ϕ ψ Γ :
     Γ ⊢ rosser ϕ ψ ↔ (∃ ϕ ∧ ∀ ($0 ⧀= $1 → ¬ ψ[$0 .: $2 ..])).
@@ -161,19 +161,35 @@ Section Rosser.
     fapply prv_lt_lt_bottom in "Hww'". ctx.
   Qed.
 
-  Lemma PA_extends_Q' φ :
-    Q ⊢ φ -> PA ⊢T φ.
+  Definition PAQ :=
+    ax_zero_succ :: ax_succ_inj :: ax_induction ($0 == zero ∨ (∃ $1 == σ $0)) :: FAeq.
+
+  Lemma PAQ_proves_cases :
+    PAQ ⊢ ax_cases.
   Proof.
-   Set Printing All.
-  Admitted.
+    unfold PAQ, ax_induction. cbn -[FAeq]. fstart. fapply "H".
+    - fleft. fapply ax_refl.
+    - fintros x "[H2|H2]".
+      + fright. fexists zero. fapply ax_succ_congr. fapply "H2".
+      + fdestruct "H2". fright. fexists (σ x0). fapply ax_succ_congr. fapply "H2".
+  Qed.
   
   Lemma PA_extends_Q φ Γ :
     (Γ ++ Qeq) ⊢ φ ->
     (forall α, List.In α Γ -> PAeq α) ->
     PAeq ⊢T φ.
   Proof.
-    intros HQ.
-  Admitted.
+    intros H1 H2. exists (List.app Γ PAQ). split.
+    - intros psi [H|H] % in_app_iff.
+      + now apply H2.
+      + destruct H as [<-|[<-|[<-|H]]]; eauto using PAeq.
+    - apply (prv_cut H1). intros psi [H|H] % in_app_iff.
+      + apply Ctx. apply in_app_iff. now left.
+      + apply Weak with PAQ; try now apply incl_appr.
+        repeat destruct H as [<-|H]; try destruct H.
+        all: try now apply Ctx; unfold PAQ, FAeq, EQ, FA; cbn; auto.
+        apply PAQ_proves_cases.
+  Qed.
 
   Theorem rosser_disj :
     PAeq ⊢T rosser α β → rosser β α → ⊥.
@@ -182,12 +198,6 @@ Section Rosser.
     intros ax [<-|[]]. apply PAeq_induction.
   Qed.
   
-
- (*  
-  [ctq.v]
-  Lemma sat_PAle ρ s t :
-    interp_nat; ρ ⊨ (s ⧀= t) <-> (eval ρ s) <= (eval ρ t).
- *)
 
 End Rosser.
 
@@ -207,7 +217,7 @@ Section HA_insep.
   Context (Disj: forall n, Qeq ⊢ α'[(num n)..] -> Qeq ⊢ β'[(num n)..] -> False).
 
   Lemma rosser_inherit n :
-    Qeq ⊢ (∃α)[(num n)..] -> Qeq ⊢ (rosser α β)[(num n)..].
+    Qeq ⊢ (∃ α)[(num n)..] -> Qeq ⊢ (rosser α β)[(num n)..].
   Proof.
     intros H. simpl in H.
     apply Σ1_witness in H. 2, 3: shelve.
