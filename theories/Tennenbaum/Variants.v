@@ -1,7 +1,7 @@
 From FOL Require Import FullSyntax Arithmetics Theories.
 From Undecidability.Shared Require Import ListAutomation.
 
-From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano Tennenbaum_insep HA_insep.
+From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano Tennenbaum_diagonal Tennenbaum_insep HA_insep.
 From FOL.Incompleteness Require Import qdec sigma1 ctq.
 
 
@@ -224,8 +224,33 @@ Section McCarty.
       intros []; [reflexivity|lia].
   Qed.
 
+  Lemma UC_unary_DN_Dec' :
+    UC nat bool -> nonStd D ->
+    ~ exists α, unary α /\ ~ Dec (fun n => ⊨ α[(num n)..]).
+  Proof.
+    intros uc [e He] [α [Hα1 HDec]].
+    assert (HDec' : ~~~ Dec (fun n : nat => ⊨ α[(num n)..])) by tauto.
+    apply HDec'.
+    apply (DN_chaining (@unary_DN_bounded_definite _ Hα1 e)), DN.
+    intros H. apply UC_Def_Dec; auto.
+    intros u.
+    specialize (H (@inu _ I u)) as [H|H].
+    - apply num_lt_nonStd; auto.
+    - left. intros ρ.
+      unfold I'. rewrite switch_num.
+      eapply bound_ext.
+      { apply Hα1. } 2: apply H.
+      intros []; [reflexivity|lia].
+    - right. intros h. apply H.
+      eapply bound_ext.
+      { apply Hα1. }
+      2: {  specialize (h (fun _ => @inu _ I u)).
+            unfold I' in h. rewrite switch_num in h. apply h. }
+      intros []; [reflexivity|lia].
+  Qed.
+
   Lemma UC_no_nonStd :
-    UC nat bool -> nonStd D -> False.
+    UC nat bool -> ~ nonStd D.
   Proof.
     intros uc [e He].
     destruct HA_Insep as (α & β & Hαβ).
@@ -233,8 +258,25 @@ Section McCarty.
     eapply UC_unary_DN_Dec; eauto. apply Hαβ.
   Qed.
 
+  Lemma UC_Discrete :
+    (forall X, UC X bool) -> Discrete D.
+  Proof.
+    intros uc. unfold Discrete.
+    apply UC_Def_Dec. apply uc.
+    intros [x y].
+    destruct (@Peano.D_eq_dec D I axioms x y); now (left + right).
+  Qed.
+
+  Theorem McCarty :
+    (forall X, UC X bool) -> MP -> stdModel D.
+  Proof.
+    intros uc mp.
+    specialize (UC_Discrete uc) as HD. 
+    unfold stdModel.
+    apply Stable_neg_exists_neg__forall; auto.
+    - now apply MP_Discrete_stable_std.
+    - apply (UC_no_nonStd (uc _)).
+  Qed.
+
 End McCarty.
-
-
-
 End Model.

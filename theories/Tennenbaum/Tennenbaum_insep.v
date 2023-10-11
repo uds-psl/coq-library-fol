@@ -65,7 +65,7 @@ Section Model.
 
   (** Recursively inseparable predicates.  *)
 
-  Definition Insep' :=
+  Definition Insep_pred :=
     exists A B : nat -> Prop,
       enumerable A /\ enumerable B /\
       (forall n, ~ (A n /\ B n)) /\
@@ -74,7 +74,7 @@ Section Model.
         (forall n, B n -> ~ D n) ->
         False).
   
-  Definition Insep :=
+  Definition Insep_form :=
     exists α β,
       bounded 1 α /\ Σ1 α /\ bounded 1 β /\ Σ1 β /\
       (forall n, ~ (Q ⊢I α[(num n)..] /\ Q ⊢I β[(num n)..]) ) /\
@@ -83,10 +83,13 @@ Section Model.
         (forall n, Q ⊢I β[(num n)..] -> ~ D n) ->
         False).
 
-  Lemma Insep_ :
-    @RT_strong intu -> Insep'.
+
+  (** ** Existence of inseparable predicates *)
+
+  Lemma CT_Insep_pred :
+    @CT_Q intu -> Insep_pred.
   Proof.
-    intros rt.
+    intros rt%CT_RTs.
     exists A, B. repeat split; auto.
     1,2 : apply enumerable_Q_prv.
     { apply Disjoint_AB. }
@@ -100,12 +103,11 @@ Section Model.
     tauto.
   Qed.
 
-  (** ** Existence of inseparable predicates *)
-  Lemma CT_Inseparable :
-    @CT_Q intu -> Insep.
+  Lemma CT_Insep_form :
+    @CT_Q intu -> Insep_form.
   Proof.
     intros ct.
-    destruct (Insep_ (CT_RTs ct)) as (A & B & HA & HB & disj & H).
+    destruct (CT_Insep_pred ct) as (A & B & HA & HB & disj & H).
     destruct ((CT_RTw ct) A HA) as [α (? & ? & Ha)],
              ((CT_RTw ct) B HB) as [β (? & ? & Hb)].
     exists α, β.
@@ -117,8 +119,8 @@ Section Model.
       apply H.
   Qed.
 
-  Lemma WInsep_ :
-    @WRT_strong intu -> Insep'.
+  Lemma WCT_Insep_pred :
+    @WRT_strong intu -> Insep_pred.
   Proof.
     intros wrt.
     exists A, B. repeat split; auto.
@@ -137,11 +139,11 @@ Section Model.
   Qed.
 
 
-  Lemma WCT_Inseparable :
-    @WCT_Q intu -> ~~ Insep.
+  Lemma WCT_potentiall_Insep_form :
+    @WCT_Q intu -> ~~ Insep_form.
   Proof.
     (* intros wct.
-    destruct (WInsep_ (WCT_WRTs wct)) as (A & B & HA & HB & disj & H).
+    destruct (WCT_Insep_pred (WCT_WRTs wct)) as (A & B & HA & HB & disj & H).
     apply (DN_chaining ((WCT_WRTw wct) B HB)),
           (DN_chaining ((WCT_WRTw wct) A HA)), DN.
     intros [α (? & ? & Ha)] [β (? & ? & Hb)].
@@ -175,7 +177,7 @@ Section Model.
   Qed.
 
   Lemma Qdec_kernel_Insep :
-    Insep ->
+    Insep_form ->
     exists α β,
       bounded 2 α /\ Qdec α /\ bounded 2 β /\ Qdec β /\
       (forall n, ~ (Q ⊢I (∃α)[(num n)..] /\ Q ⊢I (∃β)[(num n)..]) ) /\
@@ -218,19 +220,18 @@ Section Model.
     end.
 
   (** ** Tennenbaum's Theorem via Inseparability *)
-  Lemma Tennenbaum_inseparable :
-    Insep -> Stable std ->
-    (forall d, ~~ Dec (fun n => div_pi n d)) ->
-    nonStd D -> False.
+  Theorem Tennenbaum_inseparable :
+    Insep_form -> Stable std ->
+    nonStd D -> ~~ (exists d, ~ Dec (fun n => div_pi n d)).
   Proof.
     intros (α & β & HBa & HSa & HBb & HSb & Disj & H)%Qdec_kernel_Insep 
-            Hmp HDec [e He].
-    (*                  ↓ bound to α     ↓ bound to β     ↓ both   *)
+            Hmp HnonStd Hdiv.
+    (*                  ↓ bound in α     ↓ bound in β     ↓ in both *)
     pose (ϕ := ∀ $0 ⧀= $0`[↑] → ∀ $0 ⧀= $1`[↑] → ∀ $0 ⧀= $2`[↑] → 
                   α[$1..] ∧ β[$2..] → ⊥).
     assert (unary ϕ) as unary_ϕ; [shelve|..].
-    eapply Overspill_DN with (alpha:= ϕ); auto. 
-    - intros []%He. 
+    eapply Overspill_DN with (alpha:= ϕ); auto.
+    { now apply nonStd_notStd. }
     - intros n ρ. rewrite <-switch_num.
       eapply soundness with (A:=Q).
       2: {now apply sat_Q_axioms. }
@@ -265,8 +266,7 @@ Section Model.
         @Coding_nonstd_binary _ _ _ _ Hψ _ Hmp γ _ e' in _).
       DN.remove_dn.
       destruct Hcoded as [c Hc].
-      specialize (HDec c).
-      DN.remove_dn.
+      apply Hdiv; exists c. intros HDec.
       apply (H G).
       + eapply Dec_transport; eauto.
         intros n. unfold G.
@@ -333,7 +333,7 @@ Section Model.
     { unfold γ. solve_bounds. 
       eapply bounded_up; eauto || lia. }
     { auto. }
-    { intros []%He. }
+    { now apply nonStd_notStd. }
     { auto. }
     { apply Σ1_subst. now constructor. }
     { eapply subst_bound; eauto.

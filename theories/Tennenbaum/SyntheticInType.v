@@ -55,7 +55,7 @@ Fact DN_forall_stable {X} p :
 Proof. unfold Stable; firstorder. Qed.
 
 
-(** * Definitions in synthetic computability.   *)
+(** * Definitions in synthetic computability. *)
 
 Definition decider {X} p f := forall x : X, p x <-> f x = true.
 Definition Dec {X} p := inhabited(forall x : X, {p x} + {~p x}).
@@ -92,7 +92,6 @@ destruct (Dec_p x) as [H|H];
 [left | right]; firstorder.
 Qed.
 
-
 Fact Dec_decider_nat p :
   Dec p -> exists f : nat -> nat, forall x : nat, p x <-> f x = 0.
 Proof.
@@ -102,7 +101,6 @@ Proof.
   destruct (f x) eqn:Hx; try tauto.
   rewrite decf. split; congruence.
 Qed.
-
 
 Fact Dec_sigT_decider {X} p :
   Dec_sigT p <=> sigT (@decider X p).
@@ -117,7 +115,6 @@ Proof.
     now intros ?%decf.
 Qed.
 
-
 Fact dec_Dec_sig_T P :
   dec P <=> Dec_sigT (fun _ : True => P).
 Proof.
@@ -125,7 +122,6 @@ Proof.
   - intros []; now constructor.
   - intros []; unfold dec; tauto.
 Qed.
-
 
 Lemma DN_Dec_equiv X (p : X -> Prop) :
   ~ ~ Dec p <-> ((Dec_sigT p -> False) -> False).
@@ -168,7 +164,6 @@ Proof.
   intros [x Hx]. now exists x.
 Defined.
 
-
 Fact Discrete_sum {X} :
   Discrete X <-> inhabited(forall x y : X, {x = y} + {~ x = y}).
 Proof.
@@ -176,7 +171,6 @@ Proof.
   - intros x y. destruct (H (x,y)); cbn in *; tauto.
   - intros [x y]; cbn. destruct (H x y); tauto.
 Qed.
-
 
 Fact Separated_sum {X} :
   Separated X <-> inhabited(forall x y : X, {~ x = y} + {~~ x = y}).
@@ -186,9 +180,9 @@ Proof.
   - intros [x y]; cbn. destruct (H x y); tauto.
 Qed.
 
-
 Fact enumerable_nat p :
-  enumerable p -> exists f, forall x : nat, p x <-> exists n : nat, f n = S x.
+  enumerable p -> 
+  exists f, forall x : nat, p x <-> exists n : nat, f n = S x.
 Proof.
   intros [f Hf].
   exists (fun n => match f n with Some x => S x | _ => 0 end).
@@ -197,13 +191,11 @@ Proof.
   - destruct (f n); congruence.
 Qed.
 
-
 Fact enumerable_equiv X :
   Enumerable X <-> enumerable (fun x : X => True).
 Proof.
   split; intros [g Hg]; exists g; firstorder.
 Qed.
-
 
 Fact MP_Markov_nat :
   MP <-> Markov nat.
@@ -222,7 +214,6 @@ Proof.
     decide equality.
 Qed.
 
-
 Lemma UC_Def_Dec X (p : X -> Prop) :
   UC X bool -> Definite p -> Dec p.
 Proof.
@@ -238,7 +229,6 @@ Proof.
     intros H. now rewrite H in h.
 Qed.
 
-
 Fact MP_Dec_stable :
   MP -> forall (p : nat -> Prop), Dec p -> stable (ex p).
 Proof.
@@ -248,3 +238,11 @@ Proof.
     exists y. apply Hf in Hy. now destruct (f y).
   - exists y. apply Hf. now destruct (f y).
 Qed.
+
+Fact forall__neg_exists_neg X (p : X -> Prop) :
+  (forall x, p x) -> ~ exists x, ~ p x.
+Proof. firstorder. Qed.
+
+Fact Stable_neg_exists_neg__forall {X} (p : X -> Prop) :
+  Stable p -> (~ exists x, ~ p x) -> forall x, p x.
+Proof. firstorder. Qed.

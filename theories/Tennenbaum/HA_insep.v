@@ -17,6 +17,8 @@ Section prv_utils.
 
   Context {peirce: peirce}.
 
+  Locate qdec.
+
   Fact curry_no_curry ϕ ψ ρ Γ :
     Γ ⊢ ((ϕ ∧ ψ) → ρ) ↔ (ϕ → (ψ → ρ)).
   Proof.
@@ -234,7 +236,7 @@ Section HA_insep.
     eapply (bound_ext _ HB2); [|apply Hv].
     intros [|[]]; try lia || reflexivity.
     intros _. cbn. now rewrite !num_subst, !eval_num. 
-    Unshelve. 
+    Unshelve.
     { constructor. now apply Qdec_subst. }
     { eapply subst_bounded_max; eauto. 
       intros [|[]]; cbn; try lia; intros _.

@@ -16,7 +16,7 @@ Notation "x ∣ y" := (exists k, x * k = y) (at level 50).
 Definition unary α := bounded 1 α.
 Definition binary α := bounded 2 α.
 
-
+Locate form.
 
 Section ChurchThesis.
 Existing Instance PA_preds_signature.
@@ -164,7 +164,7 @@ Lemma WCT_WRTw :
 Proof.
   (* intros wct p [f Hf]%enumerable_nat.
   apply (DN_chaining (wct f)), DN.
-  intros [ϕ [b2 [[s1] H]]].
+  intros (ϕ & b2 & s1 & H).
   pose (Φ := ϕ[up (σ $1)..] ).
   exists Φ; split. 2: split.
   - unfold Φ. eapply subst_bound; eauto.

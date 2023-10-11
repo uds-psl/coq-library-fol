@@ -87,7 +87,8 @@ Qed.
 (** * The product type for Nat is witnessing. *)
 
 Theorem ProductWO (p : nat -> nat -> Prop) : 
-  ( forall x y, dec (p x y) ) -> (exists x y, p x y) -> { x & { y & p x y }}.
+  ( forall x y, dec (p x y) ) -> 
+  (exists x y, p x y) -> { x & { y & p x y }}.
 Proof.
   intros Dec_p H.
   pose (P n := let (x, y) := decode n in p x y).

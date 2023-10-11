@@ -119,6 +119,32 @@ Section Model.
     dec B -> (~B -> ~A) -> (A -> B).
   Proof. intros HB nB a. destruct HB; tauto. Qed.
 
+  Fact Stable_std_stable_stdModel :
+    Stable std -> stable (stdModel D).
+  Proof.
+    intros Hstd H e. apply Hstd. intros He. apply H.
+    intros HD. apply He, HD.
+  Qed.
+  
+  Fact Stable_std_negn_nonStd__sdtMobel_equiv :
+    Stable std -> stdModel D <-> ~ nonStd D.
+  Proof.
+    intros stab. split.
+    - apply forall__neg_exists_neg.
+    - unfold nonStd, stdModel, std.
+      apply (Stable_neg_exists_neg__forall); eauto.
+  Qed.
+
+  Fact MP_Discrete_stable_std :
+    MP -> Discrete D -> Stable std.
+  Proof.
+    intros mp [eq]%Discrete_sum e. unfold Stable.
+    refine (MP_Dec_stable mp _ _).
+    constructor. intros ?; apply eq.
+  Qed.
+
+
+
   (**  This lemma is similar to the coding lemmas in Coding.v as
       it allows decidable predicates to be coded.
    *)
@@ -129,10 +155,7 @@ Section Model.
     intros wrt%WCT_WRTs ? notStd Dec_p.
     apply (DN_remove (wrt _ Dec_p)).
     intros [ϕ (b1 & _ & H1 & H2)].
-    Locate Coding_nonStd_unary.
     unshelve refine (let H:= @Coding_nonStd_unary _ _ _ _ Hψ _ _ ϕ _ in _); auto.
-    (* { unfold Coding.unary. solve_bounds.
-      eapply bounded_up; eauto || lia. } *)
     apply (DN_chaining H), DN; clear H.
     intros [c Hc].
     exists c; intros n. split.
@@ -186,9 +209,12 @@ Section Model.
       assumption of WCT_Q.
    *)
   Theorem Tennenbaum_diagonal :
-   @WCT_Q intu -> MP -> Enumerable D -> Discrete D -> ~~ forall e, std e.
+   @WCT_Q intu -> MP -> Enumerable D -> Discrete D -> forall e, std e.
   Proof.
-    intros wct mp enum eq notStd.
+    intros wct mp enum eq.
+    apply Stable_std_stable_stdModel.
+    { apply MP_Discrete_stable_std; auto. }
+    intros notStd.
     specialize (dec_div enum eq) as [dec_div].
     specialize enum as [G HG].
     pose (g n := match G n with None => i0 | Some d => d end).
@@ -209,7 +235,7 @@ Section Model.
   Qed.
 
   Theorem Tennenbaum_diagonal_ct :
-    @CT_Q intu -> MP -> Enumerable D -> Discrete D -> ~~ forall e, std e.
+    @CT_Q intu -> MP -> Enumerable D -> Discrete D -> forall e, std e.
   Proof. now intros ?%CT_WCT; apply Tennenbaum_diagonal. Qed.
 
 

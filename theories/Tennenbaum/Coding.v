@@ -130,6 +130,14 @@ Proof.
     apply axioms.
 Qed.
 
+Lemma num_lt_nonStd_converse d :
+  (forall n, inu n i⧀ d) -> ~ std d.
+Proof.
+  intros H [n Hn]. rewrite <-Hn in H.
+  specialize (H (S n)). apply lt_equiv in H. lia.
+Qed.
+
+
 End Facts.
 
 

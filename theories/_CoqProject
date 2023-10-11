@@ -76,4 +76,6 @@ Tennenbaum/CantorPairing.v
 Tennenbaum/Coding.v
 Tennenbaum/Tennenbaum_diagonal.v
 Tennenbaum/Tennenbaum_insep.v
+Tennenbaum/HA_insep.v
 Tennenbaum/Variants.v
+Tennenbaum/Abstract_coding.v
