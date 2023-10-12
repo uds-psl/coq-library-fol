@@ -1,0 +1,37 @@
+opam-version: "2.0"
+version: "dev+8.16"
+maintainer: "kirst@cs.uni-saarland.de"
+homepage: "https://github.com/uds-psl/coq-library-fol/"
+dev-repo: "git+https://github.com/uds-psl/coq-library-fol/"
+bug-reports: "https://github.com/uds-psl/coq-library-fol/issues"
+authors: [
+  "Dominik Kirst"
+  "Johannes Hostert"
+  "Andrej Dudenhefner"
+  "Yannick Forster"
+  "Marc Hermes"
+  "Mark Koch"
+  "Dominique Larchey-Wendling"
+  "Niklas Mück"
+  "Benjamin Peters"
+  "Gert Smolka"
+  "Dominik Wehr"
+]
+license: "CECILL-2.1"
+build: [
+  [make "-j%{jobs}%"]
+]
+install: [
+  [make "install"]
+]
+depends: [
+  "coq-library-undecidability" {= "dev+8.16"}
+]
+pin-depends: [
+  "coq-library-undecidability.dev+8.16" "git+https://github.com/uds-psl/coq-library-undecidability.git#coq-8.16"
+]
+synopsis: "A Coq Library for First-Order Logic"
+url {
+  git: "https://github.com/uds-psl/coq-library-fol.git#coq-8.16"
+}
+
