@@ -1,7 +1,5 @@
 From FOL Require Import FullSyntax Arithmetics.
-
-From FOL.Tennenbaum Require Import SyntheticInType Church Tennenbaum_insep.
-From FOL.Incompleteness Require Import utils fol_utils qdec sigma1.
+From FOL.Incompleteness Require Import qdec sigma1.
 From FOL.Proofmode Require Import Theories ProofMode.
 
 Require Import Lia.
@@ -10,6 +8,32 @@ Import ListNotations.
 
 Open Scope string_scope.
 
+Module CoqRosser.
+Section CoqRosser.
+
+  (* Here we quickly verify the desired property of the Rosser 
+     sentence on the level of Coq's logic. *)
+
+  Definition rosser (ϕ ψ: nat -> nat -> Prop) x :=
+    exists t, ϕ t x /\ ~ (exists u, u <= t /\ ψ u x).
+
+  Lemma rosser_equiv ϕ ψ x :
+    rosser ϕ ψ x <-> (exists t, ϕ t x /\ forall u, ψ u x -> ~ u <= t).
+  Proof.
+    unfold rosser. split; firstorder.
+  Qed.
+
+  Lemma rosser_disj α β x :
+    rosser α β x -> rosser β α x -> False.
+  Proof.
+    intros (t  & H1  & H2 )%rosser_equiv 
+           (t' & H1' & H2')%rosser_equiv.
+    specialize (H2 _ H1'). specialize (H2' _ H1). lia.
+  Qed.
+
+End CoqRosser.
+End CoqRosser.
+
 
 Section prv_utils.
   Existing Instance PA_preds_signature.
@@ -17,9 +41,7 @@ Section prv_utils.
 
   Context {peirce: peirce}.
 
-  Locate qdec.
-
-  Fact curry_no_curry ϕ ψ ρ Γ :
+  Fact curry_to_uncurry ϕ ψ ρ Γ :
     Γ ⊢ ((ϕ ∧ ψ) → ρ) ↔ (ϕ → (ψ → ρ)).
   Proof.
     fstart; fsplit; fintros "H".
@@ -47,13 +69,13 @@ End prv_utils.
 Section Rosser.
   Existing Instance PA_preds_signature.
   Existing Instance PA_funcs_signature.
-  
+
   Context {peirce: peirce}.
   Context (α β: form)
           (HA2: bounded 2 α)(HB2: bounded 2 β).
-  
-  Definition rosser ϕ ψ := ∃ ϕ ∧ ¬ ∃ $0 ⧀= $1 ∧ ψ[$0 .: $2 ..].
 
+  (** Definition of the Rosser sentence.  *)
+  Definition rosser ϕ ψ := ∃ ϕ ∧ ¬ ∃ $0 ⧀= $1 ∧ ψ[$0 .: $2 ..].
   
   Fact unary_rosser ϕ ψ :
     bounded 2 ϕ -> bounded 2 ψ ->
@@ -65,24 +87,23 @@ Section Rosser.
     intros [|[]]; try lia; intros _; solve_bounds.
   Qed. 
 
-
   Lemma rosser_equiv ϕ ψ Γ :
     Γ ⊢ rosser ϕ ψ ↔ (∃ ϕ ∧ ∀ ($0 ⧀= $1 → ¬ ψ[$0 .: $2 ..])).
   Proof.
     unfold rosser. fstart. fsplit.
     all: fintros "[x [Hx Hψ]]"; fexists x; fsplit.
     1,3: fapply "Hx".
-    - fintros "z". fapply curry_no_curry.
+    - fintros "z". fapply curry_to_uncurry.
       fintros "H". fapply "Hψ". fexists z.
       fapply "H".
     - fintros "[z Hz]". frevert "Hz".
-      fapply curry_no_curry. fapply "Hψ".
+      fapply curry_to_uncurry. fapply "Hψ".
   Qed. 
 
   Lemma rosser_anitsymmetry Γ :
     Γ ⊢ rosser α β → rosser β α → (∃∃ (¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0)).
   Proof.
-    fstart. fapply curry_no_curry.
+    fstart. fapply curry_to_uncurry.
     fintros "[H1 H2]".
     fapply rosser_equiv in "H1".
     fapply rosser_equiv in "H2".
@@ -157,7 +178,8 @@ Section Rosser.
     Qeq) ⊢ rosser α β → rosser β α → ⊥.
   Proof.
     fstart.
-    fassert (rosser α β → rosser β α → (∃∃ (¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0))) as "Rosser" by fapply rosser_anitsymmetry.
+    fassert (rosser α β → rosser β α → (∃∃ (¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0))) 
+      as "Rosser" by fapply rosser_anitsymmetry.
     fintros "H1" "H2". 
     fdestruct ("Rosser" "H1" "H2") as "[w [w' Hww']]".
     fapply prv_lt_lt_bottom in "Hww'". ctx.

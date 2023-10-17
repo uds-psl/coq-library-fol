@@ -42,21 +42,21 @@ Existing Instance PA_funcs_signature.
   Notation "'i0'" := (i_func (Σ_funcs:=PA_funcs_signature) (f:=Zero) []) (at level 2) : PA_Notation.
   Notation "x 'i⧀' y" := (exists d : D, y = iσ (x i⊕ d) ) (at level 40).
 
-  (*  We assume that there is a formula ψ capturing the function
+  (**  We assume that there is a formula ψ capturing the function
       [Irred] which only produces prime/irreducible numbers.
    *)
   Variable ψ : form.
   Variable Hψ :
     binary ψ /\ (forall x, Q ⊢I ∀ ψ[up (num x)..] ↔ $0 == num (Irred x) ).
 
-  (*  We assume that this formula ψ can be used to give an object level 
+  (**  We assume that this formula ψ can be used to give an object level 
       proof of the coding theorem that we showed in the standard model.
    *)
   Hypothesis obj_Coding :
     forall α, unary α ->
       PAeq ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
 
-  (* Lastly, we will assume the existence of a pair of unary inseparable 
+  (** Lastly, we will assume the existence of a pair of unary inseparable 
     formulas which are furthermore disjoint on the object level. This
     is quite the strong disjointness property, and critically enables
     the fairly short proofs that will follow.

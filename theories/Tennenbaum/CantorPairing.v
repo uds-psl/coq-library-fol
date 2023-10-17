@@ -18,7 +18,7 @@ Proof.
     intros. apply IHn. lia.
 Defined.
 
-
+(** We define the Cantor pairing function and show that it is a Bijection.  *)
 Section Cantor.
 
   Definition next '(x,y) := 

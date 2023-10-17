@@ -32,11 +32,10 @@ Proof.
 Defined.
 
 
-(* Div y x gives the number of times y can be substracted from x *)
+(** Div y x gives the number of times y can be substracted from x *)
 Definition Div y x := projT1 (Euclid y x).
-(* Mod y x gives the remainder of x after division by y *)
+(** Mod y x gives the remainder of x after division by y *)
 Definition Mod y x := projT1 (projT2 (Euclid y x)).
-
 
 
 Fact Factor y x :
@@ -45,14 +44,11 @@ Proof.
   apply (projT2 (projT2 (Euclid _ _))).
 Qed.
 
-
 Fact Mod_bound y x :
   0 < y -> Mod y x < y.
 Proof.
   apply (projT2 (projT2 (Euclid _ _))).
 Qed.
-
-
 
 Fact Mod_lt y x :
   0 < y <= x -> Mod y x < x.
@@ -60,7 +56,6 @@ Proof.
   intros [H ].
   apply (Mod_bound _ x) in H. lia.
 Qed.
-
 
 Lemma Div_lt y x :
   0 < y <= x -> 0 < Div y x.
@@ -197,9 +192,12 @@ End Homomorphism.
 Section PrimeDec.
 
   (** Irreducible Numbers *)
-  Definition irred' p := p > 1 /\ forall n, Mod n p = 0 -> (n = 1) \/ (n = p).
+  Definition irred' p := 
+    p > 1 /\ forall n, Mod n p = 0 -> (n = 1) \/ (n = p).
 
-  Lemma irred_bounded p : (p > 1 /\ forall n, n < p -> Mod n p = 0 -> (n = 1) \/ (n = p) ) <-> irred' p.
+  Lemma irred_bounded p : 
+    (p > 1 /\ forall n, n < p -> Mod n p = 0 -> (n = 1) \/ (n = p) ) 
+    <-> irred' p.
   Proof.
     split.
     - intros [? H]. split. assumption.
@@ -210,8 +208,8 @@ Section PrimeDec.
     - unfold irred'. intuition.
   Qed.
 
-
-  Definition irred p := p > 1 /\ forall n, n < p -> Mod n p = 0 -> n = 1.
+  Definition irred p := 
+    p > 1 /\ forall n, n < p -> Mod n p = 0 -> n = 1.
 
   Goal forall p, irred p <-> irred' p.
   Proof.
@@ -242,7 +240,7 @@ Section PrimeDec.
     destruct H1, H2; tauto.
   Qed.
 
-  Lemma irred1 N :
+  Lemma dec_irred_factor' N :
     irred N + (N > 1 -> {x & x < N /\ Mod x N = 0 /\ x <> 1}).
   Proof.
     destruct (Dec_sigT_irred N) as [|H]; auto.
@@ -264,7 +262,7 @@ Section PrimeDec.
   Lemma dec_irred_factor N :
     irred N + (N > 1 -> {x & {y & 1 < x < N  /\ x*y = N }} ).
   Proof.
-    destruct (irred1 N) as [| H]; auto.
+    destruct (dec_irred_factor' N) as [| H]; auto.
     right. intros [x Hx]%H.
     destruct Hx as (?&[y Hy]%Mod_divides&?).
     exists x, y. nia.
@@ -348,7 +346,6 @@ Section PrimeDec.
       + apply Mod_le in H3. all: lia.
   Qed.
 
-
   Corollary Dec_sigT_prime :
     Dec_sigT (prime).
   Proof.
@@ -358,57 +355,58 @@ Section PrimeDec.
 End PrimeDec.
 
 
-
-
 Section PrimeInf.
-  Fixpoint faktorial n :=
+  Fixpoint factorial n :=
     match n with
     | 0 => 1
-    | S x => (faktorial x)*n
+    | S x => (factorial x)*n
     end.
 
-  Notation "x !" := (faktorial x) (at level 2).
+  Notation "x !" := (factorial x) (at level 2).
 
-  Fact fac1 : forall n, 0 < n!.
+  Fact factorial_positive n : 
+    0 < n!.
   Proof. induction n; cbn; lia. Qed.
 
-  Fact fac2 : forall n, 0 < n -> Mod n (n !) = 0.
+  Fact factorial_divisible_n n : 
+    0 < n -> Mod n (n !) = 0.
   Proof.
-    intros n H. destruct n; try lia.
+    intros H. destruct n; try lia.
     apply Mod_divides. exists (n !).
     reflexivity.
   Qed.
 
-  Lemma fac3 : forall x y, 0 < y <= x -> Mod y (x!) = 0.
+  Lemma factorial_divisible x y : 
+    0 < y <= x -> Mod y (x!) = 0.
   Proof.
-    intros x y H.
-    induction x in y, H |-*.
-    - lia.
-    - assert (y = S x \/ y <= x) as [<-|] by lia; cbn.
-      now apply fac2.
-      rewrite Mod_mult_hom, IHx.
-      apply Mod0_is_0. lia.
+    intros H.
+    induction x in y, H |-*. {lia. }
+    assert (y = S x \/ y <= x) as [<-|] by lia; cbn.
+    now apply factorial_divisible_n.
+    rewrite Mod_mult_hom, IHx.
+    apply Mod0_is_0. lia.
   Qed.
 
   (** There are infinitely many irreducible numbers. *)
-  Lemma infty_irred : forall N, { p & N < p /\ irred p}.
+  Lemma infty_irred : 
+    forall N, { p & N < p /\ irred p}.
   Proof.
     intros n.
     destruct (irred_factor (n! + 1)) as [k [[] ]].
-    specialize(fac1 n). lia.
+    specialize(factorial_positive n). lia.
     exists k. split.
     - rewrite Mod_add_hom in *.
       assert (n < k <-> ~ (k <= n)) as G by lia.
       apply G. intros ?.
       enough (1 = 0) by lia.
       rewrite <-H1 at 2.
-      rewrite fac3. 2: lia.
+      rewrite factorial_divisible. 2: lia.
       cbn; rewrite ModMod_is_Mod.
       symmetry. refine ( proj2 (Fac_eq _ 0 _ _)); lia.
     - unfold irred. tauto.
   Defined.
 
-  (** An injective function producing infinitely many irreducible numbers. *)
+  (** Based on the above, we can define an injective function producing infinitely many irreducible numbers. *)
   Fixpoint Irred n := match n with
                       | 0 => projT1 (infty_irred 0)
                       | S x => projT1 (infty_irred (Irred x))
@@ -432,7 +430,6 @@ Section PrimeInf.
       assert (x < y \/ y < x) as [G|G] by lia.
       all: specialize (H _ _ G); lia.
   Qed.
-
 
   Lemma inj_Irred : inj Irred.
   Proof.

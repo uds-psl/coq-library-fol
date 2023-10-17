@@ -1,4 +1,7 @@
 Module DN.
+
+(** This file contains some lemmas and derived tactics that are used to handle double negations during a proof. *)
+
 Definition ret_ {A : Prop} : A -> ~~A.                     tauto. Defined.
 Definition bind_ {A B : Prop} : ~~A -> (A -> ~~B) -> ~~B.  tauto. Defined.
 Definition remove_ {A B} : ~~A -> (A -> ~B) -> ~B.         tauto. Defined.

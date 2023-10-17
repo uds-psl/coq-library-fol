@@ -16,8 +16,6 @@ Notation "x ∣ y" := (exists k, x * k = y) (at level 50).
 Definition unary α := bounded 1 α.
 Definition binary α := bounded 2 α.
 
-Locate form.
-
 Section ChurchThesis.
 Existing Instance PA_preds_signature.
 Existing Instance PA_funcs_signature.
@@ -33,7 +31,7 @@ Instance ff : falsity_flag := falsity_on.
     nat -> nat is computable in a model of computation. In this case,
     the model of computaion is based on arithmetic: It represents
     functions by formulas in the language of PA in such a way that a
-    weak fragment (Q <<= PA) can prove the agreement of the formula
+    weak fragment (Q ⊆ PA) can prove the agreement of the formula
     with the function on every input.
  *)
 
@@ -45,6 +43,13 @@ Definition CT_Q := forall f : nat -> nat, exists φ, bounded 2 φ /\ Σ1 φ /\ r
     is only given potentially (i.e. behing a double negation).
  *)
 Definition WCT_Q := forall f : nat -> nat, ~~exists φ, bounded 2 φ /\ Σ1 φ /\ represents φ f.
+
+Lemma prime_div_relation :
+  CT_Q -> exists Π, bounded 2 Π /\ Σ1 Π /\
+    forall x, Q ⊢ ∀ Π[num x .: $0..] ↔ $0 == num (Irred x).
+Proof.
+  intros ct. apply ct.
+Qed.
 
 (** Strong Representability *)
 

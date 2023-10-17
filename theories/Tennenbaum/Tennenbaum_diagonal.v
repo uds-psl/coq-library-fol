@@ -199,13 +199,13 @@ Section Model.
     Dec p -> ~~ exists c, forall n, p n <-> div_pi n c.
   Proof. now intros ?%CT_WCT; apply Coding_Dec. Qed.
 
-  (*  We can now use the above coding lemma in combination with RT to
+  (**  We can now use the above coding lemma in combination with RT to
       give a diagonal argument which shows that enumerable and discrete
       PA models must potentially be standard. The double negation can
       actually also be eliminated, and this is done in Variants.v,
       where the needed lemmas are shown.
    *)
-  (*  We can still establish the result with the weaker
+  (**  We can still establish the result with the weaker
       assumption of WCT_Q.
    *)
   Theorem Tennenbaum_diagonal :

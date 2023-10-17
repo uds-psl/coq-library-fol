@@ -57,7 +57,15 @@ Proof. unfold Stable; firstorder. Qed.
 
 (** * Definitions in synthetic computability. *)
 
+(** The below definitions are chosen to be as convienient as possible for
+    synthetic computability proofs. They may in some cases differ from the definition that is stated in the paper, since these have been choosen
+    such that they are closest to intuition. 
+    Both definitions are however always equivalent, and the equivalence
+    proofs can be found further down in this file.
+*)
+
 Definition decider {X} p f := forall x : X, p x <-> f x = true.
+Definition dec (P : Prop) := {P} + {~P}.
 Definition Dec {X} p := inhabited(forall x : X, {p x} + {~p x}).
 Definition Dec_sigT {X} p := forall x : X, {p x} + {~p x}.
 Definition witnessing {X} (p : X -> Prop) := ex p -> sigT p.
@@ -141,10 +149,12 @@ Proof.
   constructor. intros x.
   destruct (Dec_P x); specialize (H x);
     (left; tauto) || right; tauto.
-Qed.
+Qed.  
+
 
 Lemma Witnessing_equiv X :
-  Witnessing X <=> forall (f : X -> bool), (exists x, f x = true) -> {x & f x = true}.
+  Witnessing X <=> 
+  forall (f : X -> bool), (exists x, f x = true) -> {x & f x = true}.
 Proof.
   split; intros H.
   - intros f. apply H.
@@ -156,13 +166,12 @@ Proof.
     + exists x. now apply Hf.
 Qed.
 
-Definition Witnessing_nat :
-  Witnessing nat.
+Fact Discrete_equiv {X} :
+  Discrete X <-> ex (@decider (X * X) (fun '(x, y) => x = y)).
 Proof.
-  intros p Dec_p H.
-  specialize (constructive_indefinite_ground_description_nat p Dec_p H).
-  intros [x Hx]. now exists x.
-Defined.
+  unfold Discrete. rewrite Dec_decider.
+  split; intros [f Hf]; exists f; intros [x y]; apply (Hf (x,y)).
+Qed.
 
 Fact Discrete_sum {X} :
   Discrete X <-> inhabited(forall x y : X, {x = y} + {~ x = y}).
@@ -170,6 +179,13 @@ Proof.
   split; intros [H]; constructor.
   - intros x y. destruct (H (x,y)); cbn in *; tauto.
   - intros [x y]; cbn. destruct (H x y); tauto.
+Qed.
+
+Fact Separated_equiv {X} :
+  Separated X <-> ex (@decider (X * X) (fun '(x, y) => x <> y)).
+Proof.
+  unfold Separated. rewrite Dec_decider.
+  split; intros [f Hf]; exists f; intros [x y]; apply (Hf (x,y)).
 Qed.
 
 Fact Separated_sum {X} :
@@ -195,6 +211,15 @@ Fact enumerable_equiv X :
   Enumerable X <-> enumerable (fun x : X => True).
 Proof.
   split; intros [g Hg]; exists g; firstorder.
+Qed.
+
+Fact enumerable_surjection {X} :
+  X -> Enumerable X -> exists f : nat -> X, surj f.
+Proof.
+  intros x0 [g Hg].
+  exists (fun n => match g n with Some x => x | None => x0 end).
+  intros x. specialize (Hg x) as [n Hn].
+  exists n. now rewrite Hn.
 Qed.
 
 Fact MP_Markov_nat :

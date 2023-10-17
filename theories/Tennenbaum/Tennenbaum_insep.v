@@ -1,6 +1,6 @@
 From FOL Require Import FullSyntax Arithmetics.
 From Undecidability.Shared Require Import ListAutomation.
-
+From Undecidability.Synthetic Require Import ListEnumerabilityFacts.
 From FOL.Tennenbaum Require Import MoreDecidabilityFacts DN_Utils Church Coding NumberUtils Formulas SyntheticInType Peano CantorPairing.
 From FOL.Incompleteness Require Import qdec sigma1 ctq.
 
@@ -43,18 +43,42 @@ Section Model.
   Definition Div_nat (d : D) := fun n => div_num n d.
   Definition div_pi n a :=  (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
 
-
   (** * Tennenbaum's Teorem via inseparable predicates *)
 
+  Lemma surj_form_ :
+    { Φ : nat -> form & surj Φ }.
+  Proof.
+    eapply surj_form_. 
+    4: apply enum_full_logic_quant. 3: apply enum_full_logic_sym.
+    3: exact falsity.
+    all: eapply enumerator__T_of_list.
+    1: apply enumerator_PA_funcs. 
+    1: apply enumerator_PA_preds.
+  Qed.
 
-  Context (surj_form_ : { Φ : nat -> form & surj Φ })
-          (enumerable_Q_prv :
-              forall Φ, enumerable (fun n : nat => Q ⊢I (Φ n))).
+  Lemma enumerable_Q_prv : 
+    forall Φ, enumerable (fun n : nat => Q ⊢I (Φ n)).
+  Proof.
+    intros Φ. unfold enumerable.
+      epose proof (enum_prv (enumerator__T_of_list enumerator_PA_funcs) (enumerator__T_of_list enumerator_PA_preds) PA_funcs_eq PA_preds_eq Qeq) as Henum.
+      apply list_enumerator_enumerator in Henum.
+      match type of Henum with (@enumerator _ ?H _) => pose H as fn end.
+      unfold enumerator in Henum. eexists
+      (fun k => match Cantor.of_nat k with (k1,k2) =>
+          match fn k1 with None => None
+              | Some k1' => if @dec_form PA_funcs_signature PA_preds_signature _ PA_funcs_eq PA_preds_eq _ _ falsity_on k1' (Φ k2) then Some k2 else None end end).
+      intros x; split.
+      * intros Hprv. apply Henum in Hprv. destruct Hprv as [n Hn]. exists (Cantor.to_nat (n,x)).
+        rewrite Cantor.cancel_of_to. unfold fn; rewrite Hn. destruct dec_form; congruence.
+      * intros [n Hn]. revert Hn. destruct (Cantor.of_nat n) as [k1 k2] eqn:Heq. destruct (fn k1) as [k1'|] eqn:Heq'; try congruence.
+        destruct (dec_form); try congruence. subst. injection 1. intros ->. apply Henum. unfold fn in Heq'. eexists k1. apply Heq'.
+  Qed.
 
   Definition Φ := projT1 surj_form_.
   Definition surj_form := projT2 (surj_form_).
   Definition A n := Q ⊢I ¬(Φ n)[(num n)..].
   Definition B n := Q ⊢I (Φ n)[(num n)..].
+
   (*  We need to work with the intuitionistic deduction system ⊢I here, since we want to make use of soundness to prove the next lemma. *)
   Lemma Disjoint_AB : forall n, ~(A n /\ B n).
   Proof.
@@ -138,7 +162,6 @@ Section Model.
     tauto.
   Qed.
 
-
   Lemma WCT_potentiall_Insep_form :
     @WCT_Q intu -> ~~ Insep_form.
   Proof.
@@ -218,6 +241,18 @@ Section Model.
     H : _ ⊨ ?a , B : bounded _ ?a |- _ ⊨ ?a 
         => eapply (bound_ext _ B); [|apply H]
     end.
+
+  Lemma Delta1_absoluteness φ :
+    Qdec φ -> bounded 0 φ -> interp_nat ⊨= φ -> ⊨ φ.
+  Proof.
+    intros Hdec H0 Hsat ρ. 
+    apply soundness with (A:=Q).
+    - apply Σ1_completeness_intu.
+      { now constructor. }
+      { eapply bounded_up; eauto. }
+      apply Hsat.
+    - now apply sat_Q_axioms.
+  Qed.
 
   (** ** Tennenbaum's Theorem via Inseparability *)
   Theorem Tennenbaum_inseparable :

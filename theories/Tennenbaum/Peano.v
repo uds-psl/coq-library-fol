@@ -38,15 +38,12 @@ Section Models.
   Existing Instance I | 100.
   Existing Instance I' | 0.
 
-
   Notation "x 'i=' y"  := (@i_atom PA_funcs_signature PA_preds_signature D I Eq ([x ; y])) (at level 40).
   Notation "'iσ' x" := (@i_func PA_funcs_signature PA_preds_signature D I Succ ([x])) (at level 37).
   Notation "x 'i⊕' y" := (@i_func PA_funcs_signature PA_preds_signature D I Plus ([x ; y])) (at level 39).
   Notation "x 'i⊗' y" := (@i_func PA_funcs_signature PA_preds_signature D I Mult ([x ; y])) (at level 38).
   Notation "'i0'" := (i_func (Σ_funcs:=PA_funcs_signature) (f:=Zero) []) (at level 2) : PA_Notation.
   Notation "x 'i⧀' y" := (exists d : D, y = iσ (x i⊕ d) ) (at level 40).
-
-
 
   Definition theory := form -> Prop.
   Definition in_theory (T : theory) phi := T phi.
@@ -56,6 +53,8 @@ Section Models.
 
   Definition PAsat phi := exists A : list _, A ⊏ PAeq /\ forall ρ, (forall α, List.In α A -> ρ ⊨ α) -> ρ ⊨ phi.
 
+  (** We recursively define a function that maps any natural number
+      to a standard number in the model. *)
   Fixpoint inu n :=
     match n with
     | 0 => i0
@@ -94,7 +93,6 @@ Section Models.
     cbn. now rewrite num_subst, eval_num.
   Qed.
 
-
   Lemma eq_sym : 
     forall ρ a b, ρ ⊨ (a == b) -> ρ ⊨ (b == a).
   Proof. intros. cbn in *. now cbn in *. Qed.
@@ -111,7 +109,8 @@ Section Models.
 
     Context {axioms : forall ax, PAeq ax -> ⊨ ax}.
 
-    (* provide all axioms in a more useful form *)
+    (** We use the assumed axioms of the model and derive Coq statements
+        that allow us to use them more directly. *)
 
     Lemma zero_succ x :
       i0 = iσ x -> False.
@@ -219,6 +218,9 @@ Section Models.
       Qed.
 
     End Induction.
+
+    (** We will now prove some standard results about arithmetic, like
+    case distinction on numbers, homomorphism properties of the embedding [inu], recursion of addition and multiplication on the right, distribution and commutativity laws, and some results about inequalities.  *)
 
     Lemma zero_or_succ :
       forall d, d = i0 \/ exists x, d = iσ x.
@@ -366,7 +368,6 @@ Section Models.
         intros y. now rewrite mult_rec, mult_rec_r, IH.
       - now specialize (H n (fun _ => i0) d); cbn in *.
     Qed.
-
 
     Lemma distributive x y z :
       (x i⊕ y) i⊗ z = (x i⊗ z) i⊕ (y i⊗ z).
@@ -678,7 +679,7 @@ Notation "'PA⊨' phi" := (forall D (I : interp D) ρ, (forall ψ : form, PAeq �
 
 (** *** Standard Model of PA *)
 
-Section StandartModel.
+Section StandardModel.
 
   Notation Q := Qeq.
 
@@ -697,7 +698,7 @@ Section StandartModel.
   Instance interp_nat : interp nat | 0 := extensional_model interp_nat_noeq.
 
 
-  (* We now show that there is a model in which all of PA's axioms hold. *)
+  (** We show that [Nat] gives a model in which all of PA's axioms hold. *)
   Lemma PA_std_axioms :
     forall ρ ax, PAeq ax -> sat interp_nat ρ ax.
   Proof.
@@ -720,7 +721,6 @@ Section StandartModel.
     intros []; [left|right; eexists]; reflexivity.
   Qed.
 
-
   Fact inu_nat_id :
     forall n, @inu nat interp_nat n = n.
   Proof.
@@ -728,7 +728,7 @@ Section StandartModel.
   Qed.
 
 
-End StandartModel.
+End StandardModel.
 
 
 
@@ -741,7 +741,6 @@ Section ND.
   Variable p : peirce.
 
   Definition exist_times n (phi : form) := iter (fun ψ => ∃ ψ) n phi.
-
 
 
   Lemma up_decompose sigma phi :
@@ -791,6 +790,12 @@ Notation "v '∗' ρ" := (join v ρ) (at level 20).
 
 
 Section Q_prv.
+
+  (** In this section, we establish some arithmetic results deductively in Q.
+  In particular, we show that whenever we can do a computation on natural
+  numbers in [Nat], then we can verify the same computation deductively in Q.
+  Lastly we show that equality of closed terms can be decided deductively by Q. *)
+
 
   Context {p : peirce}(Gamma : list form).
   
@@ -909,8 +914,6 @@ Section Q_prv.
     - repeat solve_bounds.
     - assumption.
   Qed.
-
-
 
   Lemma Add_rec x y :
     Gamma ⊢ ( (σ x) ⊕ y == σ (x ⊕ y) ).
@@ -1084,7 +1087,8 @@ Section Q_prv.
   (** Provability of equality for closed terms is decidable. *)
 
   Lemma term_eq_dec s t :
-    bounded_t 0 s -> bounded_t 0 t -> { Gamma ⊢ s == t } + { Gamma ⊢ ¬ s == t }.
+    bounded_t 0 s -> bounded_t 0 t -> 
+    { Gamma ⊢ s == t } + { Gamma ⊢ ¬ s == t }.
   Proof.
     intros Hs Ht.
     destruct (closed_term_is_num Hs) as [n Hn], (closed_term_is_num Ht) as [m Hm].
@@ -1138,14 +1142,6 @@ Section Q_prv.
     now unfold sless; cbn; asimpl.
   Qed.
 
-  Lemma Faster3 :
-    forall A, Qeq <<= A ++ map (subst_form ↑) Qeq.
-  Proof.
-    intros A; induction A; cbn.
-    - firstorder.
-    - right. now apply IHA.
-  Qed.
-
   Lemma num_nlt x :
     forall y, ~ (x < y) -> Qeq ⊢ ¬ num x ⧀ num y.
   Proof.
@@ -1179,7 +1175,9 @@ Section Q_prv.
 
 
   Lemma term_lt_dec s t :
-    map (subst_form ↑) Gamma = Gamma -> bounded_t 0 s -> bounded_t 0 t -> { Gamma ⊢ s ⧀ t } + { Gamma ⊢ ¬ s ⧀ t }.
+    map (subst_form ↑) Gamma = Gamma -> bounded_t 0 s -> 
+    bounded_t 0 t -> 
+    { Gamma ⊢ s ⧀ t } + { Gamma ⊢ ¬ s ⧀ t }.
   Proof.
     intros HG Hs Ht.
     destruct (closed_term_is_num Hs) as [n Hn], (closed_term_is_num Ht) as [m Hm].
@@ -1244,6 +1242,9 @@ Qed.
 Notation "⊨ phi" := (forall ρ, ρ ⊨ phi) (at level 21).
 
 Section stdModel.
+
+  (** We show here, that the property of being a standard model is equivalent to
+  being isomorphic to [Nat].  *)
 
   Variable D : Type.
   Variable I : interp D.

@@ -28,9 +28,6 @@ Section Model.
 
   Variable axioms : forall ax, PAeq ax -> forall ρ, sat (Peano.I' I) ρ ax.
 
-  Notation "N⊨ phi" := (forall rho, @sat _ _ nat (extensional_model interp_nat) _ rho phi) (at level 40).
-
-
   Notation "x 'i=' y"  := (@i_atom PA_funcs_signature PA_preds_signature D I Eq ([x ; y])) (at level 40).
   Notation "'iσ' x" := (@i_func PA_funcs_signature PA_preds_signature D I Succ ([x])) (at level 37).
   Notation "x 'i⊕' y" := (@i_func PA_funcs_signature PA_preds_signature D I Plus ([x ; y])) (at level 39).
@@ -42,7 +39,7 @@ Section Model.
 Section Facts.
 
 
-(*  We show some facts about standard numbers. Namely:
+(**  We show some facts about standard numbers. Namely:
     - If x + y is standard, then so are x and y.
     - If x * y ≠ 0 is standard, then so are x and y.
     - The embedding of nat into a PA model preserves the
@@ -51,7 +48,7 @@ Section Facts.
  *)
 
 
-Lemma std_add x y :
+Lemma inv_std_add x y :
   std (x i⊕ y) -> std x /\ std y.
 Proof.
   intros [n Hn].
@@ -69,16 +66,16 @@ Proof.
       all: apply axioms.
 Qed.
 
-Lemma std_mult x y m :
+Lemma inv_std_mult_right x y m :
   (iσ x) i⊗ y = inu m -> std y.
 Proof.
   cbn. rewrite mult_rec. intros E.
-  assert (std (y i⊕ x i⊗ y)) as H%std_add.
+  assert (std (y i⊕ x i⊗ y)) as H%inv_std_add.
   exists m; auto. tauto.
   apply axioms.
 Qed.
 
-Lemma std_mult' x y m :
+Lemma inv_std_mult x y m :
   x i⊗ y = inu (S m) -> std x /\ std y.
 Proof.
   destruct (@zero_or_succ D I axioms x) as [-> | [e ->]],
@@ -89,10 +86,10 @@ Proof.
   + rewrite mult_zero_r; auto.
     intros []%zero_succ; auto.
   + intros E. split.
-    * eapply std_mult.
+    * eapply inv_std_mult_right.
       rewrite mult_comm; auto.
       apply E.
-    * eapply std_mult, E.
+    * eapply inv_std_mult_right, E.
 Qed.
 
 Lemma lt_equiv x y :
@@ -109,7 +106,7 @@ Proof.
     + intros [k <-]%H. exists (inu k); cbn.
       now rewrite inu_add_hom.
     + intros [k Hk].
-      assert (std (inu (S x) i⊕ k)) as [_ [l Hl]]%std_add.
+      assert (std (inu (S x) i⊕ k)) as [_ [l Hl]]%inv_std_add.
       * exists y. cbn. now rewrite add_rec.
       * rewrite <-Hl in *.
         apply H. exists l.
@@ -214,8 +211,7 @@ Section Overspill.
     now apply Overspill_DN'.
   Qed.
 
-
-  Lemma Overspill_DNE :
+  Lemma DNE_Overspill :
     DNE ->
     (forall n rho, ((inu n).:rho) ⊨ alpha) ->
     exists e, ~ std e /\ (forall rho, (e.:rho) ⊨ alpha).
@@ -239,12 +235,10 @@ Section Coding.
   Variable Hψ :
     binary ψ /\ (forall x, Q ⊢I ∀ ψ[up (num x)..] ↔ $0 == num (Irred x) ).
 
-
   Definition div e d := exists k : D, e i⊗ k = d.
   Definition div_num n (d : D) := exists e, inu n i⊗ e = d.
   Definition Div_nat (d : D) := fun n => div_num n d.
   Definition div_pi n a := (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
-
 
   Lemma ψ_repr x d rho :
     (d .: inu x .: rho) ⊨ ψ <-> d = inu (Irred x).
@@ -258,7 +252,6 @@ Section Coding.
     now apply H, sat_Q_axioms.
   Qed.
 
-
   Lemma ψ_equiv n a : div_pi n a <-> div_num (Irred n) a.
   Proof.
     unfold div_pi. cbn. split.
@@ -266,51 +259,71 @@ Section Coding.
     - intros. exists (inu (Irred n)). rewrite ψ_repr. now split.
   Qed.
 
-
   (** ** Coding in the standard model *)
-  (** This shows that we can potentially get a code representing any
+  (** We show that we can potentially get a code representing any
       predicate on natural numbers up to some bound.
    *)
-  Lemma Coding_nat A n :
-    ~ ~ exists c, forall u,
-      (u < n -> A u <-> Mod (Irred u) c = 0) /\
+  Lemma Coding_nat' p n :
+    (forall x, x < n -> p x \/ ~ p x) ->
+    exists c, forall u,
+      (u < n -> p u <-> Mod (Irred u) c = 0) /\
       (Mod (Irred u) c = 0 -> u < n).
   Proof.
-    induction n.
-    - apply DN. exists 1. intros u. split. lia.
+    intros H. induction n.
+    - exists 1. intros u. split. lia.
       intros [k ]%Mod_divides.
       assert (Irred u > 1). apply irred_Irred.
       destruct k; lia.
-    - assert (~ ~ (A n \/ ~ A n)) as Dec_An by tauto.
-      apply (DN_chaining Dec_An), (DN_chaining IHn), DN.
-      clear IHn Dec_An.
-      intros [a Ha] [A_n | NA_n].
+    - destruct IHn as [a Ha].
+      { intros ??; apply H; lia. }
+      assert (p n \/ ~ p n) as [p_n | Np_n] by (apply H; lia).
       + exists (a * Irred n). intros u.
         assert (u < S n <-> u < n \/ u = n) as -> by lia.
         split.
         ++ intros [| ->]. split.
-           +++ intros A_u%Ha.
-               rewrite Mod_mult_hom, A_u.
-               now rewrite Mod0_is_0.
-               apply H.
+           +++ intros p_u%Ha.
+               rewrite Mod_mult_hom, p_u.
+               { now rewrite Mod0_is_0. }
+               auto.
            +++ intros [|H']%irred_integral_domain.
                apply Ha; assumption.
                apply irred_Mod_eq, inj_Irred in H'. lia.
                all: apply irred_Irred.
            +++ intuition. apply Mod_divides.
                now exists a.
-        ++ intros [H |H]%irred_integral_domain.
-           apply Ha in H. auto.
-           apply irred_Mod_eq, inj_Irred in H. lia.
+        ++ intros [H'|H']%irred_integral_domain.
+           apply Ha in H'. auto.
+           apply irred_Mod_eq, inj_Irred in H'. lia.
            all: apply irred_Irred.
       + exists a. intros u.
         assert (u < S n <-> u < n \/ u = n) as -> by lia.
         split.
         ++ intros Hu. destruct Hu as [| ->].
            now apply Ha.
-           split. now intros ?%NA_n.
-           intros H%Ha. lia.
-        ++ intros H%Ha. tauto.
+           split. now intros ?%Np_n.
+           intros H'%Ha. lia.
+        ++ intros H'%Ha. tauto.
+  Qed.
+  
+  Lemma DN_bounded_lem p n :
+    ~ ~ (forall x, x < n -> p x \/ ~ p x).
+  Proof.
+    induction n as [|n IH].
+    { DN.ret. lia. }
+    DN.lem (p n). intros Hn.
+    DN.bind IH. DN.ret. intros x Hx.
+    assert (x < n \/ x = n) as [| ->] by lia.
+    all: auto.
+  Qed.
+
+  Lemma Coding_nat p n :
+    ~ ~ exists c, forall u,
+      (u < n -> p u <-> Mod (Irred u) c = 0) /\
+      (Mod (Irred u) c = 0 -> u < n).
+  Proof.
+    eapply DN.bind_.
+    - apply DN_bounded_lem.
+    - intro. apply DN.ret_, (@Coding_nat' p n); eauto.
   Qed.
 
 
@@ -323,7 +336,7 @@ Section Coding.
         change i0 with (inu 0) in Hk.
         cbn. now apply inu_inj in Hk.
         apply axioms.
-      + cbn in *. destruct (std_mult Hk) as [l <-]. unfold I' in Hk.
+      + cbn in *. destruct (inv_std_mult_right Hk) as [l <-]. unfold I' in Hk.
         rewrite <- inu_I in Hk.
         apply Mod_divides. exists l.
         change (iσ inu x) with (inu (S x)) in Hk.
@@ -414,7 +427,7 @@ Section notStd.
 
   (** ** Coding in a non-standard model *)
 
-  (*  Above we have established coding results for arbitrary PA models.
+  (** Above we have established coding results for arbitrary PA models.
       We will now focus on the special case where the model is not
       standard. Using Overspill we can eliminate the bound on the
       coding; in a non-standard model, we can find elements which code
