@@ -58,7 +58,7 @@ Existing Instance PA_funcs_signature.
     forall α, unary α ->
       PAeq ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
 
-  (** Lastly, we will assume the existence of a pair of unary inseparable 
+  (** We show the existence of a pair of unary inseparable 
     formulas which are furthermore disjoint on the object level. This
     is quite the strong disjointness property, and critically enables
     the fairly short proofs that will follow.
