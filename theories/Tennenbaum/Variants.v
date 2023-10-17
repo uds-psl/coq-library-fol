@@ -1,11 +1,13 @@
-From FOL Require Import FullSyntax Arithmetics Theories.
+From FOL Require Import FullSyntax Arithmetics.
 From Undecidability.Shared Require Import ListAutomation.
 
 From FOL.Tennenbaum Require Import MoreDecidabilityFacts Church Coding NumberUtils Formulas SyntheticInType Peano Tennenbaum_diagonal Tennenbaum_insep HA_insep.
 From FOL.Incompleteness Require Import qdec sigma1 ctq.
+From FOL.Proofmode Require Import Theories ProofMode.
 
 
 Require Import Lia.
+Require Import String List.
 Import Vector.VectorNotations.
 
 
@@ -61,15 +63,82 @@ Existing Instance PA_funcs_signature.
     is quite the strong disjointness property, and critically enables
     the fairly short proofs that will follow.
    *)
-  Definition def_HA_Insep α β :=
-    unary α /\ unary β /\
-      ( PAeq ⊢TI ¬ ∃ α ∧ β ) /\
-      (forall G, Dec G ->
-        (forall n, Q ⊢I α[(num n)..] ->   G n) ->
-        (forall n, Q ⊢I β[(num n)..] -> ~ G n) ->
-        False).
+  Section HA_insep.
 
-  Hypothesis HA_Insep : exists α β, def_HA_Insep α β.
+    Definition def_HA_Insep α β :=
+        unary α /\ unary β /\
+        ( PAeq ⊢TI ¬ ∃ α ∧ β ) /\
+        (forall G, Dec G ->
+          (forall n, Q ⊢I α[(num n)..] ->   G n) ->
+          (forall n, Q ⊢I β[(num n)..] -> ~ G n) ->
+          False).
+
+    Lemma invariant_subst_list ρ Γ :
+      (forall α : form, α el Γ -> bounded 0 α) ->
+      map (subst_form ρ) Γ = Γ.
+    Proof.
+      induction Γ as [|α Γ IH]; cbn; intros H; [reflexivity|].
+      f_equal. 
+      2: { apply IH. intros a Ha. apply H; auto. }
+      apply bounded_0_subst.
+      now apply H.
+    Qed.
+
+    Lemma HA_Insep :
+      @CT_Q intu -> exists α β, def_HA_Insep α β.
+    Proof.
+      intros ct.
+      eapply CT_Insep_form in ct; eauto.
+      destruct ct as (α' & β' & Hα1' & Hα2' & Hβ1' & Hβ2' & H4 & H).
+      unfold def_HA_Insep.
+      destruct (Σ1_compression Hα1' Hα2') as (α & Hα1 & Hα2 & Hα).
+      destruct (Σ1_compression Hβ1' Hβ2') as (β & Hβ1 & Hβ2 & Hβ).
+      exists (rosser α β), (rosser β α).
+      repeat split.
+      - apply unary_rosser; auto.
+      - apply unary_rosser; auto.
+      - apply PA_extends_Q with [ax_induction (∀ ((¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0)) → ⊥)]%list.
+        2: {  intros a Ha. repeat try (destruct Ha as [<-|Ha]).
+              + apply PAeq_induction.
+              + destruct Ha. }
+        fintros "H". eapply ExE. ctx.
+        remember ([ax_induction (∀ ¬ (¬ $0 ⧀= $1) ∧ (¬ $1 ⧀= $0))] ++ Q)%list as Γ.
+        cbn -[map]. cbn -[subst_form].
+        eapply IE. 2: ctx.
+        assert (map (subst_form ↑) Γ = Γ) as ->.
+        { apply invariant_subst_list. intros a Ha.
+          rewrite HeqΓ in Ha.
+          repeat try (destruct Ha as [<-|Ha]); try destruct Ha.
+          all: solve_bounds. }
+        specialize (@curry_to_uncurry intu) as HH.
+        eapply Weak with Γ. 
+        2: now do 2 right.
+        fapply HH.
+        rewrite HeqΓ. unfold Q.
+        apply rosser_disj'; auto.
+      - intros G HG H1 H2.
+        apply (H G HG).
+        + intros n Hn. apply H1. apply rosser_inherit; auto.
+          * intros x Ha Hb. apply (H4 x).
+            split.
+            ** eapply equiv_subst. 3: apply Ha. auto.
+              fsplit; fintros; fapply Hα; apply Ctx; now left.
+            ** eapply equiv_subst. 3: apply Hb. auto.
+              fsplit; fintros; fapply Hβ; apply Ctx; now left.
+          * eapply equiv_subst. 3: apply Hn. auto.
+            fsplit; fintros; fapply Hα; apply Ctx; now left.
+        + intros n Hn. apply H2. apply rosser_inherit; auto.
+        * intros x Ha Hb. apply (H4 x).
+          split.
+          ** eapply equiv_subst. 3: apply Hb. auto.
+            fsplit; fintros; fapply Hα; apply Ctx; now left.
+          ** eapply equiv_subst. 3: apply Ha. auto.
+            fsplit; fintros; fapply Hβ; apply Ctx; now left.
+        * eapply equiv_subst. 3: apply Hn. auto.
+          fsplit; fintros; fapply Hβ; apply Ctx; now left.
+    Qed.
+
+  End HA_insep.
 
   Definition Div_nat (d : D) := fun n => @Coding.div_num D I n d.
   Definition div_pi := (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
@@ -117,10 +186,10 @@ Existing Instance PA_funcs_signature.
 
   (** * Makholms Proof of Tennenbaum's Theorem *)
   Theorem Makholm :
-    nonStd D -> ~~ exists d, ~ Dec(Div_nat d).
+    @CT_Q intu -> nonStd D -> ~~ exists d, ~ Dec(Div_nat d).
   Proof.
-    intros [e nstd_e].
-    destruct HA_Insep as (α & β & Hαβ).
+    intros ct [e nstd_e].
+    destruct (HA_Insep ct) as (α & β & Hαβ).
     refine (let Ha1 := proj1 Hαβ in
             let undec_α := HA_Insep_undec Hαβ in _ ).
     specialize (obj_Coding Ha1) as [Γ [HΓ1 HΓ2%soundness]].
@@ -250,10 +319,10 @@ Section McCarty.
   Qed.
 
   Lemma UC_no_nonStd :
-    UC nat bool -> ~ nonStd D.
+    @CT_Q intu -> UC nat bool -> ~ nonStd D.
   Proof.
-    intros uc [e He].
-    destruct HA_Insep as (α & β & Hαβ).
+    intros ct uc [e He].
+    destruct (HA_Insep ct) as (α & β & Hαβ).
     refine (_ (HA_Insep_undec Hαβ)).
     eapply UC_unary_DN_Dec; eauto. apply Hαβ.
   Qed.
@@ -268,14 +337,14 @@ Section McCarty.
   Qed.
 
   Theorem McCarty :
-    (forall X, UC X bool) -> MP -> stdModel D.
+    @CT_Q intu -> (forall X, UC X bool) -> MP -> stdModel D.
   Proof.
-    intros uc mp.
+    intros ct uc mp.
     specialize (UC_Discrete uc) as HD. 
     unfold stdModel.
     apply Stable_neg_exists_neg__forall; auto.
     - now apply MP_Discrete_stable_std.
-    - apply (UC_no_nonStd (uc _)).
+    - apply (UC_no_nonStd ct (uc _)).
   Qed.
 
 End McCarty.

@@ -27,7 +27,7 @@ Defined.
 
 
 
-(** ** PA Models *)
+(** * PA Models *)
 
 Section Models.
 

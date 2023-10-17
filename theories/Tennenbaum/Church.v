@@ -164,53 +164,5 @@ Proof.
 Qed.
 
 
-Lemma WCT_WRTw :
-  WCT_Q -> WRT_weak.
-Proof.
-  (* intros wct p [f Hf]%enumerable_nat.
-  apply (DN_chaining (wct f)), DN.
-  intros (ϕ & b2 & s1 & H).
-  pose (Φ := ϕ[up (σ $1)..] ).
-  exists Φ; split. 2: split.
-  - unfold Φ. eapply subst_bound; eauto.
-    intros [|[|[]]] ?; try lia; repeat solve_bounds.
-  - constructor. now apply delta1_subst.
-  - intros x. rewrite Hf. split.
-    + intros [n Hn]. symmetry in Hn.
-      apply sigma1_ternary_complete.
-      { unfold Φ. eapply subst_bound; eauto.
-        intros [|[|[]]] ?; try lia; repeat solve_bounds. }
-      {unfold Φ. now apply delta1_subst. }
-      exists n. specialize (H n).
-      apply soundness in H.
-      unshelve refine (let H := (H nat (extensional_model interp_nat) (fun _ => 0)) _ in _ ).
-      {apply Q_std_axioms. }
-      cbn in H. specialize (H (S x)) as [_ H2].
-      rewrite eval_num, inu_nat_id in *.
-      apply H2 in Hn. destruct Hn as [d Hd].
-      exists d.
-      unfold Φ. rewrite !sat_comp in *.
-      eapply bound_ext with (N:=3).
-      apply b2. 2: apply Hd.
-      intros [|[|[]]]; cbn; rewrite ?num_subst, ?eval_num, ?inu_nat_id in *.
-      all: try lia; reflexivity.
-    + intros HQ%soundness. specialize (HQ nat (extensional_model interp_nat) (fun _ => 0)). cbn in HQ.
-      destruct HQ as [n [d Hnd]].
-      {apply Q_std_axioms. }
-      exists n. specialize (H n).
-      apply soundness in H.
-      unshelve refine (let H := (H nat (extensional_model interp_nat) (fun _ => 0)) _ in _ ).
-      apply Q_std_axioms.
-      cbn in H. specialize (H (S x)) as [H1 _].
-      rewrite eval_num, inu_nat_id in *.
-      symmetry. apply H1. exists d.
-      rewrite !sat_comp in Hnd.
-      unfold Φ in Hnd. rewrite sat_comp in *.
-      eapply bound_ext.
-      apply b2. 2: apply Hnd.
-      intros [|[|[]]]; cbn; rewrite ?num_subst, ?eval_num, ?inu_nat_id in *.
-      all: try lia; reflexivity. *)
-Abort.
-
 
 End ChurchThesis.

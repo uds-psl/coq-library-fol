@@ -41,6 +41,12 @@ Section prv_utils.
 
   Context {peirce: peirce}.
 
+  Fact prv_equiv Γ α β :
+    Γ ⊢ α ↔ β -> Γ ⊢ α <-> Γ ⊢ β.
+  Proof.
+    intros Heq. split; intros H; fapply Heq; fapply H.
+  Qed.
+
   Fact curry_to_uncurry ϕ ψ ρ Γ :
     Γ ⊢ ((ϕ ∧ ψ) → ρ) ↔ (ϕ → (ψ → ρ)).
   Proof.
@@ -221,7 +227,6 @@ Section Rosser.
     eapply PA_extends_Q; [apply rosser_disj'|].
     intros ax [<-|[]]. apply PAeq_induction.
   Qed.
-  
 
 End Rosser.
 
@@ -235,10 +240,7 @@ Section HA_insep.
           (Qdec_α: Qdec α)  (Qdec_β: Qdec β)
           (HA2: bounded 2 α)(HB2: bounded 2 β).
 
-  Definition α' := ∃ α.
-  Definition β' := ∃ β.
-
-  Context (Disj: forall n, Qeq ⊢ α'[(num n)..] -> Qeq ⊢ β'[(num n)..] -> False).
+  Context (Disj: forall n, Qeq ⊢ (∃ α)[(num n)..] -> Qeq ⊢ (∃ β)[(num n)..] -> False).
 
   Lemma rosser_inherit n :
     Qeq ⊢ (∃ α)[(num n)..] -> Qeq ⊢ (rosser α β)[(num n)..].
@@ -250,7 +252,7 @@ Section HA_insep.
     fexists (num w). fsplit; auto.
     apply Σ1_completeness. 1, 2: shelve.
     intros ρ H. apply (@Disj n).
-    { unfold α'. fexists (num w). apply Aw. }
+    { fexists (num w). apply Aw. }
     destruct H as [v [_ Hv]]. cbn in Hv.
     apply Σ1_completeness. 1, 2: shelve.
     intros ρ'. exists v.
@@ -274,9 +276,86 @@ Section HA_insep.
         intros [|[]]; cbn; try lia; intros _. 
         + solve_bounds. 
         + rewrite !num_subst. apply num_bound. }
-    { unfold β'. do 2 constructor. now apply Qdec_subst. }
+    { do 2 constructor. now apply Qdec_subst. }
     { eapply subst_bounded_max with (n:=1).
       - intros []; try lia. intros _. apply num_bound.
       - now constructor. }
   Qed.
+
 End HA_insep.
+
+(* From FOL.Tennenbaum Require Import Formulas SyntheticInType Peano Tennenbaum_insep.
+From FOL.Incompleteness Require Import sigma1.
+Section HA_insep.
+
+  Definition HA_Insep :=
+    exists (α β : form), 
+      unary α /\ unary β /\
+      ( PAeq ⊢TI ¬ ∃ α ∧ β ) /\
+      (forall G, Dec G ->
+        (forall n, Q ⊢I α[(num n)..] ->   G n) ->
+        (forall n, Q ⊢I β[(num n)..] -> ~ G n) ->
+        False).
+
+  Lemma invariant_subst_list ρ Γ :
+    (forall α : form, α el Γ -> bounded 0 α) ->
+    map (subst_form ρ) Γ = Γ.
+  Proof.
+    induction Γ as [|α Γ IH]; cbn; intros H; [reflexivity|].
+    f_equal. 2: apply IH; firstorder.
+    apply bounded_0_subst.
+    now apply H.
+  Qed.
+
+  Lemma Insep_form_HA_Insep :
+    Insep_form -> HA_Insep.
+  Proof.
+    intros (α' & β' & Hα1' & Hα2' & Hβ1' & Hβ2' & H4 & H).
+    unfold HA_Insep.
+    destruct (Σ1_compression Hα1' Hα2') as (α & Hα1 & Hα2 & Hα).
+    destruct (Σ1_compression Hβ1' Hβ2') as (β & Hβ1 & Hβ2 & Hβ).
+    exists (rosser α β), (rosser β α).
+    repeat split.
+    - apply unary_rosser; auto.
+    - apply unary_rosser; auto.
+    - apply PA_extends_Q with [ax_induction (∀ ((¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0)) → ⊥)].
+      2: {  intros a Ha. repeat try (destruct Ha as [<-|Ha]).
+            + apply PAeq_induction.
+            + firstorder. }
+      fintros "H". eapply ExE. ctx.
+      remember ([ax_induction (∀ ¬ (¬ $0 ⧀= $1) ∧ (¬ $1 ⧀= $0))] ++ Q)%list as Γ.
+      cbn -[map]. cbn -[subst_form].
+      eapply IE. 2: ctx.
+      assert (map (subst_form ↑) Γ = Γ) as ->.
+      { apply invariant_subst_list. intros a Ha.
+        rewrite HeqΓ in Ha.
+        repeat try (destruct Ha as [<-|Ha]); try destruct Ha.
+        all: solve_bounds. }
+      specialize (@curry_to_uncurry intu) as HH.
+      eapply Weak with Γ. 2: firstorder.
+      fapply HH.
+      rewrite HeqΓ. unfold Q.
+      apply rosser_disj'; auto.
+    - intros G HG H1 H2.
+      apply (H G HG).
+      + intros n Hn. apply H1. apply rosser_inherit; auto.
+        * intros x Ha Hb. apply (H4 x).
+          split.
+          ** eapply equiv_subst. 3: apply Ha. auto.
+             fsplit; fintros; fapply Hα; ctx.
+          ** eapply equiv_subst. 3: apply Hb. auto.
+            fsplit; fintros; fapply Hβ; ctx.
+        * eapply equiv_subst. 3: apply Hn. auto.
+          fsplit; fintros; fapply Hα; ctx.
+      + intros n Hn. apply H2. apply rosser_inherit; auto.
+      * intros x Ha Hb. apply (H4 x).
+        split.
+        ** eapply equiv_subst. 3: apply Hb. auto.
+           fsplit; fintros; fapply Hα; ctx.
+        ** eapply equiv_subst. 3: apply Ha. auto.
+          fsplit; fintros; fapply Hβ; ctx.
+      * eapply equiv_subst. 3: apply Hn. auto.
+        fsplit; fintros; fapply Hβ; ctx.
+  Qed.
+
+End HA_insep. *)
