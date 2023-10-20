@@ -1,7 +1,7 @@
 -docroot .
 
 -arg -w -arg -notation-overridden
-COQDOCFLAGS = "--charset utf-8 -s --with-header ../website/resources/header.html --with-footer ../website/resources/footer.html --index indexpage --external https://hermesmarc.github.io/coq-library-fol/website/undec Undecidability"
+COQDOCFLAGS = "--charset utf-8 -s --with-header ../website/resources/header.html --with-footer ../website/resources/footer.html --index indexpage --external https://uds-psl.github.io/coq-library-fol/tennenbaum/undec Undecidability"
 
 -Q . FOL
 
