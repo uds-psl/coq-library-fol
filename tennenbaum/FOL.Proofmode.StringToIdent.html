@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="../">Project Page</a>
+      <a href="./indexpage.html"> Index </a>
+      <a href="./toc.html"> Table of Contents </a>
+    </span>
+</div>
+    <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="main">
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">All</span>.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">qUnit</span> := <a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="unitFunc" class="idref" href="#unitFunc"><span class="id" title="definition">unitFunc</span></a> <a id="k:1" class="idref" href="#k:1"><span class="id" title="binder">k</span></a> := <span class="id" title="constructor">tLambda</span> {| <span class="id" title="projection">binder_name</span> := <span class="id" title="constructor">nNamed</span> (<span class="id" title="definition">String.of_string</span> <a class="idref" href="FOL.Proofmode.StringToIdent.html#k:1"><span class="id" title="variable">k</span></a>); <span class="id" title="projection">binder_relevance</span> := <span class="id" title="constructor">Relevant</span> |} <a class="idref" href="FOL.Proofmode.StringToIdent.html#qUnit"><span class="id" title="definition">qUnit</span></a> (<span class="id" title="constructor">tRel</span> 0).<br/>
+
+<br/>
+<span class="id" title="keyword">Ltac</span> <span class="id" title="var">coq_string_to_ident_lambda'</span> <span class="id" title="var">s</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">k</span> <span class="id" title="var">v</span> := <span class="id" title="tactic">exact</span> <span class="id" title="var">v</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">run_template_program</span> (<span class="id" title="constructor">tmUnquoteTyped</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">-&gt;</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a>) (<a class="idref" href="FOL.Proofmode.StringToIdent.html#unitFunc"><span class="id" title="definition">unitFunc</span></a> <span class="id" title="var">s</span>)) <span class="id" title="var">k</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Ltac</span> <span class="id" title="var">string_to_ident</span> <span class="id" title="var">s</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">x</span> := <span class="id" title="keyword">constr</span>:(<span class="id" title="keyword">ltac</span>:(<span class="id" title="var">coq_string_to_ident_lambda'</span> <span class="id" title="var">s</span>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.16.0/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">x</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| (<span class="id" title="keyword">fun</span> (<a id="name:3" class="idref" href="#name:3"><span class="id" title="binder">name</span></a>:<span class="id" title="var">_</span>) =&gt; <span class="id" title="var">_</span>) =&gt; <span class="id" title="var">name</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a>
+</div>
+</div>
+</body>
+
+</html>
