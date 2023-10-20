@@ -1,7 +1,7 @@
 -docroot .
 
 -arg -w -arg -notation-overridden
-COQDOCFLAGS = "--charset utf-8 -s --with-header ../website/resources/header.html --with-footer ../website/resources/footer.html --index indexpage"
+COQDOCFLAGS = "--charset utf-8 -s --with-header ../website/resources/header.html --with-footer ../website/resources/footer.html --index indexpage --external https://uds-psl.github.io/coq-library-fol/tennenbaum/undec Undecidability"
 
 -Q . FOL
 
@@ -67,6 +67,7 @@ Incompleteness/fol_incompleteness.v
 
 Tennenbaum/SyntheticInType.v
 Tennenbaum/NumberUtils.v
+Tennenbaum/DN_Utils.v
 Tennenbaum/MoreDecidabilityFacts.v
 Tennenbaum/Peano.v
 Tennenbaum/Formulas.v
@@ -75,5 +76,6 @@ Tennenbaum/CantorPairing.v
 Tennenbaum/Coding.v
 Tennenbaum/Tennenbaum_diagonal.v
 Tennenbaum/Tennenbaum_insep.v
-Tennenbaum/Makholm.v
+Tennenbaum/HA_insep.v
 Tennenbaum/Variants.v
+Tennenbaum/Abstract_coding.v
