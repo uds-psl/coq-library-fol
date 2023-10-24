@@ -11,7 +11,7 @@ Definition surj {X Y} (f : X -> Y) := forall y, exists x, f x = y.
 Definition inj {X Y} (f : X -> Y) := forall x x', f x = f x' -> x = x'.
 Definition bij {X Y} (f : X -> Y) := inj f /\ surj f.
 
-(** * Basic logical notions. *)
+(** Basic logical notions. *)
 
 Definition definite P := P \/ ~P.
 Definition Definite {X} p := forall x : X, definite (p x).
@@ -55,7 +55,7 @@ Fact DN_forall_stable {X} p :
 Proof. unfold Stable; firstorder. Qed.
 
 
-(** * Definitions in synthetic computability. *)
+(** Definitions in synthetic computability. *)
 
 (** The below definitions are chosen to be as convienient as possible for
     synthetic computability proofs. They may in some cases differ from the definition that is stated in the paper, since these have been choosen
@@ -77,7 +77,7 @@ Definition Separated X := Dec (fun p : X * X => fst p <> snd p).
 Definition Markov X := forall p : X -> Prop, Dec p -> (~~ ex p) -> ex p.
 Definition Witnessing X := forall p : X -> Prop, Dec_sigT p -> witnessing p.
 
-(** ** Equivalent characterizations *)
+(** Equivalent characterizations *)
 
 Fact Dec_decider {X} p :
   Dec p <-> ex (@decider X p).

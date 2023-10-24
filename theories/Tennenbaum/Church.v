@@ -23,9 +23,9 @@ Existing Instance PA_funcs_signature.
 Context {peirce : peirce}.
 Instance ff : falsity_flag := falsity_on.
 
-(** * Church's Thesis *)
+(** Church's Thesis *)
 
-(** ** CT_Q  *)
+(** CT_Q  *)
 
 (** CT_Q internalizes computability, by claiming that every function
     nat -> nat is computable in a model of computation. In this case,
@@ -86,7 +86,7 @@ Proof. intros ct f. specialize (ct f). tauto. Qed.
 
 Hint Resolve CT_WCT : core.
 
-(** ** Strong part of the representability theorem.  *)
+(** Strong part of the representability theorem.  *)
 Lemma CT_RTs :
   CT_Q -> RT_strong.
 Proof.
@@ -155,7 +155,7 @@ Proof.
     + now right.
 Qed.
 
-(** ** Weak part of the representability theorem.  *)
+(** Weak part of the representability theorem.  *)
 Lemma CT_RTw :
   CT_Q -> RT_weak.
 Proof.

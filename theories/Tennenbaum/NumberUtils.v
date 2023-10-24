@@ -16,7 +16,7 @@ Proof.
 Defined.
 
 
-(** * Division with Rest *)
+(** Division with Rest *)
 
 Definition Euclid d x :
   { q & { r &  x = q*d + r  /\  (0 < d -> r < d)  }}.
@@ -187,7 +187,7 @@ End Homomorphism.
 
 
 
-(** * Prime Numbers *)
+(** Prime Numbers *)
 
 Section PrimeDec.
 

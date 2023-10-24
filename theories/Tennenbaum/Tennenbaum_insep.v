@@ -43,7 +43,7 @@ Section Model.
   Definition Div_nat (d : D) := fun n => div_num n d.
   Definition div_pi n a :=  (inu n .: (fun _ => a)) ⊨ (∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)).
 
-  (** * Tennenbaum's Teorem via inseparable predicates *)
+  (** ** Proof via Inseparable Predicates *)
 
   Lemma surj_form_ :
     { Φ : nat -> form & surj Φ }.
@@ -108,7 +108,7 @@ Section Model.
         False).
 
 
-  (** ** Existence of inseparable predicates *)
+  (** Existence of inseparable predicates *)
 
   Lemma CT_Insep_pred :
     @CT_Q intu -> Insep_pred.
@@ -254,7 +254,7 @@ Section Model.
     - now apply sat_Q_axioms.
   Qed.
 
-  (** ** Tennenbaum's Theorem via Inseparability *)
+  (** Tennenbaum's Theorem via Inseparability *)
   Theorem Tennenbaum_inseparable :
     Insep_form -> Stable std ->
     nonStd D -> ~~ (exists d, ~ Dec (fun n => div_pi n d)).

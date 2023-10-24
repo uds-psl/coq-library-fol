@@ -27,7 +27,7 @@ Defined.
 
 
 
-(** * PA Models *)
+(** PA Models *)
 
 Section Models.
 
@@ -556,7 +556,7 @@ Section Models.
 
     Section Euclid.
 
-      (** *** Euclidean Lemma *)
+      (** Euclidean Lemma *)
 
       Lemma iEuclid :
         forall x q, exists d r, x = d i⊗ q i⊕ r /\ (i0 i⧀ q -> r i⧀ q).
@@ -677,7 +677,7 @@ End Models.
 Arguments PAsat {_ _} _.
 Notation "'PA⊨' phi" := (forall D (I : interp D) ρ, (forall ψ : form, PAeq ψ -> ρ ⊨ ψ) -> ρ ⊨ phi) (at level 30).
 
-(** *** Standard Model of PA *)
+(** Standard Model of PA *)
 
 Section StandardModel.
 

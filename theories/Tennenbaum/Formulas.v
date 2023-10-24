@@ -26,7 +26,7 @@ Existing Instance PA_funcs_signature.
 Definition unary α := bounded 1 α.
 Definition binary α := bounded 2 α.
 
-(** * PA and Q are consistent in Coq. *)
+(** PA and Q are consistent in Coq. *)
 
 Lemma PA_consistent : ~ PAeq ⊢TI ⊥.
 Proof.

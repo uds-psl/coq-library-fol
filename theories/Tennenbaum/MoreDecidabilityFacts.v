@@ -3,7 +3,7 @@ Require Import ConstructiveEpsilon.
 From Undecidability.Synthetic Require Import DecidabilityFacts.
 From FOL.Tennenbaum Require Import SyntheticInType CantorPairing.
 
-(** * Decidability of bounded quantifiers. *)
+(** Decidability of bounded quantifiers. *)
 
 Lemma Dec_sigT_transport {X} p q :
   Dec_sigT p -> (forall x : X, p x <-> q x) -> Dec_sigT q.
@@ -84,7 +84,7 @@ Proof.
   - exists N. auto.
 Qed.
 
-(** * Nat and (Nat * Nat) are witnessing. *)
+(** Nat and (Nat * Nat) are witnessing. *)
 
 Definition Witnessing_nat :
   Witnessing nat.

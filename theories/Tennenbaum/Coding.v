@@ -224,7 +224,7 @@ End Overspill.
 
 
 
-(** * Coding Lemmas *)
+(** Coding Lemmas *)
 
 Section Coding.
 
@@ -259,7 +259,7 @@ Section Coding.
     - intros. exists (inu (Irred n)). rewrite ψ_repr. now split.
   Qed.
 
-  (** ** Coding in the standard model *)
+  (** Coding in the standard model *)
   (** We show that we can potentially get a code representing any
       predicate on natural numbers up to some bound.
    *)
@@ -348,7 +348,7 @@ Section Coding.
       all: apply axioms.
   Qed.
 
-  (** ** Coding in an arbitrary model, up to some bound. *)
+  (** Coding in an arbitrary model, up to some bound. *)
   (**  By using the coding lemma for natural numbers, we can now
       similarly verify that formulas can be coded in arbitrary models
       of PA. Here, we show this for unary and binary formulas.
@@ -425,7 +425,7 @@ Section Coding.
 
 Section notStd.
 
-  (** ** Coding in a non-standard model *)
+  (** Coding in a non-standard model *)
 
   (** Above we have established coding results for arbitrary PA models.
       We will now focus on the special case where the model is not

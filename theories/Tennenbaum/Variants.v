@@ -184,7 +184,7 @@ Existing Instance PA_funcs_signature.
       + now apply H, sat_Q_axioms.
   Qed.
 
-  (** * Makholms Proof of Tennenbaum's Theorem *)
+  (** ** Makholm's Proof *)
   Theorem Makholm :
     @CT_Q intu -> nonStd D -> ~~ exists d, ~ Dec(Div_nat d).
   Proof.
@@ -220,7 +220,7 @@ Qed.
 
 Section McCarty.
 
-  (** * McCarty Proof of Tennenbaum's Theorem *)
+  (** ** McCarty's Proof *)
   Lemma unary_DN_bounded_definite ϕ :
     bounded 1 ϕ ->
     forall x, ~ ~ forall y, y i⧀ x -> (fun _ => y) ⊨ ϕ \/ ~ (fun _ => y) ⊨ ϕ.

@@ -37,9 +37,10 @@ Section Model.
   Definition div_num n (d : D) := @Coding.div_num D I n d.
   Definition div_pi n a := @Coding.div_pi D I ψ n a.
 
-  (** * Diagonal Proof of Tennenbaum's Theorem *)
+  (** * Tennenbaum's Theorem *)
+  (** ** Proof via Diagonal Argument *)
 
-  (** ** Enumerable and discrete PA models have decidable divisibility. *)
+  (** Enumerable and discrete PA models have decidable divisibility. *)
 
   Lemma nat_eq_dec (n m : nat) : {n = m} + {n <> m}.
   Proof. decide equality. Qed.
@@ -113,7 +114,7 @@ Section Model.
   Qed.
 
 
-  (** ** Tennenbaum's Theorem via a diagnoal argument. *)
+  (** Tennenbaum's Theorem via a diagnoal argument. *)
 
   Fact dec_contraposition A B :
     dec B -> (~B -> ~A) -> (A -> B).
