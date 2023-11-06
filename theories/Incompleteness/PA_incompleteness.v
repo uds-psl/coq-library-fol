@@ -55,7 +55,7 @@ Section Arithmetic.
       intros axioms H.
       specialize (axioms phi). revert axioms.
       repeat (destruct H as [<-|H]).
-      all: cbn -[FAeq]; refine (fun A => let F := A _ rho in _); intuition.
+      all: cbn -[FAeq]; refine (fun A => let F := A _ rho in _); intuition auto with solve_subterm.
       destruct H.
       Unshelve. all: cbn; try tauto.
     Qed.
@@ -93,14 +93,14 @@ Section Arithmetic.
     intros Hg H. apply nat_H10.
     eapply sat_embed; eauto.
     clear H; intros alpha H rho.
-    repeat (destruct H as [<-|H]; cbn; intuition).
+    repeat (destruct H as [<-|H]; cbn; intuition auto with zarith).
     destruct H.
   Qed.
 
   Corollary T_class_Q_to_H10p (T : form -> Prop) (E : H10p_PROBLEM) :
     T <<= Q' -> T ⊢TC embed E -> H10p E.
   Proof.
-    intros ? [Gamma []]. eapply class_Q_to_H10p; intuition.
+    intros ? [Gamma []]. eapply class_Q_to_H10p; intuition auto with solve_subterm.
   Qed.
 
   Lemma H10p_to_class_Q :

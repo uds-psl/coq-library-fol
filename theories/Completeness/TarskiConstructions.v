@@ -347,7 +347,7 @@ Section GenCons.
       enough (A ⊏ T' \/ econsistent T' (T' ⋄ psi)) as [] by ((left; exists A; intuition) + now right).
       clear HA2; induction A.
       - firstorder.
-      - destruct (HA1 a), IHA; intuition. all: eauto with contains_theory.
+      - destruct (HA1 a), IHA; intuition eauto with contains_theory.
     Qed.
 
     Fixpoint omega n : theory :=

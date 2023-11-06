@@ -164,7 +164,7 @@ Section ReificationExample.
     + apply ieq_sym, mul_succ_r.
   Qed.
 
-  Definition proj1 {X:Type} {Y:X->Type} (H:{x:X&Y x}) : X := match H with existT x y => x end.
+  Definition proj1 {X:Type} {Y:X->Type} (H:{x:X & Y x}) : X := match H with existT x y => x end.
 
   Lemma example (a b : D) : representableP 0 (a i⊕ b i= b i⊕ a).
   Proof. represent. Defined. (* Not opaque, so we can pull out the representative witness later *)

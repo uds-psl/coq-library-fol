@@ -1,7 +1,9 @@
 From FOL Require Import FullSyntax.
-From MetaCoq.Template Require Import utils All Pretty Checker.
-Require Export MetaCoq.Template.utils.bytestring.
-Require Import List String Lia.
+From MetaCoq.Template Require Import All Pretty Checker.
+From MetaCoq.Utils Require Export bytestring.
+Require Import List String Arith Lia.
+
+
 
 (* Both metacoq and FOL have terms. *)
 Notation term := Core.term.
@@ -37,6 +39,9 @@ Arguments orelse {_} _ _.
 Notation "x <- c1 ;; c2" := (bind c1 (fun x => c2)) (at level 100, c2 at level 100, c1 at next level).
 Notation "x >>= f" := (bind x f) (at level 100).
 Arguments Vector.cons {_} _ {_} _, _ _ _ _.
+
+Open Scope bs.
+Open Scope list_scope.
 
 Section MetaCoqUtils.
   (* ** MetaCoqUtils
@@ -94,6 +99,7 @@ Section MetaCoqUtils.
     ty' <- tyf (dtype d);;
     body' <- bodyf (dbody d);;
     ret {| dname := dname d; dtype := ty'; dbody := body' ; rarg := rarg d |}.
+
   (* monadic single-term substitution. *)
   Fixpoint subst (s : FailureMonad Ast.term) (k:nat) (u:Ast.term) :=
     match u with
@@ -511,6 +517,7 @@ Section EnvConstructor.
   MetaCoq Quote Definition qI_P := @i_atom.
   Context {tr : tarski_reflector}.
   Context {te : tarski_reflector_extensions tr}.
+  
   (* Given a term in the semantic, construct an environment that contains all atoms that appear in the term (and are not otherwise representable) *)
   Fixpoint findUBRecursively (lt : list Ast.term) (IH : Ast.term -> FailureMonad (list Ast.term)) : FailureMonad ((list Ast.term) ) :=
        match lt with nil => ret (nil)

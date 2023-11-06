@@ -93,7 +93,7 @@ Section Completeness.
       assert (Hcl : closed_T (T ⋄ (¬ phi))) by (apply closed_T_extend; try econstructor; eauto).
       unshelve eapply (model_bot_correct (T_closed := Hcl) Hcons (¬ phi) var).
       - apply Out_T_sub. cbn. right. now asimpl.
-      - apply Hval. 1: apply model_bot_classical, Hcons. intros ? ?. apply valid_T_model_bot; intuition.
+      - apply Hval. 1: apply model_bot_classical, Hcons. intros ? ?. apply valid_T_model_bot; intuition auto with contains_theory.
     Qed.
 
     Lemma semi_completeness_standard :

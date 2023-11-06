@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "dev+8.16"
+version: "dev+8.18"
 maintainer: "kirst@cs.uni-saarland.de"
 homepage: "https://github.com/uds-psl/coq-library-fol/"
 dev-repo: "git+https://github.com/uds-psl/coq-library-fol/"
@@ -25,13 +25,10 @@ install: [
   [make "install"]
 ]
 depends: [
-  "coq-library-undecidability" {= "dev+8.16"}
-]
-pin-depends: [
-  "coq-library-undecidability.dev+8.16" "git+https://github.com/uds-psl/coq-library-undecidability.git#coq-8.16"
+  "coq-library-undecidability" {= "1.1.1+8.18"}
 ]
 synopsis: "A Coq Library for First-Order Logic"
 url {
-  git: "https://github.com/uds-psl/coq-library-fol.git#coq-8.16"
+  git: "https://github.com/uds-psl/coq-library-fol.git#coq-8.18"
 }
 

@@ -167,7 +167,7 @@ Section FixSignature.
             apply decidable_iff. constructor. intros phi. apply bounded_dec.
           * apply tprv_enumerable.
         + apply enumerable_equiv with (fun phi => ~ bounded 0 phi \/ T ⊢TC ¬ phi).
-          { intros phi. destruct (bounded_dec phi 0); intuition. }
+          { intros phi. destruct (bounded_dec phi 0); intuition auto with solve_subterm. }
           apply enumerable_disj; try apply dec_count_enum'; try apply form_enumerable.
           { apply decidable_iff. constructor. intros phi. apply bounded_dec. }
           destruct (tprv_enumerable (p:=class)) as [f Hf].

@@ -44,7 +44,7 @@ Section Cantor.
     intros n. induction n; intros []; auto.
     - now intros ?%n00_next.
     - now intros ?%eq_sym%n00_next.
-    - intros [=?%inj_next%IHn]. congruence.
+    - intros [= ?%inj_next%IHn]. congruence.
   Qed.
 
   (* Shows that the function "next" is almost surjective *)

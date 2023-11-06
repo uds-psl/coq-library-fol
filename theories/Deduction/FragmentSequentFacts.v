@@ -28,7 +28,7 @@ Section Gentzen.
     Lemma seq_Weak A B phi psi :
       sprv A phi psi -> A <<= B -> sprv B phi psi.
     Proof.
-      intros H; induction H in B |-*; intuition; eauto using incl_map. 
+      intros H; induction H in B |-*; intuition eauto using incl_map.
     Qed.
 
     Theorem seq_subst_Weak A phi psi sigma :

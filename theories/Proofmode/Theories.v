@@ -56,8 +56,9 @@ Definition rem := @remove form (dec_form _ _ _ _).
 Theorem WeakT A B phi :
   A ⊩ phi -> A ⊑ B -> B ⊩ phi.
 Proof.
-  intros H. revert B.
-  induction H; intros B HB; try unshelve (solve [econstructor; intuition]); try now econstructor.
+  induction 1 in B|-*; intros Hsub.
+  econstructor; split; [|apply H].
+  intros y Hy. apply Hsub,H,Hy.
 Qed.
 
 
@@ -88,8 +89,9 @@ Proof. intros ?. now left. Qed.
 Lemma contains_extend3 A T phi :
   A ⊏ T -> A ⊏ (T ⋄ phi).
 Proof.
-  intros ? ? ?. left. intuition.
+  intros ? ? ?. left. apply H,H0.
 Qed.
+
 
 
 
