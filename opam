@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "dev+8.18"
+version: "1.0+8.18"
 maintainer: "kirst@cs.uni-saarland.de"
 homepage: "https://github.com/uds-psl/coq-library-fol/"
 dev-repo: "git+https://github.com/uds-psl/coq-library-fol/"
@@ -30,6 +30,6 @@ depends: [
 ]
 synopsis: "A Coq Library for First-Order Logic"
 url {
-  git: "https://github.com/uds-psl/coq-library-fol.git#coq-8.18"
+  git: "https://github.com/uds-psl/coq-library-fol.git#v1.0+8.18"
 }
 
