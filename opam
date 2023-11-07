@@ -17,7 +17,7 @@ authors: [
   "Gert Smolka"
   "Dominik Wehr"
 ]
-license: "CECILL-2.1"
+license: "MIT"
 build: [
   [make "-j%{jobs}%"]
 ]
