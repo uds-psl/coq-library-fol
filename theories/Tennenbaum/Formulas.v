@@ -20,8 +20,8 @@ Proof.
   - apply sat_single. setoid_rewrite eval_num. now setoid_rewrite inu_nat_id.
 Qed.
 
-Existing Instance PA_preds_signature.
-Existing Instance PA_funcs_signature.
+#[global] Existing Instance PA_preds_signature.
+#[global] Existing Instance PA_funcs_signature.
 
 Definition unary α := bounded 1 α.
 Definition binary α := bounded 2 α.
