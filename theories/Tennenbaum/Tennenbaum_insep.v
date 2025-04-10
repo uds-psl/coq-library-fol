@@ -32,7 +32,7 @@ Section Model.
   Notation "x 'i⊗' y" := (@i_func PA_funcs_signature PA_preds_signature D I Mult ([x ; y])) (at level 38).
   Notation "'i0'" := (i_func (Σ_funcs:=PA_funcs_signature) (f:=Zero) []) (at level 2) : PA_Notation.
   Notation "x 'i⧀' y" := (exists d : D, y = iσ (x i⊕ d) ) (at level 40).
-  Notation "x '⧀=' y"  := (PAle x y) (at level 40) : PA_Notation.
+  Notation "x '⧀r=' y"  := (PAle x y) (at level 40) : PA_Notation.
 
   (* We also assume the existence of a formula which represents the prime number function *)
   Variable ψ : form.
@@ -263,7 +263,7 @@ Section Model.
     intros (α & β & HBa & HSa & HBb & HSb & Disj & H)%Qdec_kernel_Insep 
             Hmp HnonStd Hdiv.
     (*                  ↓ bound in α     ↓ bound in β     ↓ in both *)
-    pose (ϕ := ∀ $0 ⧀= $0`[↑] → ∀ $0 ⧀= $1`[↑] → ∀ $0 ⧀= $2`[↑] → 
+    pose (ϕ := ∀ $0 ⧀r= $0`[↑] → ∀ $0 ⧀r= $1`[↑] → ∀ $0 ⧀r= $2`[↑] → 
                   α[$1..] ∧ β[$2..] → ⊥).
     assert (unary ϕ) as unary_ϕ; [shelve|..].
     eapply Overspill_DN with (alpha:= ϕ); auto.
@@ -295,7 +295,7 @@ Section Model.
         rewrite <-(inu_nat_id x) at 2.
         apply eval_num.
     - intros [e' He'].
-      pose (γ := ∃ $0 ⧀= $2 ∧ α).
+      pose (γ := ∃ $0 ⧀r= $2 ∧ α).
       pose (G n := forall ρ, (@inu D I n .: e' .: ρ) ⊨ γ).
       assert (bounded 2 γ) as Hγ; [shelve|].
       refine (let Hcoded := 

@@ -43,7 +43,7 @@ Existing Instance PA_funcs_signature.
   Notation "x 'i⊗' y" := (@i_func PA_funcs_signature PA_preds_signature D I Mult ([x ; y])) (at level 38).
   Notation "'i0'" := (i_func (Σ_funcs:=PA_funcs_signature) (f:=Zero) []) (at level 2) : PA_Notation.
   Notation "x 'i⧀' y" := (exists d : D, y = iσ (x i⊕ d) ) (at level 40).
-  Notation "x '⧀=' y"  := (PAle x y) (at level 40) : PA_Notation.
+  Notation "x '⧀r=' y"  := (PAle x y) (at level 40) : PA_Notation.
 
   (**  We assume that there is a formula ψ capturing the function
       [Irred] which only produces prime/irreducible numbers.
@@ -57,7 +57,7 @@ Existing Instance PA_funcs_signature.
    *)
   Hypothesis obj_Coding :
     forall α, unary α ->
-      PAeq ⊢TI ∀¬¬∃∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+      PAeq ⊢TI ∀¬¬∃∀ $0 ⧀r $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
 
   (** We show the existence of a pair of unary inseparable 
     formulas which are furthermore disjoint on the object level. This
@@ -98,12 +98,12 @@ Existing Instance PA_funcs_signature.
       repeat split.
       - apply unary_rosser; auto.
       - apply unary_rosser; auto.
-      - apply PA_extends_Q with [ax_induction (∀ ((¬($0 ⧀= $1)) ∧ ¬($1 ⧀= $0)) → ⊥)]%list.
+      - apply PA_extends_Q with [ax_induction (∀ ((¬($0 ⧀r= $1)) ∧ ¬($1 ⧀r= $0)) → ⊥)]%list.
         2: {  intros a Ha. repeat try (destruct Ha as [<-|Ha]).
               + apply PAeq_induction.
               + destruct Ha. }
         fintros "H". eapply ExE. ctx.
-        remember ([ax_induction (∀ ¬ (¬ $0 ⧀= $1) ∧ (¬ $1 ⧀= $0))] ++ Q)%list as Γ.
+        remember ([ax_induction (∀ ¬ (¬ $0 ⧀r= $1) ∧ (¬ $1 ⧀r= $0))] ++ Q)%list as Γ.
         cbn -[map]. cbn -[subst_form].
         eapply IE. 2: ctx.
         assert (map (subst_form ↑) Γ = Γ) as ->.
@@ -227,7 +227,7 @@ Section McCarty.
     forall x, ~ ~ forall y, y i⧀ x -> (fun _ => y) ⊨ ϕ \/ ~ (fun _ => y) ⊨ ϕ.
   Proof.
     intros H1.
-    pose (Φ := ¬¬ ∀ $0 ⧀ $1 → ϕ ∨ ¬ ϕ).
+    pose (Φ := ¬¬ ∀ $0 ⧀r $1 → ϕ ∨ ¬ ϕ).
     assert (forall d rho, (d .: rho) ⊨ Φ) as H.
     apply induction.
     - apply axioms.

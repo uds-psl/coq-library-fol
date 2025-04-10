@@ -8,7 +8,7 @@ Import ListNotations ListAutomationNotations ListAutomationInstances ListAutomat
 From Stdlib Require Import Setoid Morphisms.
 
 Definition sless x y := (∃ y`[↑] == σ (x`[↑] ⊕ $0)).
-Notation "x '⧀' y" := (sless x y) (at level 40) : PA_Notation.
+Notation "x '⧀r' y" := (sless x y) (at level 40) : PA_Notation.
 
 Fact unfold_sless x y :
   sless x y = ∃ y`[↑] == σ (x`[↑] ⊕ $0).
@@ -445,7 +445,7 @@ Section Models.
     Lemma trichotomy x y :
       x i⧀ y \/ x = y \/ y i⧀ x.
     Proof.
-      pose (phi := ∀ ($1 ⧀ $0) ∨ ($1 == $0 ∨ $0 ⧀ $1)).
+      pose (phi := ∀ ($1 ⧀r $0) ∨ ($1 == $0 ∨ $0 ⧀r $1)).
       assert (forall n ρ, (n.:ρ) ⊨ phi).
       apply induction. repeat solve_bounds.
       - intros ρ d; cbn. destruct (zero_or_succ d) as [-> | [k ->] ].
@@ -498,7 +498,7 @@ Section Models.
     Lemma lt_S d e :
       d i⧀ (iσ e) <-> d i⧀ e \/ d = e.
     Proof.
-      pose (Φ := ∀ $0 ⧀ σ $1 ↔ $0 ⧀ $1 ∨ $0 == $1).
+      pose (Φ := ∀ $0 ⧀r σ $1 ↔ $0 ⧀r $1 ∨ $0 == $1).
       assert (H: forall d ρ, (d .: ρ)⊨ Φ).
       apply induction.
       - repeat solve_bounds.
@@ -566,7 +566,7 @@ Section Models.
         - exists i0, x. split.
           + rewrite mult_zero, add_zero. reflexivity.
           + now intros ?%nolessthen_zero.
-        - pose (phi := ∀∃∃ $3 == $1 ⊗ (σ $2) ⊕ $0 ∧ (zero ⧀ (σ $2) → $0 ⧀ (σ $2) ) ).
+        - pose (phi := ∀∃∃ $3 == $1 ⊗ (σ $2) ⊕ $0 ∧ (zero ⧀r (σ $2) → $0 ⧀r (σ $2) ) ).
           assert (forall n ρ, (n.:ρ) ⊨ phi).
           apply induction. unfold sless in *. cbn. cbn in *. repeat solve_bounds.
           + intros ρ d. cbn. exists i0, i0. fold i0. split.
@@ -1114,7 +1114,7 @@ Section Q_prv.
 
 
   Lemma num_lt x y :
-    x < y -> Gamma ⊢ num x ⧀ num y.
+    x < y -> Gamma ⊢ num x ⧀r num y.
   Proof.
     intros [k Hk]%lt_nat_equiv.
     apply ExI with (t := num k). cbn.
@@ -1124,7 +1124,7 @@ Section Q_prv.
   Qed.
 
   Lemma not_lt_zero_prv' :
-  Qeq ⊢ ∀ ¬ $0 ⧀ num 0.
+  Qeq ⊢ ∀ ¬ $0 ⧀r num 0.
   Proof.
     apply AllI, II. eapply ExE.
     - apply Ctx. now left.
@@ -1136,14 +1136,14 @@ Section Q_prv.
   Qed.
 
   Lemma not_lt_zero_prv t :
-    Qeq ⊢ ¬ t ⧀ num 0.
+    Qeq ⊢ ¬ t ⧀r num 0.
   Proof.
-    enough (¬ t ⧀ num 0 = (¬ $0 ⧀ num 0)[t..]) as -> by apply AllE, not_lt_zero_prv'.
+    enough (¬ t ⧀r num 0 = (¬ $0 ⧀r num 0)[t..]) as -> by apply AllE, not_lt_zero_prv'.
     now unfold sless; cbn; asimpl.
   Qed.
 
   Lemma num_nlt x :
-    forall y, ~ (x < y) -> Qeq ⊢ ¬ num x ⧀ num y.
+    forall y, ~ (x < y) -> Qeq ⊢ ¬ num x ⧀r num y.
   Proof.
     induction x as [| x IHx].
     - intros [] ineq.
@@ -1166,7 +1166,7 @@ Section Q_prv.
 
 
   Lemma num_lt_dec x y :
-    { Gamma ⊢ num x ⧀ num y } + { Gamma ⊢ ¬ num x ⧀ num y }.
+    { Gamma ⊢ num x ⧀r num y } + { Gamma ⊢ ¬ num x ⧀r num y }.
   Proof.
     destruct (Compare_dec.lt_dec x y); [left|right].
     - now apply num_lt.
@@ -1177,7 +1177,7 @@ Section Q_prv.
   Lemma term_lt_dec s t :
     map (subst_form ↑) Gamma = Gamma -> bounded_t 0 s -> 
     bounded_t 0 t -> 
-    { Gamma ⊢ s ⧀ t } + { Gamma ⊢ ¬ s ⧀ t }.
+    { Gamma ⊢ s ⧀r t } + { Gamma ⊢ ¬ s ⧀r t }.
   Proof.
     intros HG Hs Ht.
     destruct (closed_term_is_num Hs) as [n Hn], (closed_term_is_num Ht) as [m Hm].

@@ -356,7 +356,7 @@ Section Coding.
   Lemma Coding_model_unary α :
     unary α ->
     forall n rho, rho ⊨
-      ¬ ¬ ∃ ∀ $0 ⧀ (num n) → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+      ¬ ¬ ∃ ∀ $0 ⧀r (num n) → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros unary_α n rho. cbn.
     apply (@DN_chaining _ _
@@ -390,7 +390,7 @@ Section Coding.
   Lemma Coding_model_binary α :
     binary α ->
     forall n rho, rho ⊨
-      ∀ ¬ ¬ ∃ ∀ $0 ⧀ (num n) → α[$0 .: $2 ..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
+      ∀ ¬ ¬ ∃ ∀ $0 ⧀r (num n) → α[$0 .: $2 ..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3).
   Proof.
     intros binary_α n rho b. cbn.
     apply (@DN_chaining _ _
@@ -445,7 +445,7 @@ Section notStd.
     intros unary_α.
     specialize (@Coding_model_unary _ unary_α) as H.
     assert (forall n rho, (inu n .: rho) ⊨
-      ¬ ¬ ∃ ∀ $0 ⧀ $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
+      ¬ ¬ ∃ ∀ $0 ⧀r $2 → α ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3) ) as H'.
     - intros n rho. pose (@switch_num D I) as switch_num.
       cbn in switch_num.
       rewrite <-switch_num. cbn -[sat].
@@ -498,7 +498,7 @@ Section notStd.
   Proof.
     intros binary_α.
     assert (forall n rho, (inu n .: rho) ⊨
-      ∀ ¬ ¬ ∃ ∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)) as H'.
+      ∀ ¬ ¬ ∃ ∀ $0 ⧀r $3 → α[$0 .: $2..] ↔ ∃ (ψ ∧ ∃ $1 ⊗ $0 == $3)) as H'.
     - intros n ρ.
       specialize (@Coding_model_binary _ binary_α n ρ) as H.
       fold sat in H.
@@ -513,9 +513,9 @@ Section notStd.
       intros e. DN.bind H'. destruct H' as [e' [He' Hcoded]].
       specialize (Hcoded (fun _ => e') e); fold sat in Hcoded.
       change 
-        ((e .: e' .: (fun _ : nat => e')) ⊨ (¬ (¬ (∃ (∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))))
+        ((e .: e' .: (fun _ : nat => e')) ⊨ (¬ (¬ (∃ (∀ $0 ⧀r $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))))
         with
-        (~ ~ (e .: e' .: (fun _ : nat => e')) ⊨ (∃ (∀ $0 ⧀ $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))
+        (~ ~ (e .: e' .: (fun _ : nat => e')) ⊨ (∃ (∀ $0 ⧀r $3 → α[$0 .: $2..] ↔ (∃ ψ ∧ (∃ $1 ⊗ $0 == $3)))))
         in Hcoded. 
       DN.bind Hcoded. DN.ret.
       destruct Hcoded as [c Hc].
