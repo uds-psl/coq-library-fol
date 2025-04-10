@@ -1,6 +1,6 @@
-From MetaCoq.Template Require Import All.
+From MetaRocq.Template Require Import All.
 
-MetaCoq Quote Definition qUnit := unit.
+MetaRocq Quote Definition qUnit := unit.
 
 Definition unitFunc k := tLambda {| binder_name := nNamed (String.of_string k); binder_relevance := Relevant |} qUnit (tRel 0).
 

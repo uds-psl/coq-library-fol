@@ -1,6 +1,6 @@
 From FOL Require Import FullSyntax.
-From MetaCoq.Template Require Import All Pretty Checker.
-From MetaCoq.Utils Require Export bytestring.
+From MetaRocq.Template Require Import All Pretty Checker.
+From MetaRocq.Utils Require Export bytestring.
 From Stdlib Require Import List String Arith Lia.
 From Stdlib Require Import Classes.DecidableClass.
 
@@ -26,7 +26,7 @@ Defined.
 (* * Reification
       Please read the PDF file giving a detailed description.
       
-      We are given a Coq term and try to find a reification of it in the syntax of a specific kind of first-order theory. *)
+      We are given a Rocq term and try to find a reification of it in the syntax of a specific kind of first-order theory. *)
 Section FailureMonad.
   (* ** FailureMonad
       Since our function is partial, and we want to give helpful error messages to the User, we use this monad, which represents either success or failure, along with an error message
@@ -37,7 +37,7 @@ Section FailureMonad.
   Definition bind {A B : Type} (k:FailureMonad A) (f:A -> FailureMonad B) := match k return FailureMonad B with fail x => fail x | ret k => f k end.
   Notation "x <- c1 ;; c2" := (bind c1 (fun x => c2)) (at level 100, c2 at level 100, c1 at next level).
 
-  (* "Converts" from our monad to the TemplateMonad of MetaCoq. This is used to pass error messages back to the user *)
+  (* "Converts" from our monad to the TemplateMonad of MetaRocq. This is used to pass error messages back to the user *)
   Definition f2t {T:Type} (a:FailureMonad T) : TemplateMonad T := match a with ret k => monad_utils.ret k | fail s => tmFail (s) end.
   (* Structurally recursive definition of a monadic map *)
   Fixpoint flatten_monad {A:Type} (l:list (FailureMonad A)) : FailureMonad (list A) := match l with nil => ret nil | x::xr => (xm <- x;; (xrm <- flatten_monad xr;; ret (xm::xrm))) end.
@@ -58,9 +58,9 @@ Arguments Vector.cons {_} _ {_} _, _ _ _ _.
 Open Scope bs.
 Open Scope list_scope.
 
-Section MetaCoqUtils.
-  (* ** MetaCoqUtils
-         Here, we define various useful functions for working with MetaCoq terms *)
+Section MetaRocqUtils.
+  (* ** MetaRocqUtils
+         Here, we define various useful functions for working with MetaRocq terms *)
   (*+ Working with quoted vectors *)
   Notation vectorCons x T n xr := 
   (tApp
@@ -94,10 +94,10 @@ Section MetaCoqUtils.
     (a,nil)=> Some a
   | (lx::lxr, lsx::lsxr) => if eq_term init_graph lx lsx then popListStart lxr lsxr else None
   | _ => None end.
-  MetaCoq Quote Definition qNatZero := 0.
-  MetaCoq Quote Definition qNatSucc := S.
-  MetaCoq Quote Definition qeq_refl := (@eq_refl).
-  (* Given n, yield a MetaCoq Ast.term representation of n *)
+  MetaRocq Quote Definition qNatZero := 0.
+  MetaRocq Quote Definition qNatSucc := S.
+  MetaRocq Quote Definition qeq_refl := (@eq_refl).
+  (* Given n, yield a MetaRocq Ast.term representation of n *)
   Fixpoint quoteNumber (n:nat) : Ast.term:= match n with 0 => qNatZero | S n => tApp qNatSucc ([quoteNumber n]) end.
   (* Increases the indices of all tRel in t by amnt, assuming they are already larger than minn. If minn = 0, this increases all "free" tRel reference indices *)
   Definition addRelIndex (minn:nat) (amnt:nat) (t:Ast.term) : Ast.term := Ast.lift amnt minn t. 
@@ -148,11 +148,11 @@ Section MetaCoqUtils.
   Definition lowerRelIndex (minn:nat) (tv:FailureMonad Ast.term) (t:Ast.term) : FailureMonad Ast.term := subst tv minn t.
 
 
-  (* Notation for matching constructs like Coq.Init.Logic.and prop1 prop2 -> (x:="and", l:=[term1, term2]) *)
+  (* Notation for matching constructs like Rocq.Init.Logic.and prop1 prop2 -> (x:="and", l:=[term1, term2]) *)
   Notation baseLogicConn x l:= (tInd {| inductive_mind := (MPfile (["Logic"; "Init"; "Corelib"]), x); inductive_ind := 0 |} l).
   Definition matchBaseLogicConn {A:Type} (x: Ast.term) (f: ident -> A) : option A := match x with baseLogicConn s nil => Some (f s) | _ => None end.
 
-End MetaCoqUtils.
+End MetaRocqUtils.
 
 Section AbstractReflectionDefinitions.
   (* ** AbstractReflectionDefinitions
@@ -163,7 +163,7 @@ Section AbstractReflectionDefinitions.
       - qff:Ast.term -- the instance of falsity_flag
       - t:Ast.term -- the actual term to be reified
       - envTerm:Ast.term -- the env we are reifying into, quoted
-      - env: -- a helper, which gives the env index for Coq terms
+      - env: -- a helper, which gives the env index for Rocq terms
       - returning a pair of the reified term and a proof that it is correct, both quoted *)
   Definition helperTermReifierType := (Ast.term -> Ast.term -> Ast.term -> Ast.term -> (Ast.term -> FailureMonad nat) -> FailureMonad (prod Ast.term Ast.term)).
   (* The same, but used during the env constructing phase. The only arg is the term itself *)
@@ -177,7 +177,7 @@ Section AbstractReflectionDefinitions.
       - returning again a apair of reified term and proof *)
   Definition helperFormReifierType := (Ast.term -> Ast.term -> nat -> Ast.term -> (Ast.term -> FailureMonad nat) -> FailureMonad (prod Ast.term Ast.term)).
   Definition helperFormVarsType := (Ast.term->nat->FailureMonad (list Ast.term)).
-  (* A base connective is an inductive in Coq.Init.Logic, like and. They are common and have their own subsystem. Arguments:
+  (* A base connective is an inductive in Rocq.Init.Logic, like and. They are common and have their own subsystem. Arguments:
       - tct, qff:Ast.term -- as above
       - lst:list Ast.term -- for e.g. (and X Y), this list contains [X;Y].
       - fuel:nat -- fuel (when 0, we stop)
@@ -227,7 +227,7 @@ Section AbstractReflectionDefinitions.
   }.
   (* Extension point to extend the libary to more syntactic constructs *)
   Class tarski_reflector_extensions (t:tarski_reflector) := {
-    (* for reifying instances of inductive types Coq.Init.Logic.* applied to arguments. Mostly used for reifying eq *)
+    (* for reifying instances of inductive types Rocq.Init.Logic.* applied to arguments. Mostly used for reifying eq *)
     baseLogicConnHelper : option (string -> baseConnectiveReifier); 
     baseLogicVarHelper : option (string -> baseConnectiveVars);
     (* for reifying all terms that we fail to reify *)
@@ -258,7 +258,7 @@ Section AbstractReflectionDefinitions.
   Definition representableF (d:D) := exists trm rho, representsF d trm rho.
 
 
-  (* Functions that allow us to construct syntactic connective applications without building vectors in MetaCoq *)
+  (* Functions that allow us to construct syntactic connective applications without building vectors in MetaRocq *)
   Fixpoint naryGFunc (n:nat) (A R : Type) := match n with 0 => R | S n => A -> @naryGFunc n A R end.
   Fixpoint takeMultiple {n : nat} (X Y:Type)  : (Vector.t X n -> Y) -> @naryGFunc n X Y := 
      match n as nn return (Vector.t X nn -> Y) -> @naryGFunc nn X Y
@@ -310,10 +310,10 @@ Section AbstractReflectionDefinitions.
   Definition mergeForm (c:preds) : mergeFormBase c.
   Proof. intros rho. eapply mergeFormProto. now intros v. Defined.
   (*+ Quotes of these functions which are later used to construct (proof) terms *)
-  MetaCoq Quote Definition qConstructTerm := constructTerm.
-  MetaCoq Quote Definition qMergeTerm := mergeTerm.
-  MetaCoq Quote Definition qConstructForm := constructForm.
-  MetaCoq Quote Definition qMergeForm := mergeForm.
+  MetaRocq Quote Definition qConstructTerm := constructTerm.
+  MetaRocq Quote Definition qMergeTerm := mergeTerm.
+  MetaRocq Quote Definition qConstructForm := constructForm.
+  MetaRocq Quote Definition qMergeForm := mergeForm.
 End AbstractReflectionDefinitions.
 #[global] Arguments representableP {_} {_} _ _.
 
@@ -335,9 +335,9 @@ Section TarskiMerging.
   Definition mergeFalse (rho:nat -> D) : @representsP tr falsity_on 0 falsity rho False.
   Proof. easy. Defined.
   (* We then define a quoted version of the above proof which is later used to build subterms *)
-  MetaCoq Quote Definition qMergeFalse := @mergeFalse. 
+  MetaRocq Quote Definition qMergeFalse := @mergeFalse. 
   (* We finally define a quoted form merger which will then later be applied to the subforms. It should yield the reflected representation *)
-  MetaCoq Quote Definition qMergeFormFalse := @mFalse.
+  MetaRocq Quote Definition qMergeFormFalse := @mFalse.
   (* The same development for And. Note that this time we have subproofs. Our function arguments follow this pattern:
       - tr_quoted - quoted tarski_reflector (not visible in the arguments, but it's a context variable. Note that since the functions don't acually use te, it does not become part of the arguments outside the section
       - environment
@@ -351,9 +351,9 @@ Section TarskiMerging.
   * intros [pP pQ]. split. now apply pPl. now apply pQl.
   * intros [pP pQ]. split. now apply pPr. now apply pQr.
   Defined.
-  MetaCoq Quote Definition qMergeAnd := @mergeAnd.
+  MetaRocq Quote Definition qMergeAnd := @mergeAnd.
   (* This is the form merger for and. It is unfolded syntactic sugar, once one adds the arguments x and y, this will read x ∧ y. *)
-  MetaCoq Quote Definition qMergeFormAnd := @mAnd.
+  MetaRocq Quote Definition qMergeFormAnd := @mAnd.
 
   (* The same development for or*)
   Definition mOr {ff : falsity_flag} (fP fQ:form ff) : form ff := fP∨fQ.
@@ -363,8 +363,8 @@ Section TarskiMerging.
   * intros [pP|pQ]. left; now apply pPl. right; now apply pQl.
   * intros [pP|pQ]. left; now apply pPr. right; now apply pQr.
   Defined.
-  MetaCoq Quote Definition qMergeOr := @mergeOr.
-  MetaCoq Quote Definition qMergeFormOr := @mOr.
+  MetaRocq Quote Definition qMergeOr := @mergeOr.
+  MetaRocq Quote Definition qMergeFormOr := @mOr.
 
   (* The same development for existential quantifiaction. Note that the P argument is a 1-ary predicate.*)
   Definition mExists {ff : falsity_flag} (fP:form ff) : form ff := ∃ fP.
@@ -374,8 +374,8 @@ Section TarskiMerging.
   * intros [q Pq]. exists q. destruct (pR q) as [pRl pRr]. now apply pRl.
   * intros [q Pq]. exists q. destruct (pR q) as [pRl pRr]. now apply pRr.
   Defined.
-  MetaCoq Quote Definition qMergeExists := @mergeExists.
-  MetaCoq Quote Definition qMergeFormExists := @mExists.
+  MetaRocq Quote Definition qMergeExists := @mergeExists.
+  MetaRocq Quote Definition qMergeFormExists := @mExists.
 
   (* The same development for implication. Note that implication is handled in the main reification logic since P -> Q is just syntactic sugar for (forall _:P, Q)*)
   Definition mImpl {ff : falsity_flag} (fP fQ : form ff) : form ff := fP → fQ.
@@ -386,38 +386,38 @@ Section TarskiMerging.
   * intros PQ pP. apply pQl, PQ, pPr, pP.
   * cbn. intros pPQ pP. apply pQr, pPQ, pPl, pP.
   Defined.
-  MetaCoq Quote Definition qMergeImpl := @mergeImpl.
-  MetaCoq Quote Definition qMergeFormImpl := @mImpl.
+  MetaRocq Quote Definition qMergeImpl := @mergeImpl.
+  MetaRocq Quote Definition qMergeFormImpl := @mImpl.
 
-  (* The same development for forall. Since forall-quantification in Coq is a part of the proper syntax (product types), this will again be handled by the main reification*)
+  (* The same development for forall. Since forall-quantification in Rocq is a part of the proper syntax (product types), this will again be handled by the main reification*)
   Definition mForall {ff : falsity_flag} (fP:form ff) : form ff := ∀ fP.
   Definition mergeForall {ff : falsity_flag} (rho:nat -> D) (Q:naryProp 1) (phi:form ff) : representsP phi rho Q -> @representsP tr ff 0 (mForall phi) rho (forall x:D, Q x).
   Proof. intros H. cbn. split;
    intros HH d; specialize (HH d); specialize (H d); cbn in H; apply H, HH.
   Defined.
-  MetaCoq Quote Definition qMergeForall := @mergeForall.
-  MetaCoq Quote Definition qMergeFormForall := @mForall.
+  MetaRocq Quote Definition qMergeForall := @mergeForall.
+  MetaRocq Quote Definition qMergeFormForall := @mForall.
 
   Definition mIff {ff : falsity_flag} (fP fQ : form ff) : form ff := fP ↔ fQ.
   Definition mergeIff {ff : falsity_flag} (rho:nat -> D) (P Q : naryProp 0) (fP fQ : form ff) : representsP fP rho P -> representsP fQ rho Q -> @representsP _ ff 0 (mIff fP fQ) rho (P <-> Q).
   Proof. intros H1 H2. cbn. cbn in H1,H2. rewrite H2, H1. reflexivity. Defined.
-  MetaCoq Quote Definition qMergeFormIff := @mIff.
-  MetaCoq Quote Definition qMergeIff := @mergeIff. 
+  MetaRocq Quote Definition qMergeFormIff := @mIff.
+  MetaRocq Quote Definition qMergeIff := @mergeIff. 
 
   (* The same development for not X. *)
   Definition mNot (fP : form falsity_on) : form falsity_on := fP→falsity.
   Definition mergeNot (rho:nat -> D) (P:naryProp 0) (fP : form falsity_on) : @representsP _ falsity_on 0 fP rho P -> @representsP _ falsity_on 0 (mNot fP) rho (~P).
   Proof. cbn. tauto. Defined.
-  MetaCoq Quote Definition qMergeFormNot := @mNot.
-  MetaCoq Quote Definition qMergeNot := @mergeNot.
+  MetaRocq Quote Definition qMergeFormNot := @mNot.
+  MetaRocq Quote Definition qMergeNot := @mergeNot.
 
 
   (* The same development for truth. Note that truth has no canonical representative in the tarski semantics. It is equivalent to (falsity -> falsity), but not computationally equal. So using True in noProof mode would fail.*)
   Definition mTrue : form falsity_on := falsity → falsity.
   Definition mergeTrue (rho:nat -> D) : @representsP _ falsity_on 0 (mTrue) rho (True).
   Proof. cbn. tauto. Defined.
-  MetaCoq Quote Definition qMergeFormTrue := @mTrue.
-  MetaCoq Quote Definition qMergeTrue := @mergeTrue.
+  MetaRocq Quote Definition qMergeFormTrue := @mTrue.
+  MetaRocq Quote Definition qMergeTrue := @mergeTrue.
 
   (* We now define reification helpers for each of the primitives (except implication&forall). These helpers recursively apply the main reification function to the subterms and assemble the resulting term/prood*)
   Definition reifyFalse : baseConnectiveReifier := fun tct qff lst _ envTerm env fPR _ => match lst with nil => ret (tApp qMergeFormFalse ([tct]), tApp qMergeFalse ([tct;envTerm])) | _ => fail "False applied to terms" end. 
@@ -525,8 +525,8 @@ Section EnvHelpers.
   (* Appends something to the start of the env. At the same time, it expects the terms given to the env helper to be one level deeper, so it "unshifts" the tRels first *)
   Definition appendAndLift (env:Ast.term -> FailureMonad nat) (zv:FailureMonad nat) : (Ast.term -> FailureMonad nat) := 
         fun t => match t with tRel n => (match n with 0 => zv | S n => k <- env (tRel n);;ret (S k) end) | _ => k <- lowerRelIndex 0 (fail "tRel 0 used when lowering") t;; v <- env k;;ret (S v) end.
-  MetaCoq Quote Definition qD := @D.
-  MetaCoq Quote Definition qScons := @scons.
+  MetaRocq Quote Definition qD := @D.
+  MetaRocq Quote Definition qScons := @scons.
   (* Appends d to the env *)
   Definition raiseEnvTerm (tct:Ast.term) (d:Ast.term) (env:Ast.term) : Ast.term := tApp (qScons) ([tApp qD ([tct]);d;env]).
   (* The env helper for the empty environ, which always fails *)
@@ -538,10 +538,10 @@ Section EnvConstructor.
       Constructs the environment used to help with free variables in terms *)
   (* Useful quotations *)
   Existing Instance config.default_checker_flags.
-  MetaCoq Quote Definition qFs := @fs.
-  MetaCoq Quote Definition qLocalVar := @var.
-  MetaCoq Quote Definition qI_f := @i_func.
-  MetaCoq Quote Definition qI_P := @i_atom.
+  MetaRocq Quote Definition qFs := @fs.
+  MetaRocq Quote Definition qLocalVar := @var.
+  MetaRocq Quote Definition qI_f := @i_func.
+  MetaRocq Quote Definition qI_P := @i_atom.
   Context {tr : tarski_reflector}.
   Context {te : tarski_reflector_extensions tr}.
   
@@ -586,10 +586,10 @@ Section EnvConstructor.
              if decide (s = "False") then findUBFalse  else
              if decide (s = "True")  then findUBTrue   else
                 match @baseLogicVarHelper tr te with None => fun _ _ _ _ _ => fail (String.append "Unknown connective " s) | Some k => k s end.
-  MetaCoq Quote Definition qIff := @iff.
-  MetaCoq Quote Definition qNot := @not.
+  MetaRocq Quote Definition qIff := @iff.
+  MetaRocq Quote Definition qNot := @not.
 
-  (* Checks whether a term is the type of theory terms in Coq. *)
+  (* Checks whether a term is the type of theory terms in Rocq. *)
   Definition maybeD : Ast.term -> Ast.term -> bool := fun tct mD => if @isD tr mD then true else Checker.eq_term init_graph mD (tApp qD ([tct])).
   (* Finds the unbound variables in a form *)
   Fixpoint findUnboundVariablesForm (tct:Ast.term) (fuel:nat) (t:Ast.term) (frees:nat) {struct fuel}: (FailureMonad (list Ast.term)) := 

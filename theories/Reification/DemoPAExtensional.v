@@ -1,5 +1,5 @@
 Require Import FOL.Reification.GeneralReflection FOL.Arithmetics FOL.FullSyntax.
-Import MetaCoq.Template.Ast MetaCoq.Template.TemplateMonad.Core.
+Import MetaRocq.Template.Ast MetaRocq.Template.TemplateMonad.Core.
 Import Vector.VectorNotations.
 From Stdlib Require Import String List.
 
@@ -30,28 +30,28 @@ Section ReificationExample.
     * easy.
     * cbn. do 2 f_equal. cbn in IHn. now rewrite IHn.
     Defined.
-    (* Define some MetaCoq terms we will need later *)
-    MetaCoq Quote Definition qNum := inum.
-    MetaCoq Quote Definition qMergeNum := mergeNum.
-    MetaCoq Quote Definition qMergeTermNum := @num.
+    (* Define some MetaRocq terms we will need later *)
+    MetaRocq Quote Definition qNum := inum.
+    MetaRocq Quote Definition qMergeNum := mergeNum.
+    MetaRocq Quote Definition qMergeTermNum := @num.
 
     Definition mergeEqProp (rho:nat -> D) (d1 d2 : D) (t1 t2 : Core.term) : representsF d1 t1 rho -> representsF d2 t2 rho -> @representsP _ _ 0 (t1==t2) rho (d1 = d2).
     Proof. intros pt1 pt2. cbn. unfold representsF in pt1, pt2. cbn in pt1, pt2. rewrite pt1, pt2. now rewrite D_ext.
     Defined.
-    MetaCoq Quote Definition qMergeFormEq := (constructForm Eq).
-    MetaCoq Quote Definition qMergeEqProp := mergeEqProp.
+    MetaRocq Quote Definition qMergeFormEq := (constructForm Eq).
+    MetaRocq Quote Definition qMergeEqProp := mergeEqProp.
 
 
-    Definition reifyCoqEq : baseConnectiveReifier := fun tct qff l fuel envTerm env fPR fTR => match l with (tv::x::y::nil) => if maybeD tct tv then
+    Definition reifyRocqEq : baseConnectiveReifier := fun tct qff l fuel envTerm env fPR fTR => match l with (tv::x::y::nil) => if maybeD tct tv then
                                                xr <- fTR tct qff x envTerm env ;;
                                                yr <- fTR tct qff y envTerm env ;; let '((xt,xp),(yt,yp)) := (xr,yr) in
                                                ret (tApp qMergeFormEq (xt::yt::nil), tApp qMergeEqProp (envTerm::x::y::xt::yt::xp::yp::nil)) else fail "Eq applied to wrong type"%bs | _ => fail "Eq constructor applied to != 2 terms"%bs end.
-    Definition varsCoqEq : baseConnectiveVars := fun lst fuel tct _ fUVT => match lst with tv::x::y::nil => if maybeD tct tv then
+    Definition varsRocqEq : baseConnectiveVars := fun lst fuel tct _ fUVT => match lst with tv::x::y::nil => if maybeD tct tv then
                                                xr <- fUVT x;;
                                                yr <- fUVT y;;
                                                ret (List.app xr yr) else fail "Eq applied to wrong type" | _ => fail "Eq constructor applied to != 2 terms" end.
-    Definition reifyBLC s : baseConnectiveReifier := match s with "eq" => reifyCoqEq | _ => fun _ _ _ _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
-    Definition varsBLC s : baseConnectiveVars := match s with "eq" => varsCoqEq | _ => fun _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
+    Definition reifyBLC s : baseConnectiveReifier := match s with "eq" => reifyRocqEq | _ => fun _ _ _ _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
+    Definition varsBLC s : baseConnectiveVars := match s with "eq" => varsRocqEq | _ => fun _ _ _ _ _ => fail (String.append "Unknown connective " s) end.
     Definition findVarsTerm : termFinderVars := fun fuel t fUVT => match t with (tApp qMu (k::nil)) => ret nil | _ => fail "Fail" end.
     Definition reifyTerm : termFinderReifier := fun tct qff fuel t envTerm env fTR => match t with tApp qMu (k::nil) => ret (tApp qMergeTermNum (k::nil), tApp qMergeNum (envTerm::k::nil)) | _ => fail "Fail" end.
   End ReflectionExtension.

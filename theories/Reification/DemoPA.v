@@ -1,5 +1,5 @@
 Require Import FOL.Reification.GeneralReflection FOL.Arithmetics FOL.FullSyntax.
-Import MetaCoq.Template.Ast MetaCoq.Template.TemplateMonad.Core.
+Import MetaRocq.Template.Ast MetaRocq.Template.TemplateMonad.Core.
 Import Vector.VectorNotations.
 From Stdlib Require Import String List.
 
