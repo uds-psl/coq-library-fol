@@ -78,6 +78,8 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 - An Analysis of Tennenbaum's Theorem in Constructive Type Theory. Marc Hermes, Dominik Kirst. FSCD'22.
 - Gödel's Theorem Without Tears: Essential Incompleteness in Synthetic Computability. Dominik Kirst, Benjamin Peters. CSL'23.
 - Synthetic Undecidability and Incompleteness of First-Order Axiom Systems in Coq. Dominik Kirst, Marc Hermes. JAR'23.
+- The Kleene-Post and Post's Theorem in the Calculus of Inductive Constructions. Yannick Forster, Dominik Kirst, Niklas Mück. CSL'24.
+- An Analysis of Tennenbaum's Theorem in Constructive Type Theory (Extended Version). Marc Hermes, Dominik Kirst. LMCS'24.
 - The Blurred Drinker Paradox: Constructive Reverse Mathematics of the Downward Löwenheim-Skolem Theorem. Dominik Kirst, Haoyi Zeng. LICS'25.
 
 ### Workshop Abstracts
@@ -86,3 +88,4 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 - Synthetic Versions of the Kleene-Post and Post's Theorem. Dominik Kirst, Niklas Mück, Yannick Forster. TYPES, 2022.
 - Strong, Synthetic, and Computational Proofs of Gödel's First Incompleteness Theorem. Benjamin Peters, Dominik Kirst. TYPES, 2022.
 - A Coq Library for Mechanised First-Order Logic. Dominik Kirst, Johannes Hostert, Andrej Dudenhefner, Yannick Forster, Marc Hermes, Mark Koch, Dominique Larchey-Wendling, Niklas Mück, Benjamin Peters, Gert Smolka, Dominik Wehr. The Coq Workshop, 2022.
+- The Blurred Drinker Paradox and Blurred Choice Axioms for the Downward Löwenheim-Skolem Theorem. Dominik Kirst, Haoyi Zeng. TYPES, 2024.
