@@ -12,6 +12,7 @@ The FOL library currently extends this core with the following content:
 - [Incompleteness](theories/Incompleteness): An abstract and synthetic version of the first incompleteness theorem, instantiated to Robinson's Q.
 - [Tennenbaum](theories/Tennenbaum): Tennenbaum's theorem stating that the natural numbers are the only computable model of PA, constructivised.
 - [ArithmeticalHierachy](theories/ArithmeticalHierarchy): Semantic and syntactic characterisations of the arithmetical hierarchy and an equivalence proof.
+- [ModelTheory](theories/ModelTheory): Results on model theory, so far focused on the (downwards) Löwenheim-Skolem theorem
 - [Proofmode](theories/Proofmode): A tool easing derivations in a deduction system, including a HOAS input language hiding de Bruijn encoded syntax.
 - [Reification](theories/Reification): A tactic automating representability proofs of Coq predicates as first-order formulas.
 - [Utils](theories/Utils): A collection of additional results needed in various projects.
@@ -23,8 +24,8 @@ We are currently planning to release this library as an OPAM package. Until then
 First, we recommend that you create a new OPAM switch, although this is optional:
 
 ```
-opam switch create coq-library-fol-8-16 --packages=ocaml-variants.4.14.0+options,ocaml-option-flambda
-opam switch link coq-library-fol-8-16 .
+opam switch create coq820 --packages=ocaml-variants.4.14.0+options,ocaml-option-flambda
+opam switch link coq820 .
 eval $(opam env)
 ```
 
@@ -61,6 +62,7 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 - Benjamin Peters
 - Gert Smolka
 - Dominik Wehr
+- Haoyi Zeng
 
 ## Publications
 
@@ -76,6 +78,7 @@ To contribute, fork the project on GitHub, add a new subdirectory for your proje
 - An Analysis of Tennenbaum's Theorem in Constructive Type Theory. Marc Hermes, Dominik Kirst. FSCD'22.
 - Gödel's Theorem Without Tears: Essential Incompleteness in Synthetic Computability. Dominik Kirst, Benjamin Peters. CSL'23.
 - Synthetic Undecidability and Incompleteness of First-Order Axiom Systems in Coq. Dominik Kirst, Marc Hermes. JAR'23.
+- The Blurred Drinker Paradox: Constructive Reverse Mathematics of the Downward Löwenheim-Skolem Theorem. Dominik Kirst, Haoyi Zeng. LICS'25.
 
 ### Workshop Abstracts
 

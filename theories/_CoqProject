@@ -87,3 +87,16 @@ Tennenbaum/Tennenbaum_insep.v
 Tennenbaum/HA_insep.v
 Tennenbaum/Variants.v
 Tennenbaum/Abstract_coding.v
+
+ModelTheory/DCPre.v
+ModelTheory/LogicalPrinciples.v
+ModelTheory/UpwardLS.v
+ModelTheory/FragmentCore.v
+ModelTheory/FragmentFacts.v
+ModelTheory/FragmentHenkinModel.v 
+ModelTheory/Core.v 
+ModelTheory/ConstructiveLS.v
+ModelTheory/HenkinEnv.v
+ModelTheory/ClassicalDC.v
+ModelTheory/ReverseLS.v
+ModelTheory/AnalysisLS.v
