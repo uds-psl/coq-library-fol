@@ -138,8 +138,6 @@ Section upward.
 
 End upward.
 
-Check Upward.
-
 
 
 

@@ -521,8 +521,6 @@ Section DC_impl_DDC_BCC.
           now econstructor.
       Qed.
 
-      Check iter.
-
     Lemma AC_impl_DC: AC -> DC.
     Proof.
       intros ac X x R HR. destruct (ac _  _ x x R HR) as [f Hf].
@@ -598,7 +596,7 @@ Section LBDC_VBDC.
           destruct (@any_length_sig n).
           destruct (Hg x) as [w Hw].
           exists w. unfold R' in Hw.
-          now rewrite map_length, e in Hw.
+          now rewrite length_map, e in Hw.
     Qed.
     Fact to_map_of_eq_map {A B} (v: list A) (g: A -> B) : to_list (Vector.map g (of_list v)) = map g v.
     Proof.
@@ -606,11 +604,9 @@ Section LBDC_VBDC.
         now rewrite to_list_of_list_opp.
     Qed.
 
-    Search to_list.
-
     Fact length_map_to_list {A B n} (v: vec A n) (g: A -> B): length (map g (to_list v)) = n.
     Proof.
-        rewrite map_length.
+        rewrite length_map.
         now rewrite length_to_list.
     Qed.
     
@@ -630,7 +626,7 @@ Section LBDC_VBDC.
         P (length (map g (to_list v))) (of_list (map g (to_list v))) <-> P n (Vector.map g v).
     Proof.
         assert (H : n = length (map g (to_list v))).
-        - now rewrite map_length, length_to_list.
+        - now rewrite length_map, length_to_list.
         - unshelve erewrite vec_list_map; try apply H.
         destruct H. now rewrite cast_refl.
     Qed.
@@ -639,7 +635,7 @@ Section LBDC_VBDC.
         P (length (map g (to_list v))) (of_list (map g (to_list v))) w <-> P n (Vector.map g v) w.
     Proof.
         assert (H : n = length (map g (to_list v))).
-        - now rewrite map_length, length_to_list.
+        - now rewrite length_map, length_to_list.
         - unshelve erewrite vec_list_map; try apply H.
         destruct H. now rewrite cast_refl.
     Qed.

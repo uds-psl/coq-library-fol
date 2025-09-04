@@ -214,8 +214,6 @@ Section PDC_over_countable_set.
         exists (g next).
         now rewrite bij_r.
     Qed.
-    
-    About Vectors.vector_to_list_length.
 
     Lemma functional_least_pred root:
         (forall x, exists y, R x y) ->
@@ -405,6 +403,7 @@ Section EO_choice.
     Qed.
 
 End EO_choice.
+
 
 
 

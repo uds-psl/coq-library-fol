@@ -491,7 +491,7 @@ Section FixedModel.
 
     End directed_fixpoint.
 
-    (* This sectiob shows that ~> is directed *)
+    (* This section shows that ~>' is total *)
     Section dp_Next_env_total.
 
         Hypothesis dp: DP.
@@ -566,7 +566,7 @@ Section FixedModel.
 
     End dp_Next_env_total.
 
-        (* This sectiob shows that ~> is directed *)
+        (* This section shows that ~> is total *)
     Section bdp_Next_env_total.
         Hypothesis bdp: BDP.
         Hypothesis bep: BEP.
@@ -647,7 +647,7 @@ Section FixedModel.
         Qed.
     End bdp_Next_env_total.
 
-    (* This sectiob shows that ~> is directed *)
+    (* This section shows that ~> is directed *)
     Section Next_env_directed.
         Hypothesis bdp: BDP.
         Hypothesis bep: BEP.

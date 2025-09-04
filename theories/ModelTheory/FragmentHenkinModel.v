@@ -9,6 +9,7 @@ Local Set Implicit Arguments.
 (* Gives the proof that any model with term as domain is countable. 
    It may be possible to generalize to arbitrary cardinality depandent
    on signature. *)
+   
 Section TermIsCountable.
     Context {Σf : funcs_signature} {Σp : preds_signature}.
     Existing Instance falsity_on.
@@ -225,7 +226,7 @@ Section TermModel.
         intro fix_h. exists N. split. {apply term_model_countable. }
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q; split.
             + intros H'; destruct (Hphi (φ[up ρ])) as [i phi].
             destruct (@fix_h (φ[up ρ])) as [wit h_prop].
@@ -251,7 +252,7 @@ Section TermModel.
         intro fix_h. exists N. split. {apply term_model_countable. }
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q; split.
             + intros H'; destruct (Hphi (φ[up ρ])) as [i phi].
             specialize (@fix_h (φ[up ρ])) as h_prop.
@@ -281,7 +282,7 @@ Section TermModel.
         intro fix_h. exists N. 
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q; split.
             + intros H'; destruct (Hphi (φ[up ρ])) as [i phi].
             destruct (@fix_h (φ[up ρ])) as [wit h_prop].
@@ -307,7 +308,7 @@ Section TermModel.
         intro fix_h. exists N.
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q. split.
             + intros H'; destruct (Hphi (φ[up ρ])) as [i phi].
             specialize (@fix_h (φ[up ρ])) as h_prop.
@@ -338,7 +339,7 @@ Section TermModel.
         intro fix_h. exists N. 
         exists morphism; split. intros φ. induction φ using form_ind_subst; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q; split.
             + intros H'; destruct (Hphi (φ[up ρ])) as [i phi].
             destruct (@fix_h (φ[up ρ])) as [wit h_prop].
@@ -380,7 +381,7 @@ Section TermModel.
         exists N, morphism. split. {apply term_model_countable. } split. intros φ.
         induction φ using form_ind_falsity; intro; try easy.
         - cbn; now rewrite map_map, map_eval_eval.
-        - destruct b0; cbn; intuition.
+        - destruct b0; cbn; intuition auto with *.
         - destruct q; split.
           + intros H d; destruct (Hphi φ) as [i phi].
             destruct (witness_prop_ φ) as [wit__i [witness_prop__i witness_closed]].

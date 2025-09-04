@@ -94,7 +94,7 @@ End Elementary.
 
 Notation "M ≡ N"  := (elementary_equivalence M N) (at level 30).
 Notation "N ⪳[ h ] M"  := (@elementary_homomorphism _ _ _ N M h) (at level 30).
-Notation "N ⪳ M"  := (exists h: N -> M, N ⪳[ h ] M) (at level 30).
+Notation "N ⪳ M"  := (exists h: N -> M, (N % type) ⪳[ h ] (M % type)) (at level 30).
 
 
 Section Countable_Sig.
@@ -174,17 +174,3 @@ Section LöwenheimSkolemTheorem.
     Qed.
 
 End LöwenheimSkolemTheorem.
-
-(* Definition LS_root :=
-    forall (Σ_f: funcs_signature) (Σ_p: preds_signature),
-        forall (M: model), forall m,
-            exists (N: model), coutable_model N /\ 
-                (exists h: N -> M, N ⪳[h] M /\ exists n: N, h n = m).
-
-Definition bijective_comp {X Y} :=
-    exists f g, (forall x: X, g (f x) = x) /\ forall y: Y, f (g y) = y.
-
-Definition LS_root' :=
-    forall (Σf : funcs_signature) (Σp : preds_signature) (M: model), forall m,
-        exists (N: model), @bijective_comp N nat /\ (exists h: N -> M, elementary_homomorphism h /\ exists n: N, h n = m).
- *)
