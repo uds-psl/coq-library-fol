@@ -1,4 +1,4 @@
-From Coq Require Import Arith Lia Nat PeanoNat.
+From Coq Require Import Arith Lia Nat PeanoNat ConstructiveEpsilon.
 Require Export FOL.ModelTheory.LogicalPrinciples.
 
 Notation "'Σ' x .. y , p" :=
@@ -8,11 +8,24 @@ Notation "'Σ' x .. y , p" :=
     : type_scope.
 
 Notation unique p := (forall x y, p x -> p y -> x = y).
-Notation sig := sigT.
-Notation Sig := existT.
+
 Notation pi1 := projT1.
 
 (** * Utils *)
+
+Lemma W' (p : nat -> Prop) :
+    decidable p -> ex p -> sig p.
+Proof.
+    intros H. apply constructive_indefinite_description_nat.
+    intros n. destruct (H n); [now left | now right].
+Qed.
+
+Lemma W (p : nat -> Prop) :
+    decidable p -> ex p -> sigT p.
+Proof.
+    intros H1 H2. destruct (W' H1 H2) as [n Hn]. now exists n.
+Qed.
+
 
 Section Least_witness.
 
@@ -38,48 +51,18 @@ Section Least_witness.
     Qed.
 
     Fact safe_O p :
-    safe p 0.
+        safe p 0.
     Proof.
-    intros k _. lia.
+        intros k _. lia.
     Qed.
 
     Fact safe_S p n :
-    safe p n -> ~p n -> safe p (S n).
+        safe p n -> ~p n -> safe p (S n).
     Proof.
-    intros H1 H2 k H3.
-    specialize (H1 k H3).
-    enough (k <> n) by lia.
-    intros ->. easy.
-    Qed.
-
-    Definition XM := forall P, P \/ ~P.
-
-    Fact xm_least_safe :
-    XM -> forall p n, ex (least p) \/ safe p n.
-    Proof.
-    intros H p.
-    induction n as [|n IH].
-    - right. apply safe_O.
-    - destruct IH as [IH|IH].
-        + left. exact IH.
-        + specialize (H (p n)) as [H|H].
-        * left. exists n. easy.
-        * right. apply safe_S; assumption.
-    Qed.
-
-    Fact least_safe_ex_least :
-    (forall p n, ex (least p) \/ safe p n) -> forall p, ex p -> ex (least p).
-    Proof.
-    intros H p [n H1].
-    specialize (H p n) as [H|H].
-    * exact H.
-    * exists n. easy.
-    Qed.
-
-    Fact XM_ex_least:
-        XM -> forall p, ex p -> ex (least p).
-    Proof.
-        intro; now apply least_safe_ex_least, xm_least_safe.
+        intros H1 H2 k H3.
+        specialize (H1 k H3).
+        enough (k <> n) by lia.
+        intros ->. easy.
     Qed.
 
     Fact Logical_dec_safe (P: nat -> Prop):
@@ -106,57 +89,6 @@ Section Least_witness.
 
 End Least_witness.
 
-Section WO.
-
-    Implicit Types n k: nat.
-    Variable p: nat -> Prop.
-    Variable p_dec: decidable p.
-
-    Inductive T (n: nat) : Prop := C (phi: ~p n -> T (S n)).
-
-    Lemma T_base n :
-        p n -> T n.
-    Proof.
-        intros H. constructor. intros H1. destruct (H1 H).
-    Qed.
-
-    Lemma T_step n :
-        T (S n) -> T n.
-    Proof.
-        intros H. constructor. intros _. exact H.
-    Qed.
-
-    Lemma T_zero n :
-        T n -> T 0.
-    Proof.
-        induction n as [|n IH].
-        auto. intros H. apply IH. apply T_step, H.
-    Qed.
-
-    Lemma V n :
-        p n -> T 0.
-    Proof.
-        intros H. eapply T_zero, T_base, H.
-    Qed.
-
-    Lemma W' :
-        forall n, T n -> sig p.
-    Proof.
-        refine (fix F n a {struct a} := let (phi) := a in
-                            match p_dec n with
-                            inl H => _ | inr H => _
-                            end).
-        exact (Sig p n H). exact (F (S n) (phi H)).
-    Qed.
-
-    Theorem W :
-        ex p -> sig p.
-    Proof.
-        intros H. apply W' with 0.
-        destruct H as [n H]. apply V with n, H.
-    Qed.
-
-End WO.
 
 Section DC_over_countable_set.
 
@@ -297,93 +229,6 @@ Section StrongInduction.
 End StrongInduction.
 
 Tactic Notation "strong" "induction" ident(n) := induction n using strong_induction.
-
-Section Cantor.
-
-    Definition next a : nat * nat :=
-        match a with
-        | (0,y) => (S y, 0)
-        | (S x, y) => (x, S y)
-        end.
-
-    Fixpoint decode n : nat * nat :=
-        match n with
-        | 0 => (0,0)
-        | S n' => next (decode n')
-        end.
-
-    Fixpoint sum n : nat :=
-        match n with
-        | 0 => 0
-        | S n' => S n' + sum n'
-        end.
-
-    Definition encode_p '(x, y) : nat :=
-        sum (x + y) + y.
-
-    Fact encode_next a :
-        encode_p (next a) = S (encode_p a).
-    Proof.
-        destruct a as [[|x] y]; cbn -[sum].
-        - rewrite !Nat.add_0_r. rewrite Nat.add_comm. reflexivity.
-        - assert (forall x y, x + S y = S (x + y)) by lia.
-        rewrite !H. reflexivity.
-    Qed.
-
-    Opaque encode_p. 
-
-    Fact encode_decode n :
-        encode_p (decode n) = n.
-    Proof.
-    induction n as [|n IH]; cbn.
-    - reflexivity.
-    - rewrite encode_next, IH. reflexivity.
-    Qed.
-
-    Fact decode_encode a :
-        decode (encode_p a) = a.
-    Proof.
-    revert a.
-    enough (forall n a, encode_p a = n -> decode n = a) by eauto.
-    induction n as [|n IH]; intros [x y]; cbn.
-    - destruct x, y; cbn [encode_p]; cbn; easy.
-    - destruct y.
-        + destruct x.
-        * discriminate.
-        * change (S x, 0) with (next (0,x)).
-            rewrite encode_next.
-            intros [= <-].
-            f_equal. apply IH. reflexivity.
-        + change (x, S y) with (next (S x, y)). 
-        rewrite encode_next.
-        intros [= <-].
-        f_equal. apply IH. reflexivity.
-    Qed.
-
-    Definition encode a b := encode_p (a, b).
-    Definition π__1 x := fst (decode x).
-    Definition π__2 x := snd (decode x).
-
-    Lemma cantor_paring: forall x, encode (π__1 x) (π__2 x) = x.
-    Proof.
-        intro x; unfold encode, π__1, π__2.
-        rewrite <- (surjective_pairing (decode x)).
-        now rewrite encode_decode.
-    Qed.
-
-    Lemma cantor_left: forall x y, π__1 (encode x y) = x.
-    Proof.
-        intros x y; unfold encode, π__1.
-        now rewrite decode_encode.
-    Qed.
-
-    Definition cantor_right: forall x y, (π__2 (encode x y)) = y.
-    Proof.
-        intros x y; unfold encode, π__2.
-        now rewrite decode_encode.
-    Qed.
-
-End Cantor.
 
 Section EO_choice.
 

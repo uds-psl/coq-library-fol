@@ -2,7 +2,28 @@ Require Import FOL.ModelTheory.Core.
 Require Import FOL.ModelTheory.LogicalPrinciples.
 Require Import FOL.ModelTheory.DCPre.
 Require Import FOL.ModelTheory.ConstructiveLS.
-Require Import Arith Lia PeanoNat Peano_dec.
+Require Import Arith Cantor Lia PeanoNat Peano_dec.
+
+Definition π__1 n := fst (of_nat n).
+Definition π__2 n := snd (of_nat n).
+Definition encode n m := to_nat (n, m).
+
+Lemma cantor_left:
+  forall x y, π__1 (encode x y) = x.
+Proof.
+  intros x y; unfold encode, π__1.
+  now rewrite cancel_of_to.
+Qed.
+
+Definition cantor_right:
+  forall x y, (π__2 (encode x y)) = y.
+Proof.
+  intros x y; unfold encode, π__2.
+  now rewrite cancel_of_to.
+Qed.
+
+Opaque encode.
+
 
 (** * Construction of Henkin Environments *)
 
@@ -267,8 +288,6 @@ Section FixedModel.
         Variable Path: nat -> env M.
         Hypothesis HP: forall n, Path n ~>' Path (S n).
 
-        Opaque encode_p.
-
         Lemma mono_Path1 a b: Path a ⊆ Path (a + b) .
         Proof.
             induction b.
@@ -329,16 +348,12 @@ Section FixedModel.
             apply ι_succ'.
         Qed.
 
-    Opaque encode_p. 
-
     End total_fixpoint'.
 
     Section total_fixpoint.
 
         Variable Path: nat -> env M.
         Hypothesis HP: forall n, Path n ~> Path (S n).
-
-        Opaque encode_p.
 
         Lemma mono_Path' a b: Path a ⊆ Path (a + b) .
         Proof.
@@ -400,8 +415,6 @@ Section FixedModel.
             apply (ι_succ E).
         Qed.
 
-    Opaque encode_p. 
-
     End total_fixpoint.
 
     (* This section shows that countable directed F implies a fixpoint of ~> *)
@@ -422,8 +435,6 @@ Section FixedModel.
             + eapply trans_succ.
                 now apply Hk. apply Hkw. 
         Qed.
-
-        Opaque encode_p.
 
         Definition γ: env M := fun x => F (π__1 x) (π__2 x).
 
@@ -486,8 +497,6 @@ Section FixedModel.
             unshelve eapply bounded_sub_impl_henkin_env; [exact (F E) |exact b|..]; try easy.
             apply (γ_succ E).
         Qed.
-
-        Opaque encode_p. 
 
     End directed_fixpoint.
 
