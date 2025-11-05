@@ -3,8 +3,8 @@ Require Equations.Type.DepElim.
 From FOL.Proofmode Require Import Theories ProofMode.
 From FOL Require Import FullSyntax Arithmetics.
 
-Require FOL.Proofmode.Hoas.
-Require Import String List.
+From FOL Require Proofmode.Hoas.
+From Stdlib Require Import String List.
 
 Import ListNotations.
 Open Scope string_scope.

@@ -2,7 +2,7 @@ From Equations Require Import Equations.
 From FOL.HilbertSystem Require Import hilbert_system.
 From Undecidability.FOL Require Import Arithmetics.Robinson.
 From FOL Require Import ProofMode.
-Require Import String List.
+From Stdlib Require Import String List.
 
 Section ND_Hil_equiv.
 

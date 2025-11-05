@@ -1,6 +1,6 @@
 From Undecidability.FOL Require Import Syntax.Core Arithmetics.Robinson.
 From FOL Require Import ProofMode.
-Require Import List.
+From Stdlib Require Import List.
 
 Section Hil_def.
     Context {Σ_funcs : funcs_signature}.

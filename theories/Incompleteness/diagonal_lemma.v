@@ -14,8 +14,8 @@ From FOL.Proofmode Require Import Theories ProofMode DemoPA.
 
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu ctq formula_deduction_utils.
 
-Require FOL.Proofmode.Hoas.
-Require Import String Lia List.
+From FOL Require Proofmode.Hoas.
+From Stdlib Require Import String Lia List.
 
 Import ListNotations.
 Open Scope string_scope.

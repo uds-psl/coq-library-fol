@@ -10,7 +10,7 @@ From FOL.Proofmode Require Import Theories ProofMode DemoPA.
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu ctq formula_deduction_utils.
 
 Require FOL.Proofmode.Hoas.
-Require Import String Lia List Vector.
+From Stdlib Require Import String Lia List Vector.
 Import Vector.VectorNotations Vectors.VectorDef.
 
 Import ListNotations.

@@ -1,7 +1,7 @@
 From FOL Require Import FullSyntax Arithmetics ProofMode.
 From FOL.Incompleteness Require Import Axiomatisations sigma1 qdec utils.
 From Undecidability.FOL.Utils Require Import FriedmanTranslation.
-Require Import Lia.
+From Stdlib Require Import Lia.
 (** * Utilities *)
 (** ** Translation between Classical and Intuitionistic Reasoning *)
 Section Translations.

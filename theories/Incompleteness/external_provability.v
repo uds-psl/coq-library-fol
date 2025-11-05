@@ -7,8 +7,8 @@ From FOL.Proofmode Require Import Theories ProofMode.
 
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu ctq diagonal_lemma formula_deduction_utils.
 
-Require FOL.Proofmode.Hoas.
-Require Import String Lia List.
+From FOL Require Proofmode.Hoas.
+From Stdlib Require Import String Lia List.
 (** * External Provability Predicates *)
 
 Section Ext_prov.
