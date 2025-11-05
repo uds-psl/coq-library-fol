@@ -17,7 +17,7 @@ From Stdlib Require Import Lia List.
 (* Notation for satisfying list theories *)
 Notation "I ⊨=L T" := (forall psi, List.In psi T -> I ⊨= psi) (at level 20).
 (* Notation for explicitly giving model *)
-Notation "I ; rho '⊨' phi" := (@sat _ _ _ I _ rho phi) (at level 20, rho at next level).
+Notation "I ';;' rho '⊨' phi" := (@sat _ _ _ I _ rho phi) (at level 20, rho at next level).
 
 
 (* Utilities for first-order logic *)
@@ -36,7 +36,7 @@ Section lemmas.
     erewrite <-eval_num. apply sat_single.
   Qed.
 
-  Lemma sat_single_nat φ ρ k : interp_nat; (k .: ρ) ⊨ φ <-> interp_nat; ρ ⊨ φ[(num k)..].
+  Lemma sat_single_nat φ ρ k : interp_nat;; (k .: ρ) ⊨ φ <-> interp_nat;; ρ ⊨ φ[(num k)..].
   Proof.
     erewrite <-iμ_standard at 1.
     now rewrite sat_single_PA.

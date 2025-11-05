@@ -149,7 +149,7 @@ Section Tarski.
       specialize (HG (nat_is_Q_model (fun _ : nat => 0))).
       cbn in HG. destruct HG as [HGL  HGR]. 
       specialize (HRepr _ HGBnd).
-      eapply stable_classical; first firstorder. Unshelve. 2: exact (interp_nat; (fun _ : nat => 0) ⊨ G).
+      eapply stable_classical; first firstorder. Unshelve. 2: exact (interp_nat;; (fun _ : nat => 0) ⊨ G).
       intros [L | R].
       - apply HGL; first assumption. destruct (HRepr) as [HRepr' _].
         enough (interp_nat ⊨= true_N[(quine_quote G)..]) as H.

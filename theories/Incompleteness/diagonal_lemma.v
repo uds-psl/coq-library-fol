@@ -3,17 +3,9 @@ From Undecidability.Synthetic Require Import Definitions EnumerabilityFacts Deci
 
 From Equations Require Import Equations.
 Require Equations.Type.DepElim.
-
 From FOL Require Import FullSyntax Arithmetics.
-
-(** Gödelisation of formulas *)
-Class goedelisation {ops: operators} {ff: falsity_flag} {fns: funcs_signature} {prs: preds_signature}:=
-     {g: form -> nat; f: nat -> form; inv_fg: forall x, x = f (g x)}. (** If we define this underneath the imports, strange errors occur. *)
-
 From FOL.Proofmode Require Import Theories ProofMode DemoPA.
-
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu ctq formula_deduction_utils.
-
 From FOL Require Proofmode.Hoas.
 From Stdlib Require Import String Lia List.
 
@@ -21,6 +13,11 @@ Import ListNotations.
 Open Scope string_scope.
 
 (** * Diagonal Lemma *)
+
+(** Gödelisation of formulas *)
+Class goedelisation {ops: operators} {ff: falsity_flag} {fns: funcs_signature} {prs: preds_signature}:=
+     {g: form -> nat; f: nat -> form; inv_fg: forall x, x = f (g x)}. (** If we define this underneath the imports, strange errors occur. *)
+
 
 Existing Instance PA_funcs_signature.
 Existing Instance PA_preds_signature.

@@ -307,7 +307,7 @@ Section ctq.
   Qed.
 
   Lemma sat_PAle ρ s t :
-    interp_nat; ρ ⊨ (s ⧀= t) <-> (eval ρ s) <= (eval ρ t).
+    interp_nat;; ρ ⊨ (s ⧀= t) <-> (eval ρ s) <= (eval ρ t).
   Proof.
     split.
     - intros [k Hk]. cbn in Hk.

@@ -201,7 +201,7 @@ Section fol.
         now exists k, (Vector.cons h w). 
     Qed.
 
-    Lemma sat_exist_times n ρ φ : interp_nat; ρ ⊨ exist_times n φ <-> exists w : Vector.t nat n, interp_nat; (vec_pos_default w ρ) ⊨ φ.
+    Lemma sat_exist_times n ρ φ : interp_nat;; ρ ⊨ exist_times n φ <-> exists w : Vector.t nat n, interp_nat;; (vec_pos_default w ρ) ⊨ φ.
     Proof.
       induction n as [|n IHn] in ρ |-*; cbn.
       - split.
@@ -221,7 +221,7 @@ Section fol.
           easy.
     Qed.
 
-    Lemma dprm_definable : dio_rec_single P -> exists φ, Σ1 φ /\ bounded 1 φ /\ forall x ρ, P x <-> interp_nat; (x .: ρ) ⊨ φ.
+    Lemma dprm_definable : dio_rec_single P -> exists φ, Σ1 φ /\ bounded 1 φ /\ forall x ρ, P x <-> interp_nat;; (x .: ρ) ⊨ φ.
     Proof.
       unfold dio_rec_single.
       intros (n & p1 & p2 & H).
@@ -235,7 +235,7 @@ Section fol.
         setoid_rewrite embed_eval. cbn. reflexivity.
     Qed.
 
-    Theorem mu_recursive_definable : mu_semi_decidable P -> exists φ, Σ1 φ /\ bounded 1 φ /\ forall x ρ, P x <-> interp_nat; (x .: ρ) ⊨ φ.
+    Theorem mu_recursive_definable : mu_semi_decidable P -> exists φ, Σ1 φ /\ bounded 1 φ /\ forall x ρ, P x <-> interp_nat;; (x .: ρ) ⊨ φ.
     Proof.
       intros [r Hr]. apply dprm_definable. do 3 apply DPRM_1. now exists r.
     Qed.
