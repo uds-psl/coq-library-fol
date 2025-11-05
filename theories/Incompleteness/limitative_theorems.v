@@ -28,7 +28,7 @@ Section Indefinability.
     Variables ctq: CTQ.
     Variables göd: goedelisation.
 
-    (* First, we "enable" classical reasoning when proving stable claims (is explicit form really needed?)*)
+    (* We can use classical reasoning when proving stable claims *)
     Definition stable (P: Prop) := ~~P -> P.
 
     Lemma stable_classical (P Q: Prop):
@@ -164,7 +164,6 @@ Section Tarski.
     Qed.
       
 End Tarski.
- (** TODO get Tarski's Theorem via Loeb's reasoning *)
 
 (** ** Gödel's First Incompleteness Theorem *)
 Section Gödel.
