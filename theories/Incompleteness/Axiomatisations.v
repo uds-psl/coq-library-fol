@@ -537,7 +537,7 @@ Qed.
 
 (* A model is standard if all k ∈ om correspond to some n : nat *)
 
-Open Scope sem.
+Open Scope ZFsem.
 Lemma ZF_undec2 D (M : interp D) B :
   standard M -> M ⊨=T Z' -> M ⊨= solvable B -> PCPb B.
 Proof.
