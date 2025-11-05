@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "1.1+9.0"
+version: "1.1+9.0.1"
 maintainer: "kirst@cs.uni-saarland.de"
 homepage: "https://github.com/uds-psl/coq-library-fol/"
 dev-repo: "git+https://github.com/uds-psl/coq-library-fol/"

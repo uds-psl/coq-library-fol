@@ -62,6 +62,7 @@ We are open to contributions! To contribute, fork the project on GitHub, add a n
 - Benjamin Peters
 - Gert Smolka
 - Dominik Wehr
+- Janis Bailitis
 
 ## Publications
 
