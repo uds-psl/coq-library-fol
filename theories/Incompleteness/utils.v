@@ -37,7 +37,24 @@ Proof.
   inversion 1; now inversion H2.
 Qed.
 
+Lemma un_vector_inv {X: Type} n (v: Vector.t X (S n)):
+    exists x v', v = x::v'.
+Proof.
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+Qed.
 
+Lemma bin_vector_inv {X: Type} n (v: Vector.t X (S (S n))):
+    exists x y v', v = x::y::v'.
+Proof.
+    assert (exists x v0, v = x::v0) as (x0 & v_one & Hx0).
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+    assert (exists x v0, v_one = x::v0) as (x1 & v_nil & Hx1).
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+    exists x0, x1, v_nil. congruence.
+Qed.
 
 (* * Synthetic computability *)
 (* Partial functions **)
