@@ -70,7 +70,15 @@ Incompleteness/bin_qdec.v
 Incompleteness/weak_strong.v
 Incompleteness/ctq.v
 Incompleteness/fol_incompleteness.v
+Incompleteness/formula_deduction_utils.v
+Incompleteness/diagonal_lemma.v
+Incompleteness/external_provability.v
+Incompleteness/limitative_theorems.v
+Incompleteness/abstract_loeb.v
+Incompleteness/multivariate_ctq.v
 
+HilbertSystem/hilbert_system.v
+HilbertSystem/hilbert_system_deduction_facts.v
 
 Tennenbaum/SyntheticInType.v
 Tennenbaum/NumberUtils.v
