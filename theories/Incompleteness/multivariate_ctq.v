@@ -139,7 +139,7 @@ Section n_ary_ctq.
             2: { repeat rewrite <- n_ary_subst_update. 
                  symmetry. now apply n_ary_subst_plus_zero_var. }
             fdestruct HReprψ as "[L' R']".
-            unfold g. cbn. specialize embed_eval_interchange as H. cbn in H. rewrite <- H. fsplit.
+            unfold g. specialize embed_eval_interchange as H. cbn in H. rewrite <- H. fsplit.
             * fintros "H". fapply "L'". fapply "R". fapply "H".
             * fintros "H". fapply "L". fapply "R'". fapply "H".
     Qed.
