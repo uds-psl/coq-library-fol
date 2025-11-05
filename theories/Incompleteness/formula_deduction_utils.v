@@ -76,48 +76,11 @@ Proof.
     destruct k; first easy. lia.
 Qed.
 
-Inductive aand (P Q R : Prop) :=
-      cconj : P -> Q -> R -> aand P Q R.
-
-Lemma form_inv {Σ_funcs : funcs_signature} {Σ_preds : preds_signature} {ops : operators} {flag : falsity_flag} phi1 phi2 :
-      phi1 = phi2 ->
-      match phi1, phi2 with
-      | falsity, falsity => True
-      | atom _ P1 args1, atom _ P2 args2 => True
-      | bin falsity_on o1 phi1' phi2', bin falsity_on o2 phi1'' phi2'' =>
-            aand (o1 = o2) (phi1' = phi1'') (phi2' = phi2'')
-      | bin falsity_off o1 phi1' phi2', bin falsity_off o2 phi1'' phi2'' =>
-          aand (o1 = o2) (phi1' = phi1'') (phi2' = phi2'')
-      | quant falsity_on o1 phi, quant falsity_on o2 phi' =>
-            o1 = o2 /\ phi = phi'
-      | quant falsity_off o1 phi, quant falsity_off o2 phi' =>
-          o1 = o2 /\ phi = phi'
-      | _, _ => False
-      end.
-Proof.
-      intros H. destruct phi1; subst; eauto.
-      all: destruct b; econstructor; eauto.
-Qed.
-
 Section Formula_facts.
 
     Existing Instance PA_funcs_signature.
     Existing Instance PA_preds_signature.
     Existing Instance full_operators.
-
-    Definition impl_dec {ff: falsity_flag}:
-        forall (φ ψ: form), {τ & ψ = τ → φ} + ({τ & ψ = τ → φ} -> False).
-    Proof.
-        intros φ ψ. destruct ψ as [| ff P ts | ff b τ χ | ff q τ].
-            * right. intros [τ Hτ]. congruence.
-            * right. intros [τ Hτ]. congruence.
-            * destruct b. 1-2: right; intros [τ' Hτ']; congruence.
-              destruct (dec_form _ _ _ _  χ φ).
-                + left. exists τ. congruence.
-                + right. intros [τ' Hτ']. apply n.
-                  destruct ff; eapply form_inv in Hτ' as []; congruence.
-            * right. intros [τ' Hτ']. congruence.
-    Qed.
 
     Lemma list_theory_provability {p: peirce} {ff: falsity_flag} A φ:
     A ⊢ φ <-> list_theory A ⊢T φ.
