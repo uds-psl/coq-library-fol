@@ -28,40 +28,6 @@ Section n_ary_ctq.
     Variables pei: peirce.
     Variables ctq: CTQ.
 
-    (** * Lemmas for Vectors *)
-    Lemma zero_vector_is_nil {X: Type} (v: Vector.t X 0):
-    [] = v.
-    Proof.
-        apply case0. easy.
-    Qed. 
-
-    Lemma un_vector_inv {X: Type} n (v: Vector.t X (S n)):
-    exists x v', v = x::v'.
-    Proof.
-        specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
-        apply Ht. eauto.
-    Qed.
-
-    Lemma bin_vector_inv {X: Type} n (v: Vector.t X (S (S n))):
-    exists x y v', v = x::y::v'.
-    Proof.
-        assert (exists x v0, v = x::v0) as (x0 & v_one & Hx0).
-        specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
-        apply Ht. eauto.
-        assert (exists x v0, v_one = x::v0) as (x1 & v_nil & Hx1).
-        specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
-        apply Ht. eauto.
-        exists x0, x1, v_nil. congruence.
-    Qed.
-
-    Lemma vector_inv_two_elems {X: Type} (v: Vector.t X 2):
-    exists x y, v = x::y::[].
-    Proof.
-        destruct (@bin_vector_inv _ _ v) as (x & y & v' & H).
-        exists x, y. rewrite <- (zero_vector_is_nil v') in H.
-        congruence.
-    Qed.
-
     (** ** Premilinary Definitions *)
 
     (** Produces the function type nat -> nat -> ... -> nat
@@ -86,11 +52,10 @@ Section n_ary_ctq.
     Lemma embed_eval_interchange n x y nums (f: n_plus_one_ary_function (S n)):
         vector_eval f (x::y::nums) = vector_eval (arg_embed f) (embed' (x, y) :: nums).
     Proof.
-        Opaque embed'. Opaque unembed'. 
         destruct n as [|n].
-        - assert (nums = []) as ->. symmetry. now apply zero_vector_is_nil.
-          cbn. now rewrite unembed'_embed'.
-        - cbn. now rewrite unembed'_embed'. 
+        - assert (nums = []) as ->. now apply vec_0_nil.
+          cbn -[embed' unembed']. now rewrite unembed'_embed'.
+        - cbn -[embed' unembed']. now rewrite unembed'_embed'. 
     Qed.
 
     (** Given [x1; x2; ...; xn], yields the substitution ((num x1) .: (num x2) .: ... .: (num xn) ..)*)
@@ -117,7 +82,7 @@ Section n_ary_ctq.
         bounded (S n) φ -> φ[n_ary_subst nums][$0..] = φ[n_ary_subst nums].
     Proof.
         revert φ. induction n as [| n IH]; intros φ HBound.
-        - assert ([] = nums) as <-. apply zero_vector_is_nil.
+        - assert (nums = []) as ->. apply vec_0_nil.
           cbn. asimpl. rewrite <- (subst_var φ) at 2.
           eapply bounded_subst; first eassumption. intros k Hk.
           destruct k; easy.
@@ -132,7 +97,7 @@ Section n_ary_ctq.
         forall (v: t nat k), Qeq ⊢ φ -> Qeq ⊢ φ[n_ary_subst v].
     Proof.
         induction k as [|k IH] in φ |-*.
-        - intros v Hφ. rewrite <- (zero_vector_is_nil v). cbn.
+        - intros v Hφ. rewrite (vec_0_nil v). cbn.
           now rewrite (subst_var).
         - intros v Hφ. destruct (@un_vector_inv _ _ v) as (x & v' & ->).
           rewrite (n_ary_subst_update φ).
@@ -151,11 +116,11 @@ Section n_ary_ctq.
         - destruct ((ctq_ctq_total ctq) f) as (ψ & HBoundψ & HΣ1ψ & HReprψ).
           exists ψ. repeat split; try assumption. intros v.
           destruct (@un_vector_inv _ _ v) as (n & v_nil & ->).
-          assert ([] = v_nil) as <-. apply zero_vector_is_nil. cbn.
+          assert (v_nil = []) as ->. apply vec_0_nil. cbn.
           replace (ψ[_]) with (ψ[(num n) .: $0..]); first easy.
           eapply bounded_subst; first eassumption. intros k Hk.
           destruct k; first easy. destruct k; first easy. lia.
-        - Opaque n_ary_subst. pose (g:= arg_embed f). fold n_plus_one_ary_function in g.
+        - pose (g:= arg_embed f). fold n_plus_one_ary_function in g.
           destruct (IH g) as [ψ [HΣ1ψ [HBoundψ HReprψ]]].
           destruct (compress_free HBoundψ) as [ρ [HBoundρ HCompress]].
           pose (τ := ψ[ρ]). fold τ in HCompress. exists τ. repeat split.
@@ -164,21 +129,20 @@ Section n_ary_ctq.
           + intros nums. apply Qeq_generalisation.
             destruct (@bin_vector_inv _ _ nums) as (x & y & v & Hv).
             specialize (HReprψ ((embed' (x, y))::v)).
-            rewrite n_ary_subst_update in HReprψ. cbn in HReprψ.
+            rewrite n_ary_subst_update in HReprψ.
             specialize (HCompress x y). apply (subst_deriv_preservance v) in HCompress.
-            cbn in HCompress. rewrite Hv. rewrite n_ary_subst_update'. fstart.
+            cbn -[embed' unembed'] in HCompress. 
+            rewrite Hv. rewrite n_ary_subst_update'. fstart.
             fdestruct HCompress as "[L R]". fspecialize (HReprψ $0).
             rewrite num_subst in HReprψ. 
             replace (ψ[_][_][_]) with (ψ[(num (embed' (x, y)))..][n_ary_subst v]) in HReprψ.
             2: { repeat rewrite <- n_ary_subst_update. 
                  symmetry. now apply n_ary_subst_plus_zero_var. }
             fdestruct HReprψ as "[L' R']".
-            unfold g. rewrite <- embed_eval_interchange. fsplit.
+            unfold g. cbn. specialize embed_eval_interchange as H. cbn in H. rewrite <- H. fsplit.
             * fintros "H". fapply "L'". fapply "R". fapply "H".
             * fintros "H". fapply "L". fapply "R'". fapply "H".
     Qed.
-
-    Transparent n_ary_subst.
 
     (** ** Binary CT_Q *)
 
