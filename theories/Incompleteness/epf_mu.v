@@ -52,10 +52,10 @@ Proof.
   - intros [k Hk]. 
     apply ra_bs_c_correct. exists k.
     apply erase_correct. unfold evalfun in Hk.
-    cbn. now destruct eval as [[]|].
+    cbn. destruct eval as [[]|]; congruence.
   - intros H. apply ra_bs_c_correct in H as [k Hk].
     exists k. apply erase_correct in Hk. cbn in Hk.
-    unfold evalfun. now destruct eval as [[]|].
+    unfold evalfun. destruct eval as [[]|]; congruence.
 Qed.
 
 (* Step indexed execution of mu recursive algorithms *)
@@ -154,7 +154,7 @@ Section fol.
     Fixpoint vec_pos_default {X : Type} {n : nat} (v : Vector.t X n) (d : nat -> X) k : X
       := match v with
          | Vector.nil => d k
-         | Vector.cons x n' v' => match k with 
+         | Vector.cons _ x n' v' => match k with 
                                     | 0 => x
                                     | S k' => vec_pos_default v' d k'
                                     end

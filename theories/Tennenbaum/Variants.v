@@ -82,7 +82,7 @@ Existing Instance PA_funcs_signature.
       f_equal. 
       2: { apply IH. intros a Ha. apply H; auto. }
       apply bounded_0_subst.
-      now apply H.
+      apply H. now left.
     Qed.
 
     Lemma HA_Insep :

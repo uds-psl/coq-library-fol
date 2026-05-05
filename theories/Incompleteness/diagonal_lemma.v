@@ -92,7 +92,7 @@ Section Diagonal_Lemma.
         2: { pose (fun n => var n) as sigma. symmetry.
              assert (A[$0..] = A[sigma]) as ->.
              eapply bounded_subst; first eassumption.
-             intros k Hk. destruct k; easy.
+             intros k Hk. destruct k; try lia; easy.
              apply subst_id. easy. }
         assumption.
     Qed.
@@ -171,7 +171,7 @@ Proof.
     Unshelve. 4: exact (fun _ => 0).
     2: { constructor. apply Qdec_eq. }
     2: { solve_bounds; apply num_bound. }
-    cbn in Heq. now repeat rewrite nat_eval_num in Heq.
+    cbn in Heq. repeat rewrite nat_eval_num in Heq. lia.
 Qed.
 
 Local Ltac close HG HB := rewrite num_subst in HG; now rewrite (bounded_0_subst _ HB) in HG.

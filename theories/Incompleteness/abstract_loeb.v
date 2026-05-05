@@ -43,7 +43,7 @@ Section Löb.
   Lemma Lob's_lemma P:
     exists ψ, T ⊩ (ψ ↔ (□ψ → P)) /\ T ⊩ (□ψ → □P).
   Proof.
-    destruct (modal_fixpoint P) as [ψ equiv]. exists ψ. split; first assumption.
+    destruct (modal_fixpoint P) as [ψ equiv]. exists ψ. split. 1: assumption.
     apply T_CE1 in equiv as H2.
     apply necessitation in H2.
     assert (H4: T ⊩ (□ψ → □(□ψ → P))).
@@ -67,8 +67,8 @@ Section Löb.
     fstop. apply T_Ctx. eapply contains_extend1.
     apply T_CE2 in Hequiv as H11.
     assert (T ⊩ ψ) as H12.
-    eapply T_IE; first eassumption. assumption.
-    eapply T_IE; first eassumption. apply necessitation. assumption.
+    eapply T_IE. 1: eassumption. assumption.
+    eapply T_IE. 1: eassumption. apply necessitation. assumption.
   Qed.
 
 (** ** Internal Löb's Theorem *)
@@ -78,7 +78,7 @@ Section Löb.
   Proof.
     destruct (modal_fixpoint P) as [ψ equiv]. 
     assert (T ⊩ (ψ → □ψ → P)) as H1.
-    now eapply T_CE1. 
+    1: eapply T_CE1, equiv.
     apply necessitation in H1.
     assert (T ⊩ (□ψ → □((□ ψ) → P))) as H2.
     now fapply box_distr.
@@ -87,7 +87,7 @@ Section Löb.
     now fapply box_distr.
     assert (T ⊩ (□ψ → □P)) as H4.
     fstart. fintros "H". 
-    fapply H3; last fapply internal_necessitation.
+    fapply H3. 2: fapply internal_necessitation.
     1-2: fstop; apply T_Ctx; apply contains_extend1.
     assert (T ⊩ ((□P → P) → (□ψ → P))) as H5.
     fstart. fintros "Hf" "Hψ". fapply "Hf". fapply H4.

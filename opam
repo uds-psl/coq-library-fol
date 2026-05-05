@@ -25,11 +25,14 @@ install: [
   [make "install"]
 ]
 depends: [
-  "rocq-metarocq-template" {= "1.4+9.0.1"}
-  "coq-library-undecidability" {= "1.1.3+9.0.1"}
+#   "rocq-metarocq-template" {= "1.4+9.0.1"}
+  "coq-library-undecidability" {= "1.1.3+9.2"}
+  "rocq-equations" {= "1.3.2-9.2"}
+  "coq-core"
 ]
 pin-depends: [
-  ["coq-library-undecidability.1.1.3+9.0.1" "git+https://github.com/uds-psl/coq-library-undecidability.git#806690d024009b11a4e4e6354f8ee63bdcacc3a6"]
+  ["coq-library-undecidability.1.1.3+9.2" "git+https://github.com/uds-psl/coq-library-undecidability.git#5d3fad13f5b68aa72b95670f534766f0772fa3b6"]
+  ["rocq-equations.1.3.2-9.2" "git+https://github.com/rocq-prover/equations.git#v1.3.2-9.2"]
 ]
 synopsis: "A Coq Library for First-Order Logic"
 url {

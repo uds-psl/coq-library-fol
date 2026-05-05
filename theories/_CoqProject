@@ -43,9 +43,9 @@ Completeness/KripkeCompleteness.v
 Completeness/HeytingMacNeille.v
 Completeness/HeytingCompleteness.v
 
-Reification/GeneralReflection.v
-Reification/DemoPA.v
-Reification/DemoPAExtensional.v
+#Reification/GeneralReflection.v
+#Reification/DemoPA.v
+#Reification/DemoPAExtensional.v
 
 Proofmode/StringToIdent.v
 Proofmode/Hoas.v

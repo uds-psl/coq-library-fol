@@ -7,6 +7,8 @@ From FOL.Proofmode Require Import Theories ProofMode.
 From FOL.Incompleteness Require Import Axiomatisations utils fol_utils qdec bin_qdec sigma1 epf epf_mu.
 
 From Stdlib Require Import Lia String List Cantor.
+
+From Corelib Require Import ssreflect ssrfun ssrbool.
 Import PaOrderNotation.
 (** ** Church's Thesis for Q *)
 Section ctq.
@@ -169,7 +171,7 @@ Section ctq_repr.
         - lia. }
       exists k.
       enough (f' k = S x) as H.
-      { unfold f' in H. now destruct (f k). }
+      { unfold f' in H. destruct (f k). 1: congruence. lia. }
       apply Q_num_inj. 
       specialize (Hφ k). fspecialize (Hφ (num (S x))). 
       rewrite num_subst in Hφ. 
@@ -238,7 +240,7 @@ Section ctq.
 
   Lemma ψ'_bounded : bounded 4 ψ'.
   Proof.
-    repeat (solve_bounds; cbn in *).
+    repeat (solve_bounds; cbn in * ).
     - assumption.
     - eapply subst_bounded_max; last eassumption.
     intros [|[|[|[|n]]]] Hn; cbn; now solve_bounds.
@@ -266,11 +268,11 @@ Section ctq.
   Proof.
     cbn. do 2 f_equal.
     { eapply bounded_subst; first eassumption.
-      intros [|[|[|[|n]]]] Hn; cbn; now solve_bounds. }
+      intros [|[|[|[|n]]]] Hn; cbn; solve_bounds. all: try easy. lia. }
     do 4 f_equal.
     rewrite subst_comp. 
     eapply bounded_subst; first eassumption.
-    intros [|[|[|[|n]]]] Hn; cbn; now solve_bounds.
+    intros [|[|[|[|n]]]] Hn; cbn; solve_bounds; first [easy|lia].
   Qed.
   Lemma ψ'_subst k c x y :
     ψ'[k .: c .: x .: y ..] = φ[k .: c .: x .: y..] ∧  ∀∀ ($1 ⊕ $0 ⧀= y`[↑]`[↑] ⊕ k`[↑]`[↑]) → φ[$0 .: c`[↑]`[↑] .: x`[↑]`[↑] .: $1..] → $1 == y`[↑]`[↑].
@@ -279,7 +281,7 @@ Section ctq.
     do 4 f_equal.
     rewrite subst_comp. 
     eapply bounded_subst; first eassumption.
-    intros [|[|[|[|n]]]] Hn; cbn; now solve_bounds.
+    intros [|[|[|[|n]]]] Hn; cbn; solve_bounds; first [easy|lia].
   Qed.
 
   Lemma ψ_φ s t u :
@@ -300,7 +302,7 @@ Section ctq.
     apply AllE with (t := num y) in H.
     cbn -[ψ] in H. replace (ψ[_][_]) with ψ[num c .: num x .: (num y)..] in H.
     2: { rewrite subst_comp. eapply bounded_subst; first apply ψ_bounded.
-      intros [|[|[|n]]] Hn; solve_bounds; cbn; try easy; now rewrite num_subst. }
+      intros [|[|[|n]]] Hn; solve_bounds; cbn; try easy; try lia. all: now rewrite num_subst. }
     eapply IE.
     { eapply CE2, H. }
     rewrite num_subst. fapply ax_refl.
@@ -331,14 +333,14 @@ Section ctq.
       intros [|[|[|[|n]]]] Hn; solve_bounds; apply num_bound. }
     { apply Σ1_subst. now constructor. }
     { rewrite subst_comp. eapply subst_bounded_max; last eassumption.
-      intros [|[|[|[|n]]]] Hn; solve_bounds; try easy; cbn; rewrite ?num_subst; apply num_bound. }
+      intros [|[|[|[|n]]]] Hn; solve_bounds; try lia; try easy; cbn; rewrite ?num_subst; apply num_bound. }
     { do 2 apply Σ1_subst. now constructor. }
     exists k. split.
     - pattern (φ[up (num c .: num x .: (num y)..)]).
       erewrite bounded_subst.
       + apply sat_single_nat, Hk.
       + eassumption.
-      + intros [|[|[|[|n]]]] Hn; solve_bounds; now try apply num_subst.
+      + intros [|[|[|[|n]]]] Hn; solve_bounds; try lia; now try apply num_subst.
     - intros y' k' _ H'. cbn.
       rewrite !num_subst. rewrite nat_eval_num.
       eapply part_functional; last apply H.
@@ -441,8 +443,8 @@ Section ctq.
   Proof.
     unfold unembed', embed'.
     rewrite PeanoNat.Nat.div_mul.
-    - apply cancel_of_to.
     - lia.
+    - apply cancel_of_to.
   Qed.
   Lemma gaussian_sum x : 2 * nat_rec (fun _ : nat => nat) 0 (fun i m : nat => S i + m) x = 
     x * (x + 1).
@@ -525,12 +527,12 @@ Section ctq.
     destruct (unembed' t) as [t' y] eqn:H1, (unembed' t') as [c x] eqn:H2.
     split.
     - intros [k Hk]. exists k. cbv zeta match beta.
-      rewrite H2. rewrite Hk. destruct nat_eq_dec; lia.
+      rewrite H2. rewrite Hk. destruct nat_eq_dec; try lia. easy.
     - intros [k Hk]. exists k.
       cbv zeta match beta in Hk.
       rewrite H2 in Hk.
       destruct core.
-      + destruct nat_eq_dec; try congruence.
+      + destruct nat_eq_dec; simpl in *; try lia; try congruence.
       + discriminate.
   Qed.
 

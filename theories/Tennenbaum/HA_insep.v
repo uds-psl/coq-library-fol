@@ -218,7 +218,7 @@ Section Rosser.
       + apply Ctx. apply in_app_iff. now left.
       + apply Weak with PAQ; try now apply incl_appr.
         repeat destruct H as [<-|H]; try destruct H.
-        all: try now apply Ctx; unfold PAQ, FAeq, EQ, FA; cbn; auto.
+        all: try (apply Ctx; unfold PAQ, FAeq, EQ, FA; cbn; tauto).
         apply PAQ_proves_cases.
   Qed.
 

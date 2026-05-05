@@ -68,20 +68,20 @@ Section fol.
     Lemma fol_undecidable_strong_repr : ~decidable (fun s => T ⊢T s).
     Proof.
       assert (~T' ⊢T ⊥) as T'consis.
-      { contradict Tconsis. now eapply WeakT. }
+      { contradict Tconsis. eapply WeakT. 2: eassumption. easy. }
       eapply (insep_essential_undecidability) with (theta := theta) (fs := fol_fs Tenum Tconsis) (fs' := fol_fs T'enum T'consis).
       - assumption.
-      - unfold extension. cbn. intros φ Hφ. now eapply WeakT.
+      - unfold extension. cbn. intros φ Hφ. eapply WeakT. 2: eassumption. easy.
       - exact Hrepr.
     Qed.
 
     Lemma fol_incomplete_strong_repr : exists n, ~T ⊢T r n /\ ~T ⊢T ¬r n.
     Proof.
       assert (~T' ⊢T ⊥) as T'consis.
-      { contradict Tconsis. now eapply WeakT. }
+      { contradict Tconsis. eapply WeakT. 2: eassumption. easy. }
       apply (insep_essential_incompleteness) with (theta := theta) (fs := fol_fs Tenum Tconsis) (fs' := fol_fs T'enum T'consis).
       - assumption.
-      - unfold extension. cbn. intros φ Hφ. now eapply WeakT.
+      - unfold extension. cbn. intros φ Hφ. eapply WeakT. 2: eassumption. easy.
       - assumption.
     Qed.
 

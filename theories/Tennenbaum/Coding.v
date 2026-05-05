@@ -453,10 +453,10 @@ Section notStd.
       rewrite !num_subst in *.
       assert (ψ[var] = ψ[up (up (up (num n)..))] ) as <-.
       { eapply bounded_subst. 1: apply Hψ.
-        intros [|[]]; try now intros. }
+        intros [|[]]; try now intros. lia. }
       assert (α[var] = α[up (up (num n)..)] ) as E.
       { eapply bounded_subst. 1: apply unary_α.
-        intros []; try now intros. }
+        intros []; try now intros. lia. }
       setoid_rewrite <-E. rewrite !subst_var.
       rewrite unfold_sless, !num_subst in *.
       apply H.
@@ -476,17 +476,17 @@ Section notStd.
         split; cbn.
       + intros H. destruct Ha1 as [d Hd].
         eapply bound_ext. apply unary_α. 2: apply H.
-        intros []; try now intros.
+        intros []; try lia. 1: easy.
         exists d. split.
         eapply bound_ext. apply Hψ. 2: apply Hd.
-        intros [|[]]; try now intros.
+        intros [|[]]; try lia; now intros.
         apply Hd.
       + intros [k Hk].
         eapply bound_ext. apply unary_α. 2: apply Ha2.
-        intros []; try now intros.
+        intros []; try lia; now intros.
         exists k. split.
         eapply bound_ext. apply Hψ. 2: apply Hk.
-        intros [|[]]; try now intros.
+        intros [|[]]; try lia; now intros.
         apply Hk.
   Qed.
 
@@ -541,11 +541,11 @@ Section notStd.
           intros [|[]]; reflexivity || lia.
       Unshelve.
       { eapply bounded_subst. 1: apply Hψ.
-        intros [|[]]; try now intros. }
+        intros [|[]]; try lia; now intros. }
       { eapply @bounded_subst with (n:=3).
         - eapply subst_bound; eauto.
           intros [|[]]; cbn; try lia; intros _; constructor; lia.
-        - intros [|[|[]]]; now intros ?. }
+        - intros [|[|[]]]; try lia; now intros ?. }
       { unfold unary. solve_bounds.
         2, 3: eapply bounded_up; try apply Hψ; lia.
         all: eapply subst_bound; eauto.

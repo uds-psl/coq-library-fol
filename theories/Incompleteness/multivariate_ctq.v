@@ -85,7 +85,7 @@ Section n_ary_ctq.
         - assert (nums = []) as ->. apply vec_0_nil.
           cbn. asimpl. rewrite <- (subst_var φ) at 2.
           eapply bounded_subst; first eassumption. intros k Hk.
-          destruct k; easy.
+          destruct k; try lia; easy.
         - destruct (@un_vector_inv _ _ nums) as (x & nums' & ->). 
           rewrite n_ary_subst_update. apply IH.
           eapply subst_bounded_max. 2: eassumption. intros i Hi.
@@ -103,7 +103,7 @@ Section n_ary_ctq.
           rewrite (n_ary_subst_update φ).
           assert (Qeq ⊢ φ[(num x)..]) as Hφ'.
           apply Qeq_generalisation in Hφ. fapply Hφ.
-          easy.
+          now eapply IH.
     Qed.
 
     (** ** Proof of Multivariate CT_Q *)

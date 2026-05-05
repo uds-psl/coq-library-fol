@@ -22,7 +22,7 @@ Section ND_Hil_equiv.
   Lemma operational_K {p: peirce} A φ ψ:
       A ⊢H φ -> A ⊢H ψ → φ.
   Proof.
-      intros Hφ. eapply MP; first eassumption.
+      intros Hφ. eapply MP. 1: eassumption.
       apply axiom_inclusion. constructor.
   Qed.
 
@@ -30,14 +30,14 @@ Section ND_Hil_equiv.
       A ⊢H (φ → ψ → τ) -> A ⊢H (φ → ψ) -> A ⊢H (φ → τ).
   Proof.
       intros H1 H2. eapply MP.
-      2: { eapply MP; last eapply (axiom_inclusion A (HS _ _ _)). eassumption. }
+      2: { eapply MP. 2: eapply (axiom_inclusion A (HS _ _ _)). eassumption. }
       assumption.
   Qed.
 
   Lemma identity {p: peirce} A φ:
       A ⊢H φ → φ.
   Proof.
-      eapply MP; last eapply MP.
+      eapply MP; [|eapply MP].
       3: { eapply (axiom_inclusion A (HS φ (φ → φ) φ)). }
       1-2: apply (axiom_inclusion A (HK _ _)).
   Qed.
@@ -76,8 +76,8 @@ Section ND_Hil_equiv.
           map (subst_form ↑) A ⊢H φ -> A ⊢H ∀ φ.
       Proof.
           induction 1 as [φ ψ p _ IH1 _  IH2 | φ n p Hax | φ p HA].
-              - eapply MP; first eapply IH1.
-                eapply MP; first eapply IH2.
+              - eapply MP. 1: eapply IH1.
+                eapply MP. 1: eapply IH2.
                 apply (HilAx _ 0). constructor.
               - rewrite forall_times_once. apply (HilAx _ _). assumption.
               - assert (exists τ, (subst_form ↑) τ = φ /\ In τ A) as [τ [<- Hτ]].
@@ -90,14 +90,14 @@ Section ND_Hil_equiv.
       Lemma compat_AllE A φ t:
           A ⊢H ∀ φ -> A ⊢H φ[t..].
       Proof.
-          intros HAll. eapply MP; first eassumption.
+          intros HAll. eapply MP. 1: eassumption.
           apply (HilAx _ 0). constructor.
       Qed.
 
       Lemma compat_ExI A φ t:
           A ⊢H φ[t..] -> A ⊢H ∃ φ.
       Proof.
-          intros Hφ. eapply MP; first eassumption.
+          intros Hφ. eapply MP. 1: eassumption.
           apply (HilAx _ 0). constructor.
       Qed.
 
@@ -106,15 +106,15 @@ Section ND_Hil_equiv.
       Proof.
           intros Hex Hψ. apply deduction_theorem in Hψ.
           apply compat_AllI in Hψ.
-          eapply MP; first eapply Hψ.
-          eapply MP; first eapply Hex.
+          eapply MP. 1: eapply Hψ.
+          eapply MP. 1: eapply Hex.
           apply (HilAx _ 0). constructor.
       Qed.
 
       Lemma compat_Exp A φ:
           A ⊢H ⊥ -> A ⊢H φ.
       Proof.
-          intros Hbot. eapply MP; first eassumption.
+          intros Hbot. eapply MP. 1: eassumption.
           apply (HilAx _ 0). constructor.
       Qed.
 
@@ -128,7 +128,7 @@ Section ND_Hil_equiv.
           A ⊢H φ -> A ⊢H ψ -> A ⊢H φ ∧ ψ.
       Proof.
           intros Hφ Hψ. eapply MP.
-          2: { eapply MP; first eapply Hφ. eapply (HilAx _ 0).
+          2: { eapply MP. 1:  eapply Hφ. eapply (HilAx _ 0).
               econstructor. }
           assumption.
       Qed.
@@ -136,28 +136,28 @@ Section ND_Hil_equiv.
       Lemma compat_CE1 A φ ψ:
           A ⊢H φ ∧ ψ -> A ⊢H φ.
       Proof.
-          intros Hconj. eapply MP; first eassumption.
+          intros Hconj. eapply MP. 1: eassumption.
           eapply (HilAx _ 0). constructor.
       Qed.
 
       Lemma compat_CE2 A φ ψ:
           A ⊢H φ ∧ ψ -> A ⊢H ψ.
       Proof.
-          intros Hconj. eapply MP; first eassumption.
+          intros Hconj. eapply MP. 1: eassumption.
           eapply (HilAx _ 0). constructor.
       Qed.
 
       Lemma compat_DI1 A φ ψ:
           A ⊢H φ -> A ⊢H φ ∨ ψ.
       Proof.
-          intros Hφ. eapply MP; first eassumption.
+          intros Hφ. eapply MP. 1: eassumption.
           apply (HilAx _ 0). constructor.
       Qed.
 
       Lemma compat_DI2 A φ ψ:
           A ⊢H ψ -> A ⊢H φ ∨ ψ.
       Proof.
-          intros Hψ. eapply MP; first eassumption.
+          intros Hψ. eapply MP. 1: eassumption.
           apply (HilAx _ 0). constructor.
       Qed.
 
@@ -165,9 +165,9 @@ Section ND_Hil_equiv.
           A ⊢H φ ∨ ψ -> (φ::A) ⊢H τ -> (ψ::A) ⊢H τ -> A ⊢H τ.
       Proof.
           intros Hdisj Hφ Hψ. apply deduction_theorem in Hφ, Hψ.
-          eapply MP; first eapply Hψ.
-          eapply MP; first eapply Hφ.
-          eapply MP; first eapply Hdisj.
+          eapply MP. 1: eapply Hψ.
+          eapply MP. 1: eapply Hφ.
+          eapply MP. 1: eapply Hdisj.
           apply (HilAx _ 0). constructor.
       Qed.
 
@@ -368,10 +368,10 @@ Section ND_Hil_equiv.
     T ⊢HT φ <-> T ⊢T φ.
   Proof.
     split.
-      - intros [A [HA HDer]]. exists A. split; first assumption.
+      - intros [A [HA HDer]]. exists A. split. 1: assumption.
         apply Hil_ND_agree; assumption.
-      - intros [A [HA Hder]]. exists A. split; first eassumption.
-        destruct (Hil_ND_agree p φ A). easy.
+      - intros [A [HA Hder]]. exists A. split. 1: eassumption.
+        destruct (Hil_ND_agree p φ A). firstorder.
   Qed.
 
 End ND_Hil_equiv.

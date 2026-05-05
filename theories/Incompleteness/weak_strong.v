@@ -209,13 +209,13 @@ Section value_disjoint.
         replace ((_)[_]) with (∃ φ1'[(num x)..]); first assumption.
         change (∃ _)[_] with (∃ φ1'[$1 .: $0 ..][up (num x)..]).
         f_equal. rewrite subst_comp. eapply bounded_subst; first apply φ1'_bounded.
-        intros [|[|n]] Hn; cbn. 2-3:now asimpl.
+        intros [|[|n]] Hn; cbn. 2: now asimpl. 2: lia.
         now rewrite num_subst.
       - intros x H%DR2.
         replace ((_)[_]) with (∃ φ1'[(num x)..]); first assumption.
         change (∃ _)[_] with (∃ φ1'[$1 .: $0 ..][up (num x)..]).
         f_equal. rewrite subst_comp. eapply bounded_subst; first apply φ1'_bounded.
-        intros [|[|n]] Hn; cbn. 2-3: now asimpl.
+        intros [|[|n]] Hn; cbn. 2-3: try lia; now asimpl.
         now rewrite num_subst.
     Qed.
 

@@ -110,7 +110,8 @@ Section Indefinability.
         - intros Hτn. destruct (fR (g ψ)) eqn:E.
           + apply (HfR (g ψ)) in E. specialize (HτR _ E). exfalso. apply Hconsistent.
             eapply T_IE; last eapply Hτn. exists Qeq. split; first auto. easy.
-          + destruct (HfQ (g ψ)) as [HfQL HfQR]. destruct (fQ (g ψ)) eqn:E'; first now rewrite inv_fg.
+          + destruct (HfQ (g ψ)) as [HfQL HfQR]. destruct (fQ (g ψ)) eqn:E'.
+            1: rewrite inv_fg; now apply HfQR.
             exfalso. assert (~R (g ψ)). destruct (HfR (g ψ)) as [HfRL _]. rewrite E in HfRL.
             auto. assert (~Q (g ψ)) by auto. contradiction.
         - intros HPψ. exists Qeq. split; first auto. apply HτR. unfold R.
@@ -154,7 +155,8 @@ Section Tarski.
       - apply HGL; first assumption. destruct (HRepr) as [HRepr' _].
         enough (interp_nat ⊨= true_N[(quine_quote G)..]) as H.
         { apply H. }
-        apply HRepr. intros ρ. now eapply (sat_closed _ _ _ HGBnd).
+        apply HRepr. intros ρ. eapply (sat_closed _ _ _ HGBnd).
+        firstorder.
       - apply R. apply HGR. intros HTrue.
         assert (interp_nat ⊨= true_N[(quine_quote G)..]) as HTrue'.
         intros ρ. eapply sat_closed. 2: eapply HTrue.
@@ -232,7 +234,7 @@ Section Gödel.
         { intros HG. apply HGclass. now apply peirce_to_class_theory. }
         intros HG. assert (T ⊩C prov[(num (g G))..]) as Hprov.
         apply double_neg_elim_class. apply peirce_to_class_theory in HGE.
-        now eapply contrapositive_elim.
+        { eapply contrapositive_elim. eauto. apply HG. }
         assert (Σ1 prov[(num (g G))..]) as HΣ1'. now apply Σ1_subst.
         assert (bounded 0 prov[(num (g G))..]) as HprovB'. 
         eapply subst_bounded_max. 2: eassumption. 
