@@ -18,6 +18,22 @@ The FOL library currently extends this core with the following content:
 - [Utils](theories/Utils): A collection of additional results needed in various projects.
 - [HilbertSystem](theories/HilbertSystem): A Hilbert system for first-order logic with a proof of its equivalence to natural deduction.
 
+## Dev Version Notice
+
+This branch has experimental support for Rocq 9.2. It is still missing MetaRocq support, so the Reification mechanism is disabled.
+
+This branch includes a workaround for [equations#716](https://github.com/rocq-prover/equations/issues/716). This workaround is non-deterministic, you might have to follow the "Library Developer" setup instructions like so:
+
+```
+opam switch create . --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda --deps-only --repos=default,coq-released=https://coq.inria.fr/opam/released
+# if the above fails, answer N to keep the partially installed switch, then do the following
+eval $(opam env)
+opam install .
+# repeat the above two lines again, as long as new packages keep being installed.
+eval $(opam env)
+make
+```
+
 ## Installation
 
 ### As a Library User
@@ -39,6 +55,7 @@ First, clone this repostitory. Then, run the following commands:
 
 ```
 opam switch create . --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda --deps-only --repos=default,coq-released=https://coq.inria.fr/opam/released
+eval $(opam env)
 make
 ```
 
