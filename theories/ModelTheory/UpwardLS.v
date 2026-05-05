@@ -3,7 +3,7 @@ Require Export Undecidability.FOL.Syntax.Theories.
 From Stdlib Require Import Program.Equality Vector.
 Import VectorNotations.
 
-(** Trivial Proof of Upward Löwenhim-Skolem Theorem *)
+(** Trivial Proof of Upward Löwenheim-Skolem Theorem *)
 
 Section upward.
 

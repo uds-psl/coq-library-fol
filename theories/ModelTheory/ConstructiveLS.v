@@ -2,7 +2,7 @@ Require Import Undecidability.FOL.Syntax.Asimpl.
 Require Import FOL.ModelTheory.Core.
 Local Set Implicit Arguments.
 
-(** * Constructive Proofs of Löwenhim-Skolem Theorem *)
+(** * Constructive Proofs of Löwenheim-Skolem Theorem *)
 
 Section Henkin_Env.
     Context {Σf : funcs_signature} {Σp : preds_signature}.
