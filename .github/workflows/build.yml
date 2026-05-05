@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         coq_version: 
-          - '9.0.1'
+          - '9.2'
         ocaml_version:
           - '4.14.2-flambda'
       fail-fast: true
