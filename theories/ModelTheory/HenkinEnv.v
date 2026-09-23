@@ -727,7 +727,6 @@ Section Result.
         intros Σ_f Σ_p C_Σ M m.
         destruct (enum_form C_Σ) as (phi_ & nth_ & Hphi).
         destruct (DDC _ (fun n => m) (@blurred_henkin_next _ _ M)) as [F PF]; eauto.
-        { intros x y z Hx Hy. apply (trans_succ Hx Hy). }
         { intros A B. unshelve eapply directed_Henkin_env; eauto. }
         pose (γ_Fixed_point PF) as Succ.
         specialize Blurred_Henkin_LS with (phi_ := phi_) (M := M) as [N [h Ph]].

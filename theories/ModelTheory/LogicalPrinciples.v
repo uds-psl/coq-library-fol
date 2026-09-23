@@ -81,6 +81,10 @@ Section axiom.
             (exists x, P x) -> (exists n, P (f n)).
 
     Definition DDC_on X := forall (R: X -> X -> Prop),
+        direct R ->
+            exists f: nat -> X, direct (R ∘ f).
+
+    Definition DDC_weak_on X := forall (R: X -> X -> Prop),
         trans R -> direct R ->
             exists f: nat -> X, direct (R ∘ f).
 
@@ -108,6 +112,7 @@ Section axiom.
     Definition BDP := forall X, X -> BDP_on X.
     Definition BEP := forall X, X -> BEP_on X.
     Definition DDC := forall X, X -> DDC_on X.
+    Definition DDC_weak := forall X, X -> DDC_weak_on X.
     Definition OAC := forall X Y, X -> Y -> OAC_on X Y.
     Definition AC  := forall X Y, X -> Y -> AC_on X Y.
 
@@ -283,7 +288,7 @@ Section BCC_DDC_impl_BDC2.
     Section inner_mode.
 (* Hypotheis we have *)
     Hypothesis BCC: BCC.
-    Hypothesis DDC: DDC.
+    Hypothesis DDC: DDC_weak.
 
 (* Promise by BDC2 *)
     Variable X: Type.
@@ -320,6 +325,7 @@ Section BCC_DDC_impl_BDC2.
         now unfold R' in Hw; rewrite cancel_of_to in Hw.
         apply union_incl_l.
     Qed.
+
 
     Theorem direct_F: direct F.
     Proof.
@@ -378,9 +384,22 @@ Section BCC_DDC_impl_BDC2.
 
     End inner_mode.
 
+    Theorem res_BDC2_weak: BCC -> DDC_weak -> BDC2.
+    Proof.
+        intros BCC ddc X R x H.
+        apply res; auto.
+    Qed.
+
+    Lemma DDC_DDC_weak: DDC -> DDC_weak.
+    Proof.
+        intros ddc X R x _ Hd.
+        apply ddc; auto.
+    Qed.
+
     Theorem res_BDC2: BCC -> DDC -> BDC2.
     Proof.
         intros BCC ddc X R x H.
+        apply DDC_DDC_weak in ddc.
         apply res; auto.
     Qed.
 
@@ -403,7 +422,7 @@ Section BDC2_impl_BCC_DDC.
 
     Lemma BDC2_impl_DDC: BDC2 -> DDC.
     Proof.
-        intros H X x R _ Rd.
+        intros H X x R Rd.
         destruct (H X x (fun x y z => R x z /\ R y z)) as [f Hf].
         { intros a b; eapply Rd. }
         eexists f. intros a b.
@@ -453,7 +472,7 @@ End OBDC_implies_BDP_BEP_BDC2.
 
 Section DC_impl_DDC_BCC.
 
-    Lemma DC_impl_DDC: DC -> DDC.
+    Lemma DC_impl_DDC: DC -> DDC_weak.
     Proof.
         intros DC A a R Tr H.
         destruct (DC A a R) as [f Hf].
@@ -698,6 +717,13 @@ Section Result.
         - intros [H1 H2]. now apply res_BDC2.
     Qed.
 
+    Theorem DDC_weak_BCC_BDC2:
+        DDC_weak /\ BCC -> BDC2.
+    Proof.
+      intros [H1 H2].
+      now apply res_BDC2_weak.
+    Qed.
+
     Theorem DC_iff_BDC_CC_nat: 
         DC <-> BDC /\ CC_nat.
     Proof.
@@ -709,7 +735,7 @@ Section Result.
     Theorem DC_impl_BDC2: 
         DC -> BDC2.
     Proof.
-          intro H. rewrite BDC2_iff_DDC_BCC; split.
+          intro H. apply DDC_weak_BCC_BDC2; split.
           now apply DC_impl_DDC.
           now apply CC_impl_BCC, DC_impl_CC, DC_impl_DC_root.
     Qed.
@@ -720,7 +746,7 @@ Section Result.
     Proof.
         split.
         - intros H; split.
-          rewrite BDC2_iff_DDC_BCC; split.
+          apply DDC_weak_BCC_BDC2; split.
           now apply DC_impl_DDC.
           now apply CC_impl_BCC, DC_impl_CC, DC_impl_DC_root.
           now apply CC_impl_CC_nat, DC_impl_CC, DC_impl_DC_root.
@@ -734,8 +760,8 @@ Section Result.
     Proof.
         split.
         - intros H; split.
-        now apply DC_impl_DDC.
-        now apply DC_impl_CC, DC_impl_DC_root.
+          apply (BDC2_impl_DDC (DC_impl_BDC2 H)).
+          now apply DC_impl_CC, DC_impl_DC_root.
         - intros [H1 H2]. rewrite DC_iff_BDC_CC_nat; split.
         specialize (CC_impl_BCC H2) as H3.
         apply BDC2_impl_BDC. now rewrite BDC2_iff_DDC_BCC.
