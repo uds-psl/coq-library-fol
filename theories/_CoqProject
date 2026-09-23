@@ -107,3 +107,6 @@ ModelTheory/HenkinEnv.v
 ModelTheory/ClassicalDC.v
 ModelTheory/ReverseLS.v
 ModelTheory/AnalysisLS.v
+ModelTheory/GeneralisedAxioms.v
+ModelTheory/SeparatingAxioms.v
+

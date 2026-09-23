@@ -3,7 +3,7 @@ Require Import FOL.Completeness.TarskiCompleteness.
 Require Import FOL.ModelTheory.FragmentCore.
 Local Set Implicit Arguments.
 
-(** * Henkin Model (Negative Fragement) *)
+(** * Henkin Model (Negative Fragment) *)
 
 
 (* Gives the proof that any model with term as domain is countable. 
