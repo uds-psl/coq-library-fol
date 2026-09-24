@@ -11,7 +11,7 @@ Open Scope modelNotation.
 
 Notation vec := t.
 
-(** * Definition of Model Theory *)
+(** ** Definition of Model Theory *)
 
 Section model.
     Context {Σ_funcs : funcs_signature}.
@@ -141,7 +141,7 @@ Section Countable_Sig.
         destruct (phi_ φ). eauto. 
     Qed.
 
-    Definition coutable_model M := 
+    Definition countable_model M := 
         exists (to_M: nat -> M) (of_M: M -> nat), forall m, to_M (of_M m) = m.
 
 End Countable_Sig.
@@ -153,7 +153,7 @@ Section LöwenheimSkolemTheorem.
             forall φ ρ, Build_model N ⊨[ρ] φ <-> M ⊨[ρ >> h] φ.
 
     Definition LöwenheimSkolemTheorem_on `{funcs_signature} `{preds_signature} (M: model) :=
-        exists N: model, coutable_model N /\ N ⪳ M.
+        exists N: model, countable_model N /\ N ⪳ M.
 
     Definition SyntaticLS := 
         forall (Σ_f: funcs_signature) (Σ_p: preds_signature),

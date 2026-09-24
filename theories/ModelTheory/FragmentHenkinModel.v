@@ -3,7 +3,7 @@ Require Import FOL.Completeness.TarskiCompleteness.
 Require Import FOL.ModelTheory.FragmentCore.
 Local Set Implicit Arguments.
 
-(** * Henkin Model (Negative Fragment) *)
+(** ** Henkin Model (Negative Fragment) *)
 
 
 (* Gives the proof that any model with term as domain is countable. 
@@ -24,7 +24,7 @@ Section TermIsCountable.
     Variable list_Funcs : nat -> list syms.
     Hypothesis enum_Funcs' : list_enumerator__T list_Funcs syms.
 
-    Lemma term_model_countable: a_coutable_model term.
+    Lemma term_model_countable: a_countable_model term.
     Proof.
         destruct (enumT_term enum_Funcs') as [f H]. 
         exists (fun n => match f n with None => var n | Some t => t end).
@@ -221,7 +221,7 @@ Section TermModel.
         forall phi, (forall n, M ⊨[h n .: h] phi) -> M ⊨[h] ∀ phi. 
 
     Lemma Henkin_elementary_submodel: 
-        Henkin_env -> exists (N: model), a_coutable_model N /\ N ⪳ M.
+        Henkin_env -> exists (N: model), a_countable_model N /\ N ⪳ M.
     Proof.
         intro fix_h. exists N. split. {apply term_model_countable. }
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
@@ -247,7 +247,7 @@ Section TermModel.
     Qed.
 
     Lemma Henkin_blurred_elementary_submodel: 
-        Henkin_env_blurred -> exists (N: model), a_coutable_model N /\ N ⪳ M.
+        Henkin_env_blurred -> exists (N: model), a_countable_model N /\ N ⪳ M.
     Proof.
         intro fix_h. exists N. split. {apply term_model_countable. }
         exists morphism. intros φ. induction φ using form_ind_subst; intro; try easy.
@@ -375,7 +375,7 @@ Section TermModel.
 
     Lemma elementary_syntatic_model: 
         witness_prop M -> exists (N: model) (mor: N -> M),
-            a_coutable_model N /\ N ⪳[mor] M /\ forall i, exists n, h i = mor n.
+            a_countable_model N /\ N ⪳[mor] M /\ forall i, exists n, h i = mor n.
     Proof.
         intro witness_prop_.
         exists N, morphism. split. {apply term_model_countable. } split. intros φ.
@@ -413,7 +413,7 @@ Section WitnessPropertyLS.
 
     Theorem witness_property_LS: 
         forall M: model, witness_prop M -> inhabited M ->
-            exists N: model, a_coutable_model N /\ N ⪳ M.
+            exists N: model, a_countable_model N /\ N ⪳ M.
     Proof.
         intros M H [m].
         destruct (elementary_syntatic_model (fun _ => m) Hphi H) as (N & h & HN1 & HN2 &_).
@@ -422,7 +422,7 @@ Section WitnessPropertyLS.
 
     Corollary witness_property_LS_with_root: 
         forall M: model, witness_prop M  -> 
-            forall m: M, exists (N: model), a_coutable_model N /\ 
+            forall m: M, exists (N: model), a_countable_model N /\ 
                 (exists h: N -> M, N ⪳[h] M /\ exists n: N, h n = m).
     Proof.
         intros M wit m.
@@ -445,7 +445,6 @@ Section WitnessPropertyLS.
     End CompletenessLS.
 
 End TermIsCountable.
-
 
 
 

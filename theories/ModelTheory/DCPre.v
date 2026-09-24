@@ -11,7 +11,8 @@ Notation unique p := (forall x y, p x -> p y -> x = y).
 
 Notation pi1 := projT1.
 
-(** * Utils *)
+(** * Downward Löwenheim-Skolem Theorem *)
+(** ** Utils *)
 
 Lemma W' (p : nat -> Prop) :
     decidable p -> ex p -> sig p.
