@@ -3,7 +3,7 @@ Require Import FOL.ModelTheory.HenkinEnv.
 Require Import FOL.ModelTheory.ReverseLS. 
 Require Import FOL.ModelTheory.Core.
 
-(** * Full Decomposition of DLS *)
+(** ** Full Decomposition of DLS *)
 
 Section LSiffDC.
 
@@ -55,7 +55,8 @@ Section LSiffDC.
       BDC2 /\ BDP /\ BEP -> OBDC.
     Proof.
       intros (h1 & h2 & h3).
-      assert DDC as h4 by (now apply BDC2_impl_DDC).
+      assert DDC as h4.
+      { intros A a; apply BDC2_impl_DDC. now apply h1. }
       assert BCC. apply BDC_impl_BCC. now apply BDC2_impl_BDC.
       assert DLS by now rewrite LS_iff_DDC_BDP_BEP_BCC.
       now apply LS_impl_OBDC.

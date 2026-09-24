@@ -36,7 +36,7 @@ Notation logical_decidable p := (forall x, logical_dec (p x)).
 Notation decider p := (forall x, dec (p x)).
 Notation "R ∘ f" := (consf R f) (at level 30).
 
-(** * Standard and Blurred Logical Principles *)
+(** ** Standard and Blurred Logical Principles *)
 
 Section axiom.
 
@@ -420,10 +420,10 @@ Section BDC2_impl_BCC_DDC.
     Lemma BDC2_impl_BDC: BDC2 -> BDC.
     Proof. intros H A a. apply BDC2_impl_BDC_on. eauto. Qed.
 
-    Lemma BDC2_impl_DDC: BDC2 -> DDC.
+    Lemma BDC2_impl_DDC A: BDC2_on A -> DDC_on A.
     Proof.
-        intros H X x R Rd.
-        destruct (H X x (fun x y z => R x z /\ R y z)) as [f Hf].
+        intros H R Rd.
+        destruct (H (fun x y z => R x z /\ R y z)) as [f Hf].
         { intros a b; eapply Rd. }
         eexists f. intros a b.
         eapply Hf.
@@ -711,9 +711,10 @@ Section Result.
         BDC2 <-> (DDC /\ BCC).
     Proof.
         split.
-        - intros H; split. 
-            now apply BDC2_impl_DDC.
-            now apply BDC_impl_BCC, BDC2_impl_BDC.
+        - intros H; split.
+          intros A a. 
+          apply (BDC2_impl_DDC (H A a)).
+          now apply BDC_impl_BCC, BDC2_impl_BDC.
         - intros [H1 H2]. now apply res_BDC2.
     Qed.
 
@@ -760,7 +761,8 @@ Section Result.
     Proof.
         split.
         - intros H; split.
-          apply (BDC2_impl_DDC (DC_impl_BDC2 H)).
+          intros A a.
+          apply (BDC2_impl_DDC (DC_impl_BDC2 H a)).
           now apply DC_impl_CC, DC_impl_DC_root.
         - intros [H1 H2]. rewrite DC_iff_BDC_CC_nat; split.
         specialize (CC_impl_BCC H2) as H3.

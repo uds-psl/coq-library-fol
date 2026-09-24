@@ -3,7 +3,7 @@ Require Import Undecidability.FOL.Syntax.BinSig.
 Require Import FOL.ModelTheory.Core.
 Require Import FOL.ModelTheory.DCPre.
 
-(** * Reverse Analysis: DC-Delta *)
+(** ** Reverse Analysis: DC-Delta *)
 
 Section DC.
 
@@ -59,7 +59,7 @@ Section DC.
     Qed.
 
     Lemma exists_next:
-    forall B (R': B -> B -> Prop), coutable_model B ->
+    forall B (R': B -> B -> Prop), countable_model B ->
         (forall x, exists y, R' x y) -> exists f: nat -> B,
             forall b, exists n, R' b (f n).
     Proof.
@@ -107,7 +107,6 @@ Section DCRes.
     Qed.
 
 End DCRes.
-
 
 
 

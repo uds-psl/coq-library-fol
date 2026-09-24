@@ -25,7 +25,7 @@ Qed.
 Opaque encode.
 
 
-(** * Construction of Henkin Environments *)
+(** ** Construction of Henkin Environments *)
 
 Section Incl_im.
     Variables A B C: Type.
@@ -747,6 +747,5 @@ Section Result.
     Qed.
 
 End Result.
-
 
 

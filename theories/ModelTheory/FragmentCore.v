@@ -6,7 +6,7 @@ Local Set Implicit Arguments.
 (* Local Unset Strict Implicit. *)
 
 
-(** * Definition of Model Theory (Negative Fragment) *)
+(** ** Definition of Model Theory (Negative Fragment) *)
 
 
 Require Export Vector.
@@ -225,11 +225,11 @@ Section LöwenheimSkolemTheorem.
         exists (N: interp term) (h: term -> M), 
             forall phi (ρ: env term), ρ ⊨ phi <-> M ⊨[ρ >> h] phi.
 
-    Definition a_coutable_model M :=
+    Definition a_countable_model M :=
         exists f: nat -> M, surjective f.
 
     Definition LöwenheimSkolemTheorem :=
-        forall M: model, exists N: model, a_coutable_model N /\ N ⪳ M.
+        forall M: model, exists N: model, a_countable_model N /\ N ⪳ M.
 
     Definition LS := forall M, syntatic_model_on M.
 
@@ -245,4 +245,3 @@ Section LöwenheimSkolemTheorem.
     Qed.
 
 End LöwenheimSkolemTheorem.
-
